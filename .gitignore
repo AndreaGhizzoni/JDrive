@@ -1,0 +1,7 @@
+bin/
+out/
+build/classes
+build/tmp
+build/dependency-cache
+build/test-results
+build/docs
