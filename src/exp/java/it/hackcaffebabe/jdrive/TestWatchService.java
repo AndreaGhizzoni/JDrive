@@ -1,101 +1,107 @@
 package it.hackcaffebabe.jdrive;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
+import java.util.Map;
 import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
  * http://docs.oracle.com/javase/tutorial/essential/io/notification.html
  */
-public class TestWatchService {
+public class TestWatchService implements Runnable
+{
+    private WatchService watcher;
+    private static final WatchEvent.Kind[] mod = {ENTRY_CREATE, ENTRY_DELETE,
+                                                                ENTRY_MODIFY };
+    private Path dir = Paths.get("/home/andrea/test");
+    private final Map<WatchKey, Path> directories = new HashMap<WatchKey,Path>();
+
+    public TestWatchService() throws IOException{
+        this.watcher = FileSystems.getDefault().newWatchService();
+    }
+
+    private void registerTree(Path start) throws IOException {
+        Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+                    throws IOException {
+                System.out.println("Registering:" + dir);
+                registerPath(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+    private void registerPath(Path path) throws IOException {
+        //register the received path
+        WatchKey key = path.register(this.watcher, mod );
+        //store the key and path
+        directories.put(key, path);
+    }
+
+    @Override
+    public void run() {
+        try {
+            registerTree(this.dir);
+            WatchKey key;
+            WatchEvent.Kind<?> kind;
+            Path filename;
+            while (true) {
+                //retrieve and remove the next watch key
+                key = this.watcher.take();
+
+                //get list of events for the watch key
+                for (WatchEvent<?> watchEvent : key.pollEvents()) {
+                    //get the kind of event (create, modify, delete)
+                    kind = watchEvent.kind();
+                    //get the filename for the event
+                    filename = ((WatchEvent<Path>) watchEvent).context();
+
+                    //handle OVERFLOW event
+                    if (kind.equals(OVERFLOW)) {
+                        continue;
+                    }
+                    //handle CREATE event
+                    Path child = null;
+                    if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
+                        child = directories.get(key).resolve(filename);
+                        if(Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS))
+                            registerTree(child);
+                    }
+                    //print it out
+                    System.out.println(kind + " -> " + child);
+                }
+
+                boolean valid = key.reset();
+                //remove the key if it is not valid
+                if (!valid) {
+                    directories.remove(key);
+                    if (directories.isEmpty())
+                        break;
+                }
+            }
+
+            this.watcher.close();
+
+        }catch(InterruptedException inter){
+            System.err.println("Interrupted Exit.");
+        }catch(IOException ioe){
+            System.err.println("IOException Exit.");
+        }
+    }
+
 
     public static void main( String...args ){
         try {
-            final WatchService watcher = FileSystems.getDefault().newWatchService();
-            final WatchEvent.Kind[] mod = {ENTRY_CREATE,
-                                           ENTRY_DELETE,
-                                           ENTRY_MODIFY };
-            final Path dir = Paths.get("/home/andrea/test");
-            dir.register( watcher, mod );
-            System.out.println("--- Starting watch on path "+dir);
-
-            final SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) throws IOException {
-                    dir.register(watcher, mod);
-                    return FileVisitResult.CONTINUE;
-                }
-            };
-
-            final SimpleFileVisitor<Path> registerExistingFiles = new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult postVisitDirectory(Path d, IOException e) throws IOException {
-                    if(d.equals(dir))
-                        return FileVisitResult.CONTINUE;
-                    d.register(watcher, mod);
-                    System.out.println(d);
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult visitFile( Path file, BasicFileAttributes attr) throws IOException {
-                    System.out.println(file);
-                    return FileVisitResult.CONTINUE;
-                }
-            };
-
-            System.out.println("--- Existing files added to watcher services:");
-            Files.walkFileTree(dir, registerExistingFiles);
-            System.out.println("---");
-
-            WatchKey key;
-            Path rPath;
-            while (true) {
-                key = watcher.take();
-                if(!key.isValid()) {
-                    System.out.println(String.format("Key %s is not valid", key));
-                    continue;
-                }
-
-                for (WatchEvent<?> event : key.pollEvents()) {
-                    WatchEvent.Kind<?> kind = event.kind();
-
-                    if( kind.equals(OVERFLOW) )
-                        continue;
-
-                    WatchEvent<Path> ev = (WatchEvent<Path>) event;
-                    rPath = ((Path)key.watchable()).resolve(ev.context());
-                    System.out.println( String.format("resolved path: %s", rPath) );
-
-                    //this doesn't work
-                    if(kind.equals(ENTRY_DELETE) ) {
-                        key.cancel();
-                        System.out.println("unregister service");
-                        continue;
-                    }
-
-                    boolean isFolder = rPath.toFile().isDirectory();
-                    if( isFolder && kind.equals(ENTRY_CREATE) ) {
-                        Files.walkFileTree(rPath, fileVisitor);
-                        //process directory and continue
-                    }
-                    System.out.println(String.format("=== key: %s - path: %s", kind, rPath));
-                    //process file
-                }
-
-                if( !key.reset() ){
-                    watcher.close();
-                    break;
-                }
-            }
-        }catch (NoSuchFileException nsfe){
-            System.err.println("NoSuchFileException throw");
-        } catch (IOException e) {
+            TestWatchService t = new TestWatchService();
+            new Thread(t).start();
+        }catch (IOException ioe){
+            System.err.println("IOException Throw");
+        }catch (Exception e){
             e.printStackTrace();
-        }catch (InterruptedException e){
-            System.err.println("Interrupted Exit.");
         }
+
     }
 }
