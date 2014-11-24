@@ -28,8 +28,9 @@ public class TestWatchService {
                 }
             };
 
+            WatchKey key ;
             while (true) {
-                WatchKey key = watcher.take();
+                key = watcher.take();
 
                 for (WatchEvent<?> event : key.pollEvents()) {
                     WatchEvent.Kind<?> kind = event.kind();
@@ -41,26 +42,22 @@ public class TestWatchService {
                         continue;
                     }
 
-                    // The filename is the context of the event.
                     WatchEvent<Path> ev = (WatchEvent<Path>) event;
-                    Path filename = ev.context();
-//                    Path child = dir.resolve(filename);
-                    Path child;
-                    try {
-                       child = filename.toRealPath();
-                    }catch (IllegalArgumentException e){continue;}
-                    System.out.println( String.format("child resolved: %s", child ));
+                    Path child = ((Path)key.watchable()).resolve(ev.context());
+                    System.out.println( String.format("event from: %s", child ));
 
                     Boolean isFolder = child.toFile().isDirectory();
                     if( isFolder ){
-                        Files.walkFileTree(child, fileVisitor);
-                        System.out.println("folder watched");
+                        if( kind == ENTRY_DELETE ){
+                            key.reset();
+                            key.cancel();
+                            watcher.close();
+                        }else {
+                            Files.walkFileTree(child, fileVisitor);
+                        }
                         //process directory
                     } else {
-                        // Resolve the filename against the directory.
-                        // If the filename is "test" and the directory is "foo",
-                        // the resolved name is "test/foo".
-                        System.out.println(String.format("key: %s - path: %s", kind, child));
+                        System.out.println(String.format("=== key: %s - path: %s", kind, child));
                     }
                 }
 
@@ -68,6 +65,8 @@ public class TestWatchService {
                 // receive further watch events.  If the key is no longer valid,
                 // the directory is inaccessible so exit the loop.
                 if( !key.reset() ){
+                    key.cancel();
+                    watcher.close();
                     break;
                 }
             }
@@ -76,7 +75,7 @@ public class TestWatchService {
         } catch (IOException e) {
             e.printStackTrace();
         }catch (InterruptedException e){
-            System.err.println("Exit.");
+            System.err.println("Interrupted Exit.");
         }
     }
 }
