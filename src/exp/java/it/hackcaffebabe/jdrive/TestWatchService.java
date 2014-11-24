@@ -6,7 +6,6 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import static java.nio.file.StandardWatchEventKinds.*;
 
-
 /**
  * http://docs.oracle.com/javase/tutorial/essential/io/notification.html
  */
@@ -15,15 +14,17 @@ public class TestWatchService {
     public static void main( String...args ){
         try {
             final WatchService watcher = FileSystems.getDefault().newWatchService();
-            final WatchEvent.Kind[] mod = {ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY };
+            final WatchEvent.Kind[] mod = {ENTRY_CREATE,
+                                           ENTRY_DELETE,
+                                           ENTRY_MODIFY };
             Path dir = new File("/home/andrea/test").toPath();
             dir.register( watcher, mod );
 
             final SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    dir.register(watcher, mod);
-                    return FileVisitResult.CONTINUE;
+                dir.register(watcher, mod);
+                return FileVisitResult.CONTINUE;
                 }
             };
 
@@ -43,7 +44,11 @@ public class TestWatchService {
                     // The filename is the context of the event.
                     WatchEvent<Path> ev = (WatchEvent<Path>) event;
                     Path filename = ev.context();
-                    Path child = dir.resolve(filename);
+//                    Path child = dir.resolve(filename);
+                    Path child;
+                    try {
+                       child = filename.toRealPath();
+                    }catch (IllegalArgumentException e){continue;}
                     System.out.println( String.format("child resolved: %s", child ));
 
                     Boolean isFolder = child.toFile().isDirectory();

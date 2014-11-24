@@ -1,1 +1,1 @@
-Google Driver desktop integration in Java.
+Google Drive desktop integration in Java.

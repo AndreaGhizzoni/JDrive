@@ -5,3 +5,5 @@ build/tmp
 build/dependency-cache
 build/test-results
 build/docs
+.idea/
+JDrive.iml
