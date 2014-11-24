@@ -17,7 +17,7 @@ public class TestWatchService {
             final WatchEvent.Kind[] mod = {ENTRY_CREATE,
                                            ENTRY_DELETE,
                                            ENTRY_MODIFY };
-            final Path dir = new File("/home/andrea/test").toPath();
+            final Path dir = Paths.get("/home/andrea/test");
             dir.register( watcher, mod );
             System.out.println("--- Starting watch on path "+dir);
 
@@ -51,41 +51,40 @@ public class TestWatchService {
             System.out.println("---");
 
             WatchKey key;
+            Path rPath;
             while (true) {
                 key = watcher.take();
+                if(!key.isValid()) {
+                    System.out.println(String.format("Key %s is not valid", key));
+                    continue;
+                }
 
                 for (WatchEvent<?> event : key.pollEvents()) {
                     WatchEvent.Kind<?> kind = event.kind();
 
-                    // This key is registered only for ENTRY_CREATE events,
-                    // but an OVERFLOW event can occur regardless if events
-                    // are lost or discarded.
-                    if(kind == OVERFLOW) {
+                    if( kind.equals(OVERFLOW) )
                         continue;
-                    }
 
                     WatchEvent<Path> ev = (WatchEvent<Path>) event;
-                    Path child = ((Path)key.watchable()).resolve(ev.context());
-                    System.out.println( String.format("event from: %s", child) );
+                    rPath = ((Path)key.watchable()).resolve(ev.context());
+                    System.out.println( String.format("resolved path: %s", rPath) );
 
                     //this doesn't work
-                    if(kind == ENTRY_DELETE) {
-                        key.reset();
+                    if(kind.equals(ENTRY_DELETE) ) {
+                        key.cancel();
                         System.out.println("unregister service");
                         continue;
                     }
 
-                    Boolean isFolder = child.toFile().isDirectory();
-                    if( isFolder ) {
-                        Files.walkFileTree(child, fileVisitor);
-                        //process directory
+                    boolean isFolder = rPath.toFile().isDirectory();
+                    if( isFolder && kind.equals(ENTRY_CREATE) ) {
+                        Files.walkFileTree(rPath, fileVisitor);
+                        //process directory and continue
                     }
-                    System.out.println(String.format("=== key: %s - path: %s", kind, child));
+                    System.out.println(String.format("=== key: %s - path: %s", kind, rPath));
+                    //process file
                 }
 
-                // Reset the key -- this step is critical if you want to
-                // receive further watch events.  If the key is no longer valid,
-                // the directory is inaccessible so exit the loop.
                 if( !key.reset() ){
                     watcher.close();
                     break;
