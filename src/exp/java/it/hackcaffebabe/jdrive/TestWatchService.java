@@ -48,29 +48,32 @@ public class TestWatchService implements Runnable
             WatchKey key;
             WatchEvent.Kind<?> kind;
             Path filename;
-            while (true) {
+            while( true ){
                 //retrieve and remove the next watch key
                 key = this.watcher.take();
 
                 //get list of events for the watch key
-                for (WatchEvent<?> watchEvent : key.pollEvents()) {
+                for( WatchEvent<?> watchEvent : key.pollEvents() ) {
                     //get the kind of event (create, modify, delete)
                     kind = watchEvent.kind();
                     //get the filename for the event
                     filename = ((WatchEvent<Path>) watchEvent).context();
 
                     //handle OVERFLOW event
-                    if (kind.equals(OVERFLOW)) {
+                    if( kind.equals(OVERFLOW) )
                         continue;
-                    }
+
+                    Path child = directories.get(key).resolve(filename);
+
                     //handle CREATE event
-                    Path child = null;
-                    if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
-                        child = directories.get(key).resolve(filename);
-                        if(Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS))
+                    if( kind == ENTRY_CREATE ){
+                        if( Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS) )
                             registerTree(child);
                     }
-                    //print it out
+
+//                    if( kind.equals(ENTRY_MODIFY) ){
+//                    }
+
                     System.out.println(kind + " -> " + child);
                 }
 
