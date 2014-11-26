@@ -6,10 +6,20 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="it.hackcaffebabe.jdrive.Bar" level="trace">
+        <Logger name="it.hackcaffebabe.jdrive.TestLog4J" level="trace"
+                additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
         <Root level="error">
+            <AppenderRef ref="Console"/>
+        </Root>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+        <Root level="trace">
+            <AppenderRef ref="Console"/>
+        </Root>
+        <Root level="debug">
             <AppenderRef ref="Console"/>
         </Root>
     </Loggers>
