@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 
 public class TestLog4J
 {
-    static final Logger logger = LogManager.getLogger(TestLog4J.class.getName());
+    static final Logger logger = LogManager.getLogger("primaryLog");
 
     public boolean doIt( int a) {
         //Trace level information, separately is to call you when you started

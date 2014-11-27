@@ -1,26 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN">
+<Configuration status="ALL">
+    <!-- List of properties -->
+    <Properties>
+        <Property name="logFileName">log</Property>
+        <Property name="logFilePath">log/${logFileName}</Property>
+    </Properties>
+
+    <!-- List of appender, responsibly to display the log somewhere -->
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
+        <!-- immediateFlush="false" for better SSD lifetime -->
+        <!--<File name="File" fileName="${logFilePath}" immediateFlush="false" append="false">-->
+            <!--<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>-->
+        <!--</File>-->
     </Appenders>
+
+    <!-- List of Logger to retrieve with LogManager.getLogger() -->
     <Loggers>
-        <Logger name="it.hackcaffebabe.jdrive.TestLog4J" level="trace"
-                additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
         <Root level="error">
             <AppenderRef ref="Console"/>
         </Root>
-        <Root level="info">
+        <Logger name="primaryLog" level="all" additivity="false">
             <AppenderRef ref="Console"/>
-        </Root>
-        <Root level="trace">
-            <AppenderRef ref="Console"/>
-        </Root>
-        <Root level="debug">
-            <AppenderRef ref="Console"/>
-        </Root>
+        </Logger>
+
+        <!--<Root level="error">-->
+            <!--<AppenderRef ref="File"/>-->
+        <!--</Root>-->
+        <!--<Logger name="fileLog" level="all" additivity="false">-->
+            <!--<AppenderRef ref="File"/>-->
+        <!--</Logger>-->
     </Loggers>
 </Configuration>
