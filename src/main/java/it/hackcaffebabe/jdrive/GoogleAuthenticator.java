@@ -43,10 +43,13 @@ public final class GoogleAuthenticator
     }
 
     private void buildGoogleAuthCodeFlow(){
-         this.googleAuthCodeFlow = new GoogleAuthorizationCodeFlow.Builder(
-                 this.httpTransport, this.jsonFactory, CLIENT_ID, CLIENT_SECRET,
-                 Arrays.asList(DriveScopes.DRIVE)).setAccessType("online")
-                .setApprovalPrompt("auto").build();
+        this.googleAuthCodeFlow = new GoogleAuthorizationCodeFlow.Builder(
+                httpTransport,
+                jsonFactory,
+                CLIENT_ID,
+                CLIENT_SECRET,
+                Arrays.asList(DriveScopes.DRIVE)
+        ).setAccessType("offline").setApprovalPrompt("auto").build();
     }
 
 //==============================================================================
@@ -60,7 +63,13 @@ public final class GoogleAuthenticator
     public Drive getService(String auth) throws IOException {
         GoogleTokenResponse t = this.googleAuthCodeFlow.newTokenRequest(auth)
                 .setRedirectUri(REDIRECT_URI).execute();
-        GoogleCredential c = new GoogleCredential().setFromTokenResponse(t);
+        //NOW THIS CREDENTIAL CAN BE STORED
+        GoogleCredential c = (new GoogleCredential.Builder()
+                .setTransport(this.httpTransport)
+                .setJsonFactory(this.jsonFactory)
+                .setClientSecrets(CLIENT_ID, CLIENT_SECRET).build())
+                .setFromTokenResponse(t);
+
         this.service = new Drive.Builder(this.httpTransport, this.jsonFactory, c)
                 .setApplicationName(APP_NAME).build();
         return this.service;
