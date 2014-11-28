@@ -1,8 +1,10 @@
-package it.hackcaffebabe.jdrive;
+package it.hackcaffebabe.jdrive.testing;
 
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
+import it.hackcaffebabe.jdrive.GoogleAuthenticator;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

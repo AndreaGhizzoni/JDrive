@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive;
 
+import static it.hackcaffebabe.jdrive.UtilConst.*;
 import static it.hackcaffebabe.jdrive.AuthConst.*;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -61,7 +62,7 @@ public final class GoogleAuthenticator
                 .setRedirectUri(REDIRECT_URI).execute();
         GoogleCredential c = new GoogleCredential().setFromTokenResponse(t);
         this.service = new Drive.Builder(this.httpTransport, this.jsonFactory, c)
-                .build();
+                .setApplicationName(APP_NAME).build();
         return this.service;
     }
 
