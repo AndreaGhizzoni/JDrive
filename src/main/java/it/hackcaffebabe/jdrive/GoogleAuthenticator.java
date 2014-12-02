@@ -89,10 +89,10 @@ public final class GoogleAuthenticator
                 .build();
 
         if(this.store.containsKey("stored")){
-//        if(this.googleAuthCodeFlow.getCredentialDataStore().containsKey("stored")){
             System.out.println("token stored");
-            StoredCredential sc = this.googleAuthCodeFlow.getCredentialDataStore().get("access_token");
+            StoredCredential sc = this.store.get("stored");
             cred.setAccessToken(sc.getAccessToken());
+            cred.setRefreshToken(sc.getRefreshToken());
         }else{
             GoogleTokenResponse t = this.googleAuthCodeFlow.newTokenRequest(auth)
                 .setRedirectUri(REDIRECT_URI).execute();

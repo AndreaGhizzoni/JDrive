@@ -32,9 +32,11 @@ public class TestGoogleAPI {
             FileContent mediaContent = new FileContent("text/plain", fileContent);
 
             File file = service.files().insert(body, mediaContent).execute();
-            System.out.println("File ID: " + file.getId());
+            System.out.println("File with service one ID: " + file.getId());
 
             Drive anotherService = a.getService(null);
+            anotherService.files().insert(body, mediaContent).execute();
+            System.out.println("File with another service one ID: " + file.getId());
         }catch (IOException e){
             e.printStackTrace();
         }
