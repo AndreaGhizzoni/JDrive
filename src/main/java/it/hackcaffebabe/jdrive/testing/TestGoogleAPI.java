@@ -17,15 +17,17 @@ public class TestGoogleAPI {
     public static void main(String[] args){
         try {
             GoogleAuthenticator a = GoogleAuthenticator.getInstance();
-            String url = a.getAuthURL();
+//            String url = a.getAuthURL();
+//
+//            log.info("Open the following url:");
+//            log.info(url);
+//            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+//            String code = br.readLine();
 
-            log.info("Open the following url:");
-            log.info(url);
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            String code = br.readLine();
-
-            Drive service = a.getService(code);
+            Drive service = a.getService(null);
             log.info("First instance of service created.");
+
+//            a.store();
 
             File body = makeFile();
             java.io.File fileContent = new java.io.File("/home/andrea/document.txt");

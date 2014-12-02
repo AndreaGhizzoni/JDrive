@@ -3,6 +3,9 @@ package it.hackcaffebabe.jdrive;
 import static it.hackcaffebabe.jdrive.UtilConst.*;
 import static it.hackcaffebabe.jdrive.AuthConst.*;
 
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.google.api.client.auth.oauth2.*;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -10,6 +13,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.JsonGenerator;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
@@ -18,6 +22,8 @@ import com.google.api.services.drive.DriveScopes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -43,6 +49,7 @@ public final class GoogleAuthenticator
 
     private GoogleAuthenticator() throws IOException {
         this.buildHTTPTransportJsonFactory();
+        this.buildDataStore();
         this.buildGoogleAuthCodeFlow();
     }
 
@@ -54,8 +61,7 @@ public final class GoogleAuthenticator
         this.jsonFactory = new JacksonFactory();
     }
 
-    private void buildGoogleAuthCodeFlow() throws IOException {
-        this.store = new MemoryDataStoreFactory().getDataStore(STORE_NAME);
+    private void buildGoogleAuthCodeFlow(){
         this.googleAuthCodeFlow = new GoogleAuthorizationCodeFlow.Builder(
                 httpTransport,
                 jsonFactory,
@@ -65,16 +71,66 @@ public final class GoogleAuthenticator
         ).setAccessType("offline").setApprovalPrompt("force").build();
     }
 
-//==============================================================================
-// GETTER
-//==============================================================================
-    public String getAuthURL() {
-        return this.googleAuthCodeFlow.newAuthorizationUrl().
-                setRedirectUri(REDIRECT_URI).build();
+    private void buildDataStore() throws IOException{
+        this.store = new MemoryDataStoreFactory().getDataStore(STORE_NAME);
+
+        File f = new File("test.json");
+        if(f.exists())
+            load();
     }
 
-    public Drive getService(String auth) throws IOException {
-        GoogleCredential cred = new GoogleCredential.Builder()
+    public void store(){
+        try{
+            com.fasterxml.jackson.core.JsonGenerator j = new
+                    com.fasterxml.jackson.core.JsonFactory().createGenerator(
+                    new File("test.json"), JsonEncoding.UTF8 );
+
+            StoredCredential c = this.store.get(TOKEN_NAME);
+            j.writeStartObject();// {
+
+            j.writeStringField("access_token", c.getAccessToken());
+            j.writeStringField("refresh_token", c.getRefreshToken());
+
+            j.writeEndObject();// }
+            j.flush();
+            j.close();
+        }catch (IOException e){
+            log.error(e.getMessage());
+        }
+    }
+
+    public void load(){
+       try{
+           JsonParser p = new com.fasterxml.jackson.core.JsonFactory()
+                   .createJsonParser(new File("test.json"));
+
+           StoredCredential s = new StoredCredential(makeGoogleCredential());
+
+           String fieldName;
+           while (p.nextToken() != JsonToken.END_OBJECT) {
+               fieldName = p.getCurrentName();
+               if("access_token".equals(fieldName)){
+                   p.nextToken();
+                   s.setAccessToken(p.getText());
+                   log.debug("access_token: "+s.getAccessToken());
+               }
+
+               if("refresh_token".equals(fieldName)){
+                   p.nextToken();
+                   s.setRefreshToken(p.getText());
+                   log.debug("refresh_token: "+s.getRefreshToken());
+               }
+           }
+           p.close();
+
+           this.store.set(TOKEN_NAME, s);
+       }catch (IOException e){
+           log.error(e.getMessage());
+       }
+    }
+
+    private GoogleCredential makeGoogleCredential(){
+        return new GoogleCredential.Builder()
                 .setTransport(this.httpTransport)
                 .setJsonFactory(this.jsonFactory)
                 .setClientSecrets(CLIENT_ID, CLIENT_SECRET)
@@ -91,6 +147,18 @@ public final class GoogleAuthenticator
 //                    }
 //                })
                 .build();
+    }
+
+//==============================================================================
+// GETTER
+//==============================================================================
+    public String getAuthURL() {
+        return this.googleAuthCodeFlow.newAuthorizationUrl().
+                setRedirectUri(REDIRECT_URI).build();
+    }
+
+    public Drive getService(String auth) throws IOException {
+        GoogleCredential cred = makeGoogleCredential();
 
         if(this.store.containsKey(TOKEN_NAME)){
             log.debug("Token present into the store.");
