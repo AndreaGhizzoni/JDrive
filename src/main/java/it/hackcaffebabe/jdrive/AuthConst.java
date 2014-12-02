@@ -6,4 +6,5 @@ public final class AuthConst
                                          "7qhoodggrd.apps.googleusercontent.com";
     public static final String CLIENT_SECRET = "TR7FU-rJxK1JQTo69ILuksEG";
     public static final String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
+    public static final String ACCESS_TOKEN = "access_token";
 }

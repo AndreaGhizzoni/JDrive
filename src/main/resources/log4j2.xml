@@ -22,7 +22,7 @@
         <Root level="error">
             <AppenderRef ref="Console"/>
         </Root>
-        <Logger name="primaryLog" level="all" additivity="false">
+        <Logger name="primary" level="all" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
 

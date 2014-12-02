@@ -15,13 +15,20 @@ import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.Arrays;
 
+/**
+ * https://stackoverflow.com/questions/20684238/authorization-to-google-client
+ * https://stackoverflow.com/questions/19861178/stored-credential-from-google-api-to-be-reused-java
+ */
 public final class GoogleAuthenticator
 {
     private static GoogleAuthenticator instance;
+    private static final Logger log = LogManager.getLogger("primary");
 
     public static GoogleAuthenticator getInstance() throws IOException {
         if (instance == null)
@@ -33,7 +40,6 @@ public final class GoogleAuthenticator
     private JsonFactory jsonFactory;
     private GoogleAuthorizationCodeFlow googleAuthCodeFlow;
     private DataStore<StoredCredential> store;
-    private Drive service;
 
     private GoogleAuthenticator() throws IOException {
         this.buildHTTPTransportJsonFactory();
@@ -49,16 +55,14 @@ public final class GoogleAuthenticator
     }
 
     private void buildGoogleAuthCodeFlow() throws IOException {
-        this.store = new MemoryDataStoreFactory().getDataStore("store");
+        this.store = new MemoryDataStoreFactory().getDataStore(STORE_NAME);
         this.googleAuthCodeFlow = new GoogleAuthorizationCodeFlow.Builder(
                 httpTransport,
                 jsonFactory,
                 CLIENT_ID,
                 CLIENT_SECRET,
                 Arrays.asList(DriveScopes.DRIVE)
-        )
-         .setAccessType("offline")
-         .setApprovalPrompt("force").build();
+        ).setAccessType("offline").setApprovalPrompt("force").build();
     }
 
 //==============================================================================
@@ -74,37 +78,6 @@ public final class GoogleAuthenticator
                 .setTransport(this.httpTransport)
                 .setJsonFactory(this.jsonFactory)
                 .setClientSecrets(CLIENT_ID, CLIENT_SECRET)
-                .addRefreshListener(new CredentialRefreshListener() {
-                    @Override
-                    public void onTokenResponse(Credential credential,
-                                                TokenResponse tokenResponse) throws IOException {
-                        System.out.println("successfully");
-                    }
-                    @Override
-                    public void onTokenErrorResponse(Credential credential,
-                                                     TokenErrorResponse tokenErrorResponse) throws IOException {
-                        System.out.println("wrong");
-                    }
-                })
-                .build();
-
-        if(this.store.containsKey("stored")){
-            System.out.println("token stored");
-            StoredCredential sc = this.store.get("stored");
-            cred.setAccessToken(sc.getAccessToken());
-            cred.setRefreshToken(sc.getRefreshToken());
-        }else{
-            GoogleTokenResponse t = this.googleAuthCodeFlow.newTokenRequest(auth)
-                .setRedirectUri(REDIRECT_URI).execute();
-            cred.setFromTokenResponse(t);
-            cred.setAccessToken("access_token");
-            this.store.set("stored", new StoredCredential(cred));
-        }
-
-//        GoogleCredential cred = new GoogleCredential.Builder()
-//                .setTransport(this.httpTransport)
-//                .setJsonFactory(this.jsonFactory)
-//                .setClientSecrets(CLIENT_ID, CLIENT_SECRET)
 //                .addRefreshListener(new CredentialRefreshListener() {
 //                    @Override
 //                    public void onTokenResponse(Credential credential,
@@ -114,16 +87,27 @@ public final class GoogleAuthenticator
 //                    @Override
 //                    public void onTokenErrorResponse(Credential credential,
 //                                                     TokenErrorResponse tokenErrorResponse) throws IOException {
-//
 //                        System.out.println("wrong");
 //                    }
 //                })
-//                .build()
-//                .setFromTokenResponse(t)
-//                .setAccessToken("access_token");
+                .build();
 
-        this.service = new Drive.Builder(this.httpTransport, this.jsonFactory, cred)
+        if(this.store.containsKey(TOKEN_NAME)){
+            log.debug("Token present into the store.");
+            StoredCredential sc = this.store.get(TOKEN_NAME);
+            cred.setAccessToken(sc.getAccessToken());
+            cred.setRefreshToken(sc.getRefreshToken());
+        }else{
+            log.debug("Token not present into the store.");
+            GoogleTokenResponse t = this.googleAuthCodeFlow.newTokenRequest(auth)
+                .setRedirectUri(REDIRECT_URI).execute();
+            cred.setFromTokenResponse(t);
+            cred.setAccessToken(ACCESS_TOKEN);
+            this.store.set(TOKEN_NAME, new StoredCredential(cred));
+            log.debug("Token stored.");
+        }
+
+        return new Drive.Builder(this.httpTransport, this.jsonFactory, cred)
                 .setApplicationName(APP_NAME).build();
-        return this.service;
     }
 }
