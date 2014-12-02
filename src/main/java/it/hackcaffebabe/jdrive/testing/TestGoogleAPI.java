@@ -22,7 +22,7 @@ public class TestGoogleAPI {
 
             Drive service = a.getService(code);
 
-            //Insert a file
+//            Insert a file
             File body = new File();
             body.setTitle("My document");
             body.setDescription("A test document");
@@ -33,6 +33,8 @@ public class TestGoogleAPI {
 
             File file = service.files().insert(body, mediaContent).execute();
             System.out.println("File ID: " + file.getId());
+
+            Drive anotherService = a.getService(null);
         }catch (IOException e){
             e.printStackTrace();
         }
