@@ -20,14 +20,31 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-/**
+/*
  * https://stackoverflow.com/questions/20684238/authorization-to-google-client
  * https://stackoverflow.com/questions/19861178/stored-credential-from-google-api-to-be-reused-java
+ */
+
+/**
+ * Google Authenticator class.
+ * How to use:
+ * <pre>{@code
+ * GoogleAuthenticator g = GoogleAuthenticator.getInstance();
+ * String code;
+ * String url = g.getAuthURL();
+ * if(url != null){
+ *    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+ *    code = br.readLine();
+ *    g.setAuthResponseCode(code);
+ * }
+ * Drive service = g.getService();
+ * }</pre>
+ *
+ * @version 0.0.1
+ * @author Andrea Ghizzoni
  */
 public final class GoogleAuthenticator
 {
@@ -36,6 +53,11 @@ public final class GoogleAuthenticator
             GoogleAuthenticator.class.getSimpleName()
     );
 
+    /**
+     * This method returns an instance of GoogleAuthenticator.
+     * @return GoogleAuthenticator the GoogleAuthenticator
+     * @throws IOException if something goes wrong
+     */
     public static GoogleAuthenticator getInstance() throws IOException {
         if (instance == null)
             instance = new GoogleAuthenticator();
@@ -50,9 +72,10 @@ public final class GoogleAuthenticator
     private DataStore<StoredCredential> store;
     private Drive service;
 
+    /* constructor */
     private GoogleAuthenticator() throws IOException {
         log.entry();
-        this.status = Status.UNAUTHORIZED;
+        setStatus(Status.UNAUTHORIZED);
         this.buildHTTPTransportJsonFactory();
         this.buildDataStore();
         this.buildGoogleAuthCodeFlow();
@@ -62,16 +85,19 @@ public final class GoogleAuthenticator
 //==============================================================================
 // METHOD
 //==============================================================================
+    /* build up the HTTPTransport and JsonFactory */
     private void buildHTTPTransportJsonFactory() {
         this.httpTransport = new NetHttpTransport();
         this.jsonFactory = new JacksonFactory();
     }
 
+    /* build up the data store and load stored credential if the are any */
     private void buildDataStore() throws IOException{
         this.store = new MemoryDataStoreFactory().getDataStore(STORE_NAME);
         loadCredential();
     }
 
+    /* build up the Google Authentication Flow */
     private void buildGoogleAuthCodeFlow(){
         this.googleAuthCodeFlow = new GoogleAuthorizationCodeFlow.Builder(
                 httpTransport, jsonFactory,
@@ -80,6 +106,7 @@ public final class GoogleAuthenticator
         ).setAccessType("offline").setApprovalPrompt("force").build();
     }
 
+    /* store the user credential */
     private void storeCredential() throws IOException{
         if(JSON_FILE.exists() && !JSON_FILE.delete())
             throw new IOException("Error while deleting old authentication token.");
@@ -99,6 +126,7 @@ public final class GoogleAuthenticator
         j.close();
     }
 
+    /* load the stored credential */
     private void loadCredential() throws  IOException{
         if(!JSON_FILE.exists())
             return;
@@ -112,23 +140,24 @@ public final class GoogleAuthenticator
         String fieldName;
         while (p.nextToken() != JsonToken.END_OBJECT) {
             fieldName = p.getCurrentName();
-                if(JSON_AC.equals(fieldName)){
-                    p.nextToken();
-                    s.setAccessToken(p.getText());
-                }
-
-                if(JSON_RT.equals(fieldName)){
-                    p.nextToken();
-                    s.setRefreshToken(p.getText());
-                }
+            if(JSON_AC.equals(fieldName)){
+                p.nextToken();
+                s.setAccessToken(p.getText());
             }
-            p.close();
+
+            if(JSON_RT.equals(fieldName)){
+                p.nextToken();
+                s.setRefreshToken(p.getText());
+            }
+        }
+        p.close();
 
         this.store.set(TOKEN_NAME, s);
-        this.status = Status.AUTHORIZE;
+        setStatus(Status.AUTHORIZE);
         log.info("Credential loaded.");
     }
 
+    /* build the GoogleCredential Object */
     private GoogleCredential makeGoogleCredential(){
         return new GoogleCredential.Builder()
                 .setTransport(this.httpTransport)
@@ -138,34 +167,59 @@ public final class GoogleAuthenticator
                     @Override
                     public void onTokenResponse(Credential credential,
                                                 TokenResponse tokenResponse) throws IOException {
-                        log.info("===== Token response ======");
+                        log.info("Refresh listener: token response.");
                     }
                     @Override
                     public void onTokenErrorResponse(Credential credential,
                                                      TokenErrorResponse tokenErrorResponse) throws IOException {
-                        log.info("===== Token response error =====");
+                        log.info("Refresh listener: token response error.");
                     }
                 })
                 .build();
     }
 
+//==============================================================================
+// SETTER
+//==============================================================================
+    /**
+     * This method is used set the code in response of the authentication url
+     * from method <code>getAuthUrl()</code>.
+     * @param code {@link String} the response code.
+     * @throws IOException if something goes wrong.
+     */
     public void setAuthResponseCode(String code) throws IOException{
-        if(this.status.equals(Status.UNAUTHORIZED)) {
+        if(getStatus().equals(Status.UNAUTHORIZED)) {
             this.tokenResponse = this.googleAuthCodeFlow.newTokenRequest(code)
                     .setRedirectUri(REDIRECT_URI).execute();
             this.status = Status.AUTHORIZE;
         }
     }
 
+    /* set the status of authorizations if argument is not null */
+    private void setStatus( GoogleAuthenticator.Status s){
+        if(s != null){
+            this.status = s;
+        }
+    }
+
 //==============================================================================
 // GETTER
 //==============================================================================
+    /** @return {@link GoogleAuthenticator.Status} the status of authorization */
     public GoogleAuthenticator.Status getStatus(){
         return this.status;
     }
 
+    /**
+     * This method build a url where you can get the authentication code. Once
+     * obtained you can pass it to <code>setAuthResponseCode(code)</code>.
+     * If <code>getStatus().equals(Status.AUTHORIZED)</code> this method returns
+     * null.
+     * @return {@link String} the authorization url or null if
+     * <code>getStatus().equals(Status.AUTHORIZED)</code>
+     */
     public String getAuthURL() {
-        if(this.status.equals(Status.UNAUTHORIZED) ) {
+        if(getStatus().equals(Status.UNAUTHORIZED) ) {
             return this.googleAuthCodeFlow.newAuthorizationUrl().
                     setRedirectUri(REDIRECT_URI).build();
         }else{
@@ -173,8 +227,13 @@ public final class GoogleAuthenticator
         }
     }
 
+    /**
+     * This method returns the Drive service to manage all Drives functionality.
+     * @return {@link Drive} the drive service.
+     * @throws IOException or UnAuthorizeException
+     */
     public Drive getService() throws IOException {
-        if(this.status.equals(Status.UNAUTHORIZED)) {
+        if(getStatus().equals(Status.UNAUTHORIZED)) {
             throw new UnAuthorizeException("User not authenticate. Use getAuthURL()" +
                     " to get the authentication url.");
         }
@@ -199,18 +258,20 @@ public final class GoogleAuthenticator
             this.service = new Drive.Builder(this.httpTransport, this.jsonFactory, cred)
                     .setApplicationName(APP_NAME).build();
         }
-        this.status = Status.AUTHORIZE;
+        setStatus(Status.AUTHORIZE);
         return this.service;
     }
 
 //==============================================================================
 // INNER CLASS
 //==============================================================================
-    public enum Status {
-        AUTHORIZE,
-        UNAUTHORIZED
-    }
+    /** Represents the Authorization status */
+    public enum Status { AUTHORIZE, UNAUTHORIZED }
 
+    /**
+     * Exception throws when call <code>getService()</code> while your not
+     * authenticate with the appropriate procedure.
+     */
     public class UnAuthorizeException extends IOException
     {
         public UnAuthorizeException(String m){

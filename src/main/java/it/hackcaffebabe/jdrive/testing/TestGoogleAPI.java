@@ -1,8 +1,8 @@
 package it.hackcaffebabe.jdrive.testing;
 
-import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.FileList;
 import it.hackcaffebabe.jdrive.GoogleAuthenticator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,7 +10,12 @@ import org.apache.logging.log4j.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * Testing Google API
+ */
 public class TestGoogleAPI {
     public static final Logger log = LogManager.getLogger("TestGoogleAuthenticator");
 
@@ -32,22 +37,30 @@ public class TestGoogleAPI {
             Drive service = g.getService();
             log.info("Service get.");
 
-            log.info("Try to send file...");
-            File body = makeFile();
-            java.io.File fileContent = new java.io.File("/home/andrea/document.txt");
-            FileContent mediaContent = new FileContent("text/plain", fileContent);
-            File file = service.files().insert(body, mediaContent).execute();
-            log.info("sent with ID: " + file.getId());
+
+            listFiles(service);
         }catch (IOException e){
             log.error(e.getMessage());
         }
     }
 
-    public static File makeFile(){
-        File body = new File();
-        body.setTitle("My document");
-        body.setDescription("A test document");
-        body.setMimeType("text/plain");
-        return body;
+    public static void listFiles( Drive d ) throws IOException{
+        log.info("retrieve file list");
+        List<File> result = new ArrayList<File>();
+        Drive.Files.List r = d.files().list();
+        FileList fileList;
+        do{
+            fileList = r.setQ("not trashed").execute();
+            result.addAll(fileList.getItems());
+
+            r.setPageToken(fileList.getNextPageToken());
+        }while( r.getPageToken() != null && r.getPageToken().length() > 0 );
+
+        for(File f : result ) {
+            log.info("Name: "+f.getTitle());
+            log.info("EmbedLink: "+f.getEmbedLink());
+            log.info("Kind: "+f.getKind());
+            log.info("====");
+        }
     }
 }
