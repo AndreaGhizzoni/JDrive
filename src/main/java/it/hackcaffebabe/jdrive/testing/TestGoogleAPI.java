@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class TestGoogleAPI {
-    public static final Logger log = LogManager.getLogger("primary");
+    public static final Logger log = LogManager.getLogger("TestGoogleAuthenticator");
 
     public static void main(String[] args){
         try{
@@ -21,7 +21,6 @@ public class TestGoogleAPI {
             String code;
             String url = g.getAuthURL();
             if(url != null){
-                log.debug(g.getStatus());
                 log.info("Open the following url:");
                 log.info(url);
                 BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -38,8 +37,7 @@ public class TestGoogleAPI {
             java.io.File fileContent = new java.io.File("/home/andrea/document.txt");
             FileContent mediaContent = new FileContent("text/plain", fileContent);
             File file = service.files().insert(body, mediaContent).execute();
-            log.info("File ID from first service: " + file.getId());
-
+            log.info("sent with ID: " + file.getId());
         }catch (IOException e){
             log.error(e.getMessage());
         }

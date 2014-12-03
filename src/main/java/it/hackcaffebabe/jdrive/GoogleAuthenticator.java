@@ -1,7 +1,7 @@
 package it.hackcaffebabe.jdrive;
 
 import static it.hackcaffebabe.jdrive.UtilConst.*;
-import static it.hackcaffebabe.jdrive.AuthConst.*;
+import static it.hackcaffebabe.jdrive.AuthenticationConst.*;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonParser;
@@ -23,7 +23,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Arrays;
 
 /**
@@ -33,7 +32,9 @@ import java.util.Arrays;
 public final class GoogleAuthenticator
 {
     private static GoogleAuthenticator instance;
-    private static final Logger log = LogManager.getLogger("primary");
+    private static final Logger log = LogManager.getLogger(
+            GoogleAuthenticator.class.getSimpleName()
+    );
 
     public static GoogleAuthenticator getInstance() throws IOException {
         if (instance == null)
@@ -50,10 +51,12 @@ public final class GoogleAuthenticator
     private Drive service;
 
     private GoogleAuthenticator() throws IOException {
+        log.entry();
         this.status = Status.UNAUTHORIZED;
         this.buildHTTPTransportJsonFactory();
         this.buildDataStore();
         this.buildGoogleAuthCodeFlow();
+        log.info("Instance created correctly.");
     }
 
 //==============================================================================
@@ -71,67 +74,59 @@ public final class GoogleAuthenticator
 
     private void buildGoogleAuthCodeFlow(){
         this.googleAuthCodeFlow = new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport,
-                jsonFactory,
-                CLIENT_ID,
-                CLIENT_SECRET,
-                Arrays.asList(DriveScopes.DRIVE)
+                httpTransport, jsonFactory,
+                CLIENT_ID, CLIENT_SECRET,
+                Arrays.asList(DriveScopes.DRIVE, DriveScopes.DRIVE_FILE)
         ).setAccessType("offline").setApprovalPrompt("force").build();
     }
 
-    private void storeCredential(){
-        try{
-            com.fasterxml.jackson.core.JsonGenerator j = new
-                    com.fasterxml.jackson.core.JsonFactory().createGenerator(
-                    new File("test.json"), JsonEncoding.UTF8 );
+    private void storeCredential() throws IOException{
+        if(JSON_FILE.exists() && !JSON_FILE.delete())
+            throw new IOException("Error while deleting old authentication token.");
 
-            StoredCredential c = this.store.get(TOKEN_NAME);
-            j.writeStartObject();// {
+        com.fasterxml.jackson.core.JsonGenerator j = new
+                com.fasterxml.jackson.core.JsonFactory().createGenerator(
+                JSON_FILE, JsonEncoding.UTF8 );
 
-            j.writeStringField("access_token", c.getAccessToken());
-            j.writeStringField("refresh_token", c.getRefreshToken());
+        StoredCredential c = this.store.get(TOKEN_NAME);
+        j.writeStartObject();// {
 
-            j.writeEndObject();// }
-            j.flush();
-            j.close();
-        }catch (IOException e){
-            log.error(e.getMessage());
-        }
+        j.writeStringField(JSON_AC, c.getAccessToken());
+        j.writeStringField(JSON_RT, c.getRefreshToken());
+
+        j.writeEndObject();// }
+        j.flush();
+        j.close();
     }
 
-    private void loadCredential(){
-        File f = new File("test.json");
-        if(!f.exists())
+    private void loadCredential() throws  IOException{
+        if(!JSON_FILE.exists())
             return;
 
-        try{
-            log.info("Credential found: try to load.");
-            JsonParser p = new com.fasterxml.jackson.core.JsonFactory()
-                       .createJsonParser(f);
+        log.info("Credential found: try to load.");
+        JsonParser p = new com.fasterxml.jackson.core.JsonFactory()
+                   .createJsonParser(JSON_FILE);
 
-            StoredCredential s = new StoredCredential(makeGoogleCredential());
+        StoredCredential s = new StoredCredential(makeGoogleCredential());
 
-            String fieldName;
-            while (p.nextToken() != JsonToken.END_OBJECT) {
-                fieldName = p.getCurrentName();
-                    if("access_token".equals(fieldName)){
-                        p.nextToken();
-                        s.setAccessToken(p.getText());
-                    }
-
-                    if("refresh_token".equals(fieldName)){
-                        p.nextToken();
-                        s.setRefreshToken(p.getText());
-                    }
+        String fieldName;
+        while (p.nextToken() != JsonToken.END_OBJECT) {
+            fieldName = p.getCurrentName();
+                if(JSON_AC.equals(fieldName)){
+                    p.nextToken();
+                    s.setAccessToken(p.getText());
                 }
-                p.close();
 
-            this.store.set(TOKEN_NAME, s);
-            this.status = Status.AUTHORIZE;
-            log.info("Credential loaded.");
-        }catch (IOException e){
-            log.error(e.getMessage());
-        }
+                if(JSON_RT.equals(fieldName)){
+                    p.nextToken();
+                    s.setRefreshToken(p.getText());
+                }
+            }
+            p.close();
+
+        this.store.set(TOKEN_NAME, s);
+        this.status = Status.AUTHORIZE;
+        log.info("Credential loaded.");
     }
 
     private GoogleCredential makeGoogleCredential(){
@@ -139,18 +134,18 @@ public final class GoogleAuthenticator
                 .setTransport(this.httpTransport)
                 .setJsonFactory(this.jsonFactory)
                 .setClientSecrets(CLIENT_ID, CLIENT_SECRET)
-//                .addRefreshListener(new CredentialRefreshListener() {
-//                    @Override
-//                    public void onTokenResponse(Credential credential,
-//                                                TokenResponse tokenResponse) throws IOException {
-//                        System.out.println("successfully");
-//                    }
-//                    @Override
-//                    public void onTokenErrorResponse(Credential credential,
-//                                                     TokenErrorResponse tokenErrorResponse) throws IOException {
-//                        System.out.println("wrong");
-//                    }
-//                })
+                .addRefreshListener(new CredentialRefreshListener() {
+                    @Override
+                    public void onTokenResponse(Credential credential,
+                                                TokenResponse tokenResponse) throws IOException {
+                        log.info("===== Token response ======");
+                    }
+                    @Override
+                    public void onTokenErrorResponse(Credential credential,
+                                                     TokenErrorResponse tokenErrorResponse) throws IOException {
+                        log.info("===== Token response error =====");
+                    }
+                })
                 .build();
     }
 
@@ -158,6 +153,7 @@ public final class GoogleAuthenticator
         if(this.status.equals(Status.UNAUTHORIZED)) {
             this.tokenResponse = this.googleAuthCodeFlow.newTokenRequest(code)
                     .setRedirectUri(REDIRECT_URI).execute();
+            this.status = Status.AUTHORIZE;
         }
     }
 

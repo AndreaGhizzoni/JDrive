@@ -22,9 +22,16 @@
         <Root level="error">
             <AppenderRef ref="Console"/>
         </Root>
-        <Logger name="primary" level="all" additivity="false">
+
+        <Logger name="TestGoogleAuthenticator" level="all" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
+
+        <Logger name="GoogleAuthenticator" level="all" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+
 
         <!--<Root level="error">-->
             <!--<AppenderRef ref="File"/>-->
