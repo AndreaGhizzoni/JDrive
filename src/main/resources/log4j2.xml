@@ -12,9 +12,9 @@
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
         <!-- immediateFlush="false" for better SSD lifetime -->
-        <!--<File name="File" fileName="${logFilePath}" immediateFlush="false" append="false">-->
-            <!--<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>-->
-        <!--</File>-->
+        <File name="File" fileName="${logFilePath}" immediateFlush="false" append="false">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </File>
     </Appenders>
 
     <!-- List of Logger to retrieve with LogManager.getLogger() -->
@@ -36,8 +36,8 @@
         <!--<Root level="error">-->
             <!--<AppenderRef ref="File"/>-->
         <!--</Root>-->
-        <!--<Logger name="fileLog" level="all" additivity="false">-->
-            <!--<AppenderRef ref="File"/>-->
-        <!--</Logger>-->
+        <Logger name="fileLog" level="all" additivity="false">
+            <AppenderRef ref="File"/>
+        </Logger>
     </Loggers>
 </Configuration>

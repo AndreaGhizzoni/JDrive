@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.testing;
 
+import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
@@ -11,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -38,28 +40,34 @@ public class TestGoogleAPI {
             log.info("Service get.");
 
 
-            listFiles(service);
+            listFilesInRoot(service);
         }catch (IOException e){
             log.error(e.getMessage());
         }
     }
 
-    public static void listFiles( Drive d ) throws IOException{
+    public static void uploadSimpleFile(Drive d) throws IOException{
+        File body = new File();
+        body.setTitle("My Document-"+new Date());
+        body.setDescription("A test document");
+        body.setMimeType("text/plain");
+
+        java.io.File fileContent = new java.io.File("test/document.txt");
+        FileContent mediaContent = new FileContent("text/plain", fileContent);
+
+        File file = d.files().insert(body, mediaContent).execute();
+        log.info("File uploaded with ID:" +file.getId());
+    }
+
+    public static void listFilesInRoot( Drive d ) throws IOException{
         log.info("retrieve file list");
         List<File> result = new ArrayList<File>();
         Drive.Files.List r = d.files().list();
-        FileList fileList;
-        do{
-            fileList = r.setQ("not trashed").execute();
-            result.addAll(fileList.getItems());
-
-            r.setPageToken(fileList.getNextPageToken());
-        }while( r.getPageToken() != null && r.getPageToken().length() > 0 );
+        FileList fileList = r.setQ("not trashed and ('root' in parents)").execute();
+        result.addAll(fileList.getItems());
 
         for(File f : result ) {
-            log.info("Name: "+f.getTitle());
-            log.info("EmbedLink: "+f.getEmbedLink());
-            log.info("Kind: "+f.getKind());
+            log.info(f.getTitle());
             log.info("====");
         }
     }
