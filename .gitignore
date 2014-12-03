@@ -1,6 +1,7 @@
 bin/
 out/
 test/
+log/
 build/classes
 build/tmp
 build/dependency-cache
