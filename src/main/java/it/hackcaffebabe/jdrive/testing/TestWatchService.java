@@ -37,7 +37,7 @@ public class TestWatchService implements Runnable
     private void registerPath(Path path) throws IOException {
         //register the received path
         WatchKey key = path.register(this.watcher, mod );
-        //store the key and path
+        //storeCredential the key and path
         directories.put(key, path);
     }
 

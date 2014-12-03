@@ -15,34 +15,33 @@ public class TestGoogleAPI {
     public static final Logger log = LogManager.getLogger("primary");
 
     public static void main(String[] args){
-        try {
-            GoogleAuthenticator a = GoogleAuthenticator.getInstance();
-//            String url = a.getAuthURL();
-//
-//            log.info("Open the following url:");
-//            log.info(url);
-//            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-//            String code = br.readLine();
+        try{
+            GoogleAuthenticator g = GoogleAuthenticator.getInstance();
 
-            Drive service = a.getService(null);
-            log.info("First instance of service created.");
+            String code;
+            String url = g.getAuthURL();
+            if(url != null){
+                log.debug(g.getStatus());
+                log.info("Open the following url:");
+                log.info(url);
+                BufferedReader br = new BufferedReader(new InputStreamReader(
+                        System.in));
+                code = br.readLine();
+                g.setAuthResponseCode(code);
+            }
 
-//            a.store();
+            Drive service = g.getService();
+            log.info("Service get.");
 
+            log.info("Try to send file...");
             File body = makeFile();
             java.io.File fileContent = new java.io.File("/home/andrea/document.txt");
             FileContent mediaContent = new FileContent("text/plain", fileContent);
-
             File file = service.files().insert(body, mediaContent).execute();
             log.info("File ID from first service: " + file.getId());
 
-            Drive anotherService = a.getService(null);
-            log.info("Second instance of service retrieved.");
-
-            anotherService.files().insert(body, mediaContent).execute();
-            log.info("File ID from second service: " + file.getId());
         }catch (IOException e){
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 
