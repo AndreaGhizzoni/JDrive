@@ -272,10 +272,7 @@ public final class GoogleAuthenticator
      * Exception throws when call <code>getService()</code> while your not
      * authenticate with the appropriate procedure.
      */
-    public class UnAuthorizeException extends IOException
-    {
-        public UnAuthorizeException(String m){
-            super(m);
-        }
+    public class UnAuthorizeException extends IOException {
+        public UnAuthorizeException(String m){ super(m); }
     }
 }

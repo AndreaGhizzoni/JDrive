@@ -1,10 +1,9 @@
-package it.hackcaffebabe.jdrive.testing;
+package it.hackcaffebabe.jdrive;
 
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
-import it.hackcaffebabe.jdrive.GoogleAuthenticator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,27 +22,40 @@ public class TestGoogleAPI {
 
     public static void main(String[] args){
         try{
-            GoogleAuthenticator g = GoogleAuthenticator.getInstance();
-
-            String code;
-            String url = g.getAuthURL();
-            if(url != null){
-                log.info("Open the following url:");
-                log.info(url);
-                BufferedReader br = new BufferedReader(new InputStreamReader(
-                        System.in));
-                code = br.readLine();
-                g.setAuthResponseCode(code);
-            }
-
-            Drive service = g.getService();
-            log.info("Service get.");
-
-
-            listFilesInRoot(service);
+            Drive service = GoogleLoginWithGUI();
         }catch (IOException e){
             log.error(e.getMessage());
         }
+    }
+
+    public static Drive GoogleLoginWithGUI() throws IOException{
+        GoogleAuthenticator g = GoogleAuthenticator.getInstance();
+
+        String code;
+        String url = g.getAuthURL();
+        if(url != null) {
+            GoogleAuthenticatorUI.show(url);
+        }
+        return null;
+    }
+
+    public static Drive GoogleLogin() throws IOException{
+        GoogleAuthenticator g = GoogleAuthenticator.getInstance();
+
+        String code;
+        String url = g.getAuthURL();
+        if(url != null){
+            log.info("Open the following url:");
+            log.info(url);
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    System.in));
+            code = br.readLine();
+            g.setAuthResponseCode(code);
+        }
+
+        Drive service = g.getService();
+        log.info("Service get.");
+        return service;
     }
 
     public static void uploadSimpleFile(Drive d) throws IOException{
