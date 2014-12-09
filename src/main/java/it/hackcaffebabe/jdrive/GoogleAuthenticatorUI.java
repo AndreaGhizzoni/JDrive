@@ -2,7 +2,6 @@ package it.hackcaffebabe.jdrive;
 
 import static javafx.concurrent.Worker.State.FAILED;
 import java.awt.*;
-import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javafx.application.Platform;
@@ -17,13 +16,7 @@ import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 import javax.swing.*;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 /**
  *
@@ -37,8 +30,6 @@ public class GoogleAuthenticatorUI implements Runnable
     private JPanel panel = new JPanel(new BorderLayout());
     private JLabel lblStatus = new JLabel();
 
-//    private JButton btnGo = new JButton("Go");
-//    private JTextField txtURL = new JTextField();
     private JProgressBar progressBar = new JProgressBar();
 
     private String url;
@@ -53,7 +44,6 @@ public class GoogleAuthenticatorUI implements Runnable
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         initComponents();
-
         loadURL(url);
 
         frame.pack();
@@ -65,29 +55,13 @@ public class GoogleAuthenticatorUI implements Runnable
 
         createScene();
 
-//        ActionListener al = new ActionListener() {
-//            @Override public void actionPerformed(ActionEvent e) {
-//                loadURL(txtURL.getText());
-//            }
-//        };
-//
-//        btnGo.addActionListener(al);
-//        txtURL.addActionListener(al);
-
-        progressBar.setPreferredSize(new Dimension(150, 18));
         progressBar.setStringPainted(true);
-
-//        JPanel topBar = new JPanel(new BorderLayout(5, 0));
-//        topBar.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
-//        topBar.add(txtURL, BorderLayout.CENTER);
-//        topBar.add(btnGo, BorderLayout.EAST);
 
         JPanel statusBar = new JPanel(new BorderLayout(5, 0));
         statusBar.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
         statusBar.add(lblStatus, BorderLayout.CENTER);
         statusBar.add(progressBar, BorderLayout.EAST);
 
-//        panel.add(topBar, BorderLayout.NORTH);
         panel.add(jfxPanel, BorderLayout.CENTER);
         panel.add(statusBar, BorderLayout.SOUTH);
 
@@ -144,18 +118,6 @@ public class GoogleAuthenticatorUI implements Runnable
                     }
                 });
 
-//                engine.locationProperty().addListener(new ChangeListener<String>() {
-//                    @Override
-//                    public void changed(ObservableValue<? extends String> ov,
-//                                        String oldValue, final String newValue) {
-//                        SwingUtilities.invokeLater(new Runnable() {
-//                            @Override public void run() {
-//                                txtURL.setText(newValue);
-//                            }
-//                        });
-//                    }
-//                });
-
                 engine.getLoadWorker().stateProperty()
                         .addListener(new ChangeListener<Worker.State>() {
                             @Override
@@ -192,11 +154,16 @@ public class GoogleAuthenticatorUI implements Runnable
                                 if (engine.getLoadWorker().getState() == FAILED) {
                                     SwingUtilities.invokeLater(new Runnable() {
                                         @Override public void run() {
+                                            //TODO log this error case
+                                            String l = engine.getLocation()+"\n";
+                                            String v;
+                                            if(value != null)
+                                                v = l + value.getMessage();
+                                            else
+                                                v = l +"Unexpected error.";
+
                                             JOptionPane.showMessageDialog(
-                                                    panel,
-                                                    (value != null) ?
-                                                            engine.getLocation() + "\n" + value.getMessage() :
-                                                            engine.getLocation() + "\nUnexpected error.",
+                                                    panel, v,
                                                     "Loading error...",
                                                     JOptionPane.ERROR_MESSAGE);
                                         }

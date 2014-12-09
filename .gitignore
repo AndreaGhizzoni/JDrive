@@ -8,4 +8,5 @@ build/dependency-cache
 build/test-results
 build/docs
 .idea/
+.gradle/
 JDrive.iml
