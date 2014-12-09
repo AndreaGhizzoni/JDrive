@@ -7,6 +7,7 @@ import com.google.api.services.drive.model.FileList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,7 +35,7 @@ public class TestGoogleAPI {
         String code;
         String url = g.getAuthURL();
         if(url != null) {
-            GoogleAuthenticatorUI.show(url);
+            SwingUtilities.invokeLater(new GoogleAuthenticatorUI(url));
         }
         return null;
     }
