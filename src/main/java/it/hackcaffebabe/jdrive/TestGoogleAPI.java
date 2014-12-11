@@ -23,7 +23,7 @@ public class TestGoogleAPI {
 
     public static void main(String[] args){
         try{
-            Drive service = GoogleLoginWithGUI();
+            Drive d = GoogleLoginWithGUI();
         }catch (IOException e){
             log.error(e.getMessage());
         }
@@ -31,13 +31,7 @@ public class TestGoogleAPI {
 
     public static Drive GoogleLoginWithGUI() throws IOException{
         GoogleAuthenticator g = GoogleAuthenticator.getInstance();
-
-        String code;
-        String url = g.getAuthURL();
-        if(url != null) {
-            SwingUtilities.invokeLater(new GoogleAuthenticatorUI(url));
-        }
-        return null;
+        return g.UIAuthentication();
     }
 
     public static Drive GoogleLogin() throws IOException{

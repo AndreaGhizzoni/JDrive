@@ -279,6 +279,19 @@ public final class GoogleAuthenticator
         return this.service;
     }
 
+
+    public Drive UIAuthentication() throws IOException {
+        if(getStatus().equals(Status.AUTHORIZE))
+            return this.service;
+
+        String url = getAuthURL();
+        SwingUtilities.invokeLater(new UI(url, this));
+
+        //spin lock goes here
+
+        return getService();
+    }
+
 //==============================================================================
 // INNER CLASS
 //==============================================================================
@@ -304,13 +317,14 @@ public final class GoogleAuthenticator
         private JFrame frame = new JFrame();
         private JPanel panel = new JPanel(new BorderLayout());
         private JLabel lblStatus = new JLabel();
-
         private JProgressBar progressBar = new JProgressBar();
 
         private String url;
+        private GoogleAuthenticator g;
 
-        public UI(String url){
+        public UI(String url, GoogleAuthenticator g){
             this.url = url;
+            this.g = g;
         }
 
         @Override
@@ -404,7 +418,13 @@ public final class GoogleAuthenticator
                                         Element e = doc.getElementById("code");
                                         if (e != null) {
                                             String value = e.getAttribute("value");
-                                            System.out.println("Value: " + value);
+                                            log.debug("Value: " + value);
+                                            try {
+                                                g.setAuthResponseCode(value);
+                                            } catch (IOException e1) {
+                                                log.error(e1.getMessage());
+                                            }
+                                            frame.dispose();
                                         }
                                     }
                                 }
