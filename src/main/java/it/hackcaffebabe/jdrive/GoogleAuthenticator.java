@@ -322,11 +322,15 @@ public final class GoogleAuthenticator
 
         @Override
         public void run() {
+            String url = g.getAuthURL();
+            if(url == null)
+                return;
+
             frame.setPreferredSize(new Dimension(1024, 600));
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
             initComponents();
-            loadURL(g.getAuthURL());
+            loadURL(url);
 
             frame.pack();
             frame.setVisible(true);
