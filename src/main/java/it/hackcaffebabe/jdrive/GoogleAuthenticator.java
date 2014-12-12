@@ -280,16 +280,11 @@ public final class GoogleAuthenticator
     }
 
 
-    public Drive UIAuthentication() throws IOException {
+    public void UIAuthentication() throws IOException {
         if(getStatus().equals(Status.AUTHORIZE))
-            return this.service;
+            return;
 
-        String url = getAuthURL();
-        SwingUtilities.invokeLater(new UI(url, this));
-
-        //spin lock goes here
-
-        return getService();
+        SwingUtilities.invokeLater(new UI(this));
     }
 
 //==============================================================================
@@ -319,11 +314,9 @@ public final class GoogleAuthenticator
         private JLabel lblStatus = new JLabel();
         private JProgressBar progressBar = new JProgressBar();
 
-        private String url;
         private GoogleAuthenticator g;
 
-        public UI(String url, GoogleAuthenticator g){
-            this.url = url;
+        public UI(GoogleAuthenticator g){
             this.g = g;
         }
 
@@ -333,7 +326,7 @@ public final class GoogleAuthenticator
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
             initComponents();
-            loadURL(url);
+            loadURL(g.getAuthURL());
 
             frame.pack();
             frame.setVisible(true);
@@ -421,6 +414,7 @@ public final class GoogleAuthenticator
                                             log.debug("Value: " + value);
                                             try {
                                                 g.setAuthResponseCode(value);
+                                                g.getService();
                                             } catch (IOException e1) {
                                                 log.error(e1.getMessage());
                                             }

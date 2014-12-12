@@ -7,7 +7,6 @@ import com.google.api.services.drive.model.FileList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -31,7 +30,8 @@ public class TestGoogleAPI {
 
     public static Drive GoogleLoginWithGUI() throws IOException{
         GoogleAuthenticator g = GoogleAuthenticator.getInstance();
-        return g.UIAuthentication();
+        g.UIAuthentication();
+        return g.getService();
     }
 
     public static Drive GoogleLogin() throws IOException{
