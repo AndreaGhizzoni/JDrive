@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive;
+package it.hackcaffebabe.jdrive.auth.google;
 
 import java.io.File;
 

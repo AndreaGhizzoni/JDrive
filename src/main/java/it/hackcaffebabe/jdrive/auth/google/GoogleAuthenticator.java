@@ -1,7 +1,4 @@
-package it.hackcaffebabe.jdrive;
-
-import static it.hackcaffebabe.jdrive.UtilConst.*;
-import static it.hackcaffebabe.jdrive.AuthenticationConst.*;
+package it.hackcaffebabe.jdrive.auth.google;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonParser;
@@ -18,26 +15,11 @@ import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker;
-import javafx.embed.swing.JFXPanel;
-import javafx.event.EventHandler;
-import javafx.scene.Scene;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebEvent;
-import javafx.scene.web.WebView;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 
 /*
@@ -110,7 +92,7 @@ public final class GoogleAuthenticator
 
     /* build up the data store and load stored credential if the are any */
     private void buildDataStore() throws IOException{
-        this.store = new MemoryDataStoreFactory().getDataStore(STORE_NAME);
+        this.store = new MemoryDataStoreFactory().getDataStore(UtilConst.STORE_NAME);
         loadCredential();
     }
 
@@ -118,25 +100,25 @@ public final class GoogleAuthenticator
     private void buildGoogleAuthCodeFlow(){
         this.googleAuthCodeFlow = new GoogleAuthorizationCodeFlow.Builder(
                 httpTransport, jsonFactory,
-                CLIENT_ID, CLIENT_SECRET,
+                AuthenticationConst.CLIENT_ID, AuthenticationConst.CLIENT_SECRET,
                 Arrays.asList(DriveScopes.DRIVE, DriveScopes.DRIVE_FILE)
         ).setAccessType("offline").setApprovalPrompt("force").build();
     }
 
     /* store the user credential */
     private void storeCredential() throws IOException{
-        if(JSON_FILE.exists() && !JSON_FILE.delete())
+        if(UtilConst.JSON_FILE.exists() && !UtilConst.JSON_FILE.delete())
             throw new IOException("Error while deleting old authentication token.");
 
         com.fasterxml.jackson.core.JsonGenerator j = new
                 com.fasterxml.jackson.core.JsonFactory().createGenerator(
-                JSON_FILE, JsonEncoding.UTF8 );
+                UtilConst.JSON_FILE, JsonEncoding.UTF8 );
 
-        StoredCredential c = this.store.get(TOKEN_NAME);
+        StoredCredential c = this.store.get(UtilConst.TOKEN_NAME);
         j.writeStartObject();// {
 
-        j.writeStringField(JSON_AC, c.getAccessToken());
-        j.writeStringField(JSON_RT, c.getRefreshToken());
+        j.writeStringField(UtilConst.JSON_AC, c.getAccessToken());
+        j.writeStringField(UtilConst.JSON_RT, c.getRefreshToken());
 
         j.writeEndObject();// }
         j.flush();
@@ -145,31 +127,31 @@ public final class GoogleAuthenticator
 
     /* load the stored credential */
     private void loadCredential() throws  IOException{
-        if(!JSON_FILE.exists())
+        if(!UtilConst.JSON_FILE.exists())
             return;
 
         log.info("Credential found: try to load.");
         JsonParser p = new com.fasterxml.jackson.core.JsonFactory()
-                   .createJsonParser(JSON_FILE);
+                   .createJsonParser(UtilConst.JSON_FILE);
 
         StoredCredential s = new StoredCredential(makeGoogleCredential());
 
         String fieldName;
         while (p.nextToken() != JsonToken.END_OBJECT) {
             fieldName = p.getCurrentName();
-            if(JSON_AC.equals(fieldName)){
+            if(UtilConst.JSON_AC.equals(fieldName)){
                 p.nextToken();
                 s.setAccessToken(p.getText());
             }
 
-            if(JSON_RT.equals(fieldName)){
+            if(UtilConst.JSON_RT.equals(fieldName)){
                 p.nextToken();
                 s.setRefreshToken(p.getText());
             }
         }
         p.close();
 
-        this.store.set(TOKEN_NAME, s);
+        this.store.set(UtilConst.TOKEN_NAME, s);
         setStatus(Status.AUTHORIZE);
         log.info("Credential loaded.");
     }
@@ -179,7 +161,7 @@ public final class GoogleAuthenticator
         return new GoogleCredential.Builder()
                 .setTransport(this.httpTransport)
                 .setJsonFactory(this.jsonFactory)
-                .setClientSecrets(CLIENT_ID, CLIENT_SECRET)
+                .setClientSecrets(AuthenticationConst.CLIENT_ID, AuthenticationConst.CLIENT_SECRET)
                 .addRefreshListener(new CredentialRefreshListener() {
                     @Override
                     public void onTokenResponse(Credential credential,
@@ -207,7 +189,7 @@ public final class GoogleAuthenticator
     public void setAuthResponseCode(String code) throws IOException{
         if(getStatus().equals(Status.UNAUTHORIZED)) {
             this.tokenResponse = this.googleAuthCodeFlow.newTokenRequest(code)
-                    .setRedirectUri(REDIRECT_URI).execute();
+                    .setRedirectUri(AuthenticationConst.REDIRECT_URI).execute();
             this.status = Status.AUTHORIZE;
         }
     }
@@ -238,7 +220,7 @@ public final class GoogleAuthenticator
     public String getAuthURL() {
         if(getStatus().equals(Status.UNAUTHORIZED) ) {
             return this.googleAuthCodeFlow.newAuthorizationUrl().
-                    setRedirectUri(REDIRECT_URI).build();
+                    setRedirectUri(AuthenticationConst.REDIRECT_URI).build();
         }else{
             return null;
         }
@@ -257,23 +239,23 @@ public final class GoogleAuthenticator
 
         GoogleCredential cred = makeGoogleCredential();
 
-        if(this.store.containsKey(TOKEN_NAME)){
+        if(this.store.containsKey(UtilConst.TOKEN_NAME)){
             log.debug("Token present into the store.");
-            StoredCredential sc = this.store.get(TOKEN_NAME);
+            StoredCredential sc = this.store.get(UtilConst.TOKEN_NAME);
             cred.setAccessToken(sc.getAccessToken());
             cred.setRefreshToken(sc.getRefreshToken());
         }else{
             log.debug("Token not present into the store.");
             cred.setFromTokenResponse(this.tokenResponse);
-            cred.setAccessToken(ACCESS_TOKEN);
-            this.store.set(TOKEN_NAME, new StoredCredential(cred));
+            cred.setAccessToken(UtilConst.ACCESS_TOKEN);
+            this.store.set(UtilConst.TOKEN_NAME, new StoredCredential(cred));
             this.storeCredential();
             log.debug("Token stored.");
         }
 
         if(service == null) {
             this.service = new Drive.Builder(this.httpTransport, this.jsonFactory, cred)
-                    .setApplicationName(APP_NAME).build();
+                    .setApplicationName(UtilConst.APP_NAME).build();
         }
         setStatus(Status.AUTHORIZE);
         return this.service;
@@ -284,7 +266,7 @@ public final class GoogleAuthenticator
         if(getStatus().equals(Status.AUTHORIZE))
             return;
 
-        SwingUtilities.invokeLater(new UI(this));
+        SwingUtilities.invokeLater(new GoogleAuthenticatorUI(this));
     }
 
 //==============================================================================
@@ -299,178 +281,5 @@ public final class GoogleAuthenticator
      */
     public class UnAuthorizeException extends IOException {
         public UnAuthorizeException(String m){ super(m); }
-    }
-
-    /**
-     * TODO add doc
-     */
-    private class UI implements Runnable
-    {
-        private JFXPanel jfxPanel;
-        private WebEngine engine;
-
-        private JFrame frame = new JFrame();
-        private JPanel panel = new JPanel(new BorderLayout());
-        private JLabel lblStatus = new JLabel();
-        private JProgressBar progressBar = new JProgressBar();
-
-        private GoogleAuthenticator g;
-
-        public UI(GoogleAuthenticator g){
-            this.g = g;
-        }
-
-        @Override
-        public void run() {
-            String url = g.getAuthURL();
-            if(url == null)
-                return;
-
-            frame.setPreferredSize(new Dimension(1024, 600));
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-            initComponents();
-            loadURL(url);
-
-            frame.pack();
-            frame.setVisible(true);
-        }
-
-        private void initComponents() {
-            jfxPanel = new JFXPanel();
-
-            createScene();
-
-            progressBar.setStringPainted(true);
-
-            JPanel statusBar = new JPanel(new BorderLayout(5, 0));
-            statusBar.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
-            statusBar.add(lblStatus, BorderLayout.CENTER);
-            statusBar.add(progressBar, BorderLayout.EAST);
-
-            panel.add(jfxPanel, BorderLayout.CENTER);
-            panel.add(statusBar, BorderLayout.SOUTH);
-
-            frame.getContentPane().add(panel);
-        }
-
-        public void loadURL(final String url) {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    String tmp = toURL(url);
-
-                    if (tmp == null) {
-                        tmp = toURL("http://" + url);
-                    }
-
-                    engine.load(tmp);
-                }
-            });
-        }
-
-        private String toURL(String str) {
-            try {
-                return new URL(str).toExternalForm();
-            } catch (MalformedURLException exception) {
-                return null;
-            }
-        }
-
-        private void createScene() {
-            Platform.runLater(new Runnable() {
-                @Override public void run() {
-                    WebView view = new WebView();
-                    engine = view.getEngine();
-
-                    engine.titleProperty().addListener(new ChangeListener<String>() {
-                        @Override
-                        public void changed(ObservableValue<? extends String> observable,
-                                            String oldValue, final String newValue) {
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override public void run() {
-                                    frame.setTitle(newValue);
-                                }
-                            });
-                        }
-                    });
-
-                    engine.setOnStatusChanged(new EventHandler<WebEvent<String>>() {
-                        @Override public void handle(final WebEvent<String> event) {
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override public void run() {
-                                    lblStatus.setText(event.getData());
-                                }
-                            });
-                        }
-                    });
-
-                    engine.getLoadWorker().stateProperty()
-                            .addListener(new ChangeListener<Worker.State>() {
-                                @Override
-                                public void changed(ObservableValue<? extends Worker.State> observable,
-                                                    Worker.State oldValue, Worker.State newState) {
-                                    if (newState == Worker.State.SUCCEEDED) {
-                                        Document doc = engine.getDocument();
-                                        Element e = doc.getElementById("code");
-                                        if (e != null) {
-                                            String value = e.getAttribute("value");
-                                            log.debug("Value: " + value);
-                                            try {
-                                                g.setAuthResponseCode(value);
-                                                g.getService();
-                                            } catch (IOException e1) {
-                                                log.error(e1.getMessage());
-                                            }
-                                            frame.dispose();
-                                        }
-                                    }
-                                }
-                            });
-
-                    engine.getLoadWorker().workDoneProperty()
-                            .addListener(new ChangeListener<Number>() {
-                                @Override
-                                public void changed(ObservableValue<? extends Number> observableValue,
-                                                    Number oldValue, final Number newValue) {
-                                    SwingUtilities.invokeLater(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            progressBar.setValue(newValue.intValue());
-                                        }
-                                    });
-                                }
-                            });
-
-                    engine.getLoadWorker().exceptionProperty()
-                            .addListener(new ChangeListener<Throwable>() {
-                                public void changed(ObservableValue<? extends Throwable> o,
-                                                    Throwable old, final Throwable value) {
-                                    if (engine.getLoadWorker().getState() == Worker.State.FAILED) {
-                                        SwingUtilities.invokeLater(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                //TODO log this error case
-                                                String l = engine.getLocation() + "\n";
-                                                String v;
-                                                if (value != null)
-                                                    v = l + value.getMessage();
-                                                else
-                                                    v = l + "Unexpected error.";
-
-                                                JOptionPane.showMessageDialog(
-                                                        panel, v,
-                                                        "Loading error...",
-                                                        JOptionPane.ERROR_MESSAGE);
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-
-                    jfxPanel.setScene(new Scene(view));
-                }
-            });
-        }
     }
 }

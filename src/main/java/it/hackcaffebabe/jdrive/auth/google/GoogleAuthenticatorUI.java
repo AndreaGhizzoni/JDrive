@@ -1,7 +1,8 @@
-package it.hackcaffebabe.jdrive;
+package it.hackcaffebabe.jdrive.auth.google;
 
 import static javafx.concurrent.Worker.State.FAILED;
 import java.awt.*;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javafx.application.Platform;
@@ -14,15 +15,18 @@ import javafx.scene.Scene;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import javax.swing.*;
 
 /**
- *
+ * TODO add doc
  */
 public class GoogleAuthenticatorUI implements Runnable
 {
+    private static final Logger log = LogManager.getLogger("GoogleAuthenticatorUI");
     private JFXPanel jfxPanel;
     private WebEngine engine;
 
@@ -32,14 +36,17 @@ public class GoogleAuthenticatorUI implements Runnable
 
     private JProgressBar progressBar = new JProgressBar();
 
-    private String url;
+    private GoogleAuthenticator g;
 
-    public GoogleAuthenticatorUI(String url){
-        this.url = url;
+    public GoogleAuthenticatorUI(GoogleAuthenticator g){
+        this.g = g;
     }
 
     @Override
     public void run() {
+        String url = g.getAuthURL();
+        if(url==null)
+            return;
         frame.setPreferredSize(new Dimension(1024, 600));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -128,10 +135,17 @@ public class GoogleAuthenticatorUI implements Runnable
                                     Element e = doc.getElementById("code");
                                     if(e != null) {
                                         String value = e.getAttribute("value");
-                                        System.out.println("Value: " + value);
+                                        log.debug("Value :" +value);
+                                        try{
+                                            g.setAuthResponseCode(value);
+                                            g.getService();
+                                        }catch (IOException ex){
+                                            log.error(ex.getMessage());
+                                        }
+                                        frame.dispose();
                                     }
                                 }
-                    }
+                            }
                 });
 
                 engine.getLoadWorker().workDoneProperty()

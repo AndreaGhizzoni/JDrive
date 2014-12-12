@@ -31,7 +31,9 @@
             <AppenderRef ref="Console"/>
         </Logger>
 
-
+        <Logger name="GoogleAuthenticatorUI" level="all" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
 
         <!--<Root level="error">-->
             <!--<AppenderRef ref="File"/>-->
