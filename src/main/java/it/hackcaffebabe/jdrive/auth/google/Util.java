@@ -1,8 +1,5 @@
 package it.hackcaffebabe.jdrive.auth.google;
 
-import javafx.application.Platform;
-import javafx.scene.web.WebEngine;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -24,23 +21,6 @@ final class Util
     public static final String JSON_AC = "at";
     public static final String JSON_RT = "rt";
     public static final File JSON_FILE = new File("test/test.json");
-
-    /**
-     * TODO add doc
-     * @param url
-     * @param engine
-     */
-    static void loadURL(final String url, final WebEngine engine) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                String tmp = toURL(url);
-                if (tmp == null)
-                    tmp = toURL("http://" + url);
-                engine.load(tmp);
-            }
-        });
-    }
 
     /**
      * TODO add doc

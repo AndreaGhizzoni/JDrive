@@ -262,11 +262,20 @@ public final class GoogleAuthenticator
     }
 
 
-    public void UIAuthentication() throws IOException {
+    public Drive UIAuthentication() throws IOException {
         if(getStatus().equals(Status.AUTHORIZE))
-            return;
+            return null;//TODO manage the exception
 
-        SwingUtilities.invokeLater(new GoogleAuthenticatorUI(this));
+        GoogleAuthenticatorUI ui = new GoogleAuthenticatorUI(this);
+        SwingUtilities.invokeLater(ui);
+        while(!ui.isProcessFinish()){
+            try{
+                Thread.sleep(500);
+            }catch (InterruptedException e){
+                log.error(e.getMessage());
+            }
+        }
+        return getService();
     }
 
 //==============================================================================

@@ -32,6 +32,8 @@ public class TestGoogleAPI {
     public static void GoogleLoginWithGUI() throws IOException{
         GoogleAuthenticator g = GoogleAuthenticator.getInstance();
         g.UIAuthentication();
+        Drive d = g.getService();
+        log.debug("ok");
     }
 
     public static Drive GoogleLogin() throws IOException{

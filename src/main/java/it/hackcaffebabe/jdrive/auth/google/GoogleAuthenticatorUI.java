@@ -29,11 +29,11 @@ class GoogleAuthenticatorUI implements Runnable
     private JFXPanel jfxPanel;
     private WebEngine engine;
     private JFrame frame = new JFrame();
-    private JPanel panel = new JPanel(new BorderLayout());
     private JLabel lblStatus = new JLabel();
     private JProgressBar progressBar = new JProgressBar();
 
     private GoogleAuthenticator g;
+    public boolean isFinish = false;
 
     public GoogleAuthenticatorUI(GoogleAuthenticator g){
         this.g = g;
@@ -48,26 +48,22 @@ class GoogleAuthenticatorUI implements Runnable
         frame.setPreferredSize(new Dimension(1024, 600));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         initComponents();
-        Util.loadURL(url, engine);
+        loadURL(url);
         frame.pack();
         frame.setVisible(true);
     }
 
     private void initComponents() {
         jfxPanel = new JFXPanel();
-
         createScene();
-
         progressBar.setStringPainted(true);
-
         JPanel statusBar = new JPanel(new BorderLayout(5, 0));
         statusBar.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
         statusBar.add(lblStatus, BorderLayout.CENTER);
         statusBar.add(progressBar, BorderLayout.EAST);
-
+        JPanel panel = new JPanel(new BorderLayout());
         panel.add(jfxPanel, BorderLayout.CENTER);
         panel.add(statusBar, BorderLayout.SOUTH);
-
         frame.getContentPane().add(panel);
     }
 
@@ -89,6 +85,21 @@ class GoogleAuthenticatorUI implements Runnable
         });
     }
 
+    synchronized boolean isProcessFinish(){
+        return this.isFinish;
+    }
+
+    private void loadURL(final String url) {
+        Platform.runLater(new Runnable() {
+            @Override public void run() {
+                String tmp = Util.toURL(url);
+                if (tmp == null)
+                    tmp = Util.toURL("http://" + url);
+                engine.load(tmp);
+            }
+        });
+    }
+
 //==============================================================================
 // INNER CLASS
 //==============================================================================
@@ -105,10 +116,10 @@ class GoogleAuthenticatorUI implements Runnable
                     log.debug("Value :" +value);
                     try{
                         g.setAuthResponseCode(value);
-                        g.getService();
                     }catch (IOException ex){
                         log.error(ex.getMessage());
                     }
+                    isFinish = true;
                     frame.dispose();
                 }
             }
@@ -174,7 +185,7 @@ class GoogleAuthenticatorUI implements Runnable
                             v = l +"Unexpected error.";
 
                         JOptionPane.showMessageDialog(
-                                panel, v,
+                                frame.getContentPane(), v,
                                 "Loading error...",
                                 JOptionPane.ERROR_MESSAGE);
                     }
