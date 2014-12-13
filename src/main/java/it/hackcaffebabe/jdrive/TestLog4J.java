@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.testing;
+package it.hackcaffebabe.jdrive;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;

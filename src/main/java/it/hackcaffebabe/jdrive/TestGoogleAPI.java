@@ -23,17 +23,18 @@ public class TestGoogleAPI {
 
     public static void main(String[] args){
         try{
-            GoogleLoginWithGUI();
+            Drive d = GoogleLoginWithGUI();
         }catch (IOException e){
             log.error(e.getMessage());
         }
     }
 
-    public static void GoogleLoginWithGUI() throws IOException{
+    public static Drive GoogleLoginWithGUI() throws IOException{
         GoogleAuthenticator g = GoogleAuthenticator.getInstance();
         g.UIAuthentication();
         Drive d = g.getService();
-        log.debug("ok");
+        log.info("Service get.");
+        return d;
     }
 
     public static Drive GoogleLogin() throws IOException{

@@ -33,6 +33,7 @@ class GoogleAuthenticatorUI implements Runnable
     private JProgressBar progressBar = new JProgressBar();
 
     private GoogleAuthenticator g;
+    // used for sync between UI e GoogleAuthenticator class
     public boolean isFinish = false;
 
     public GoogleAuthenticatorUI(GoogleAuthenticator g){
