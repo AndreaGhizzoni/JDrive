@@ -92,7 +92,7 @@ public final class GoogleAuthenticator
 
     /* build up the data store and load stored credential if the are any */
     private void buildDataStore() throws IOException{
-        this.store = new MemoryDataStoreFactory().getDataStore(UtilConst.STORE_NAME);
+        this.store = new MemoryDataStoreFactory().getDataStore(Util.STORE_NAME);
         loadCredential();
     }
 
@@ -107,18 +107,18 @@ public final class GoogleAuthenticator
 
     /* store the user credential */
     private void storeCredential() throws IOException{
-        if(UtilConst.JSON_FILE.exists() && !UtilConst.JSON_FILE.delete())
+        if(Util.JSON_FILE.exists() && !Util.JSON_FILE.delete())
             throw new IOException("Error while deleting old authentication token.");
 
         com.fasterxml.jackson.core.JsonGenerator j = new
                 com.fasterxml.jackson.core.JsonFactory().createGenerator(
-                UtilConst.JSON_FILE, JsonEncoding.UTF8 );
+                Util.JSON_FILE, JsonEncoding.UTF8 );
 
-        StoredCredential c = this.store.get(UtilConst.TOKEN_NAME);
+        StoredCredential c = this.store.get(Util.TOKEN_NAME);
         j.writeStartObject();// {
 
-        j.writeStringField(UtilConst.JSON_AC, c.getAccessToken());
-        j.writeStringField(UtilConst.JSON_RT, c.getRefreshToken());
+        j.writeStringField(Util.JSON_AC, c.getAccessToken());
+        j.writeStringField(Util.JSON_RT, c.getRefreshToken());
 
         j.writeEndObject();// }
         j.flush();
@@ -127,31 +127,31 @@ public final class GoogleAuthenticator
 
     /* load the stored credential */
     private void loadCredential() throws  IOException{
-        if(!UtilConst.JSON_FILE.exists())
+        if(!Util.JSON_FILE.exists())
             return;
 
         log.info("Credential found: try to load.");
         JsonParser p = new com.fasterxml.jackson.core.JsonFactory()
-                   .createJsonParser(UtilConst.JSON_FILE);
+                   .createJsonParser(Util.JSON_FILE);
 
         StoredCredential s = new StoredCredential(makeGoogleCredential());
 
         String fieldName;
         while (p.nextToken() != JsonToken.END_OBJECT) {
             fieldName = p.getCurrentName();
-            if(UtilConst.JSON_AC.equals(fieldName)){
+            if(Util.JSON_AC.equals(fieldName)){
                 p.nextToken();
                 s.setAccessToken(p.getText());
             }
 
-            if(UtilConst.JSON_RT.equals(fieldName)){
+            if(Util.JSON_RT.equals(fieldName)){
                 p.nextToken();
                 s.setRefreshToken(p.getText());
             }
         }
         p.close();
 
-        this.store.set(UtilConst.TOKEN_NAME, s);
+        this.store.set(Util.TOKEN_NAME, s);
         setStatus(Status.AUTHORIZE);
         log.info("Credential loaded.");
     }
@@ -239,23 +239,23 @@ public final class GoogleAuthenticator
 
         GoogleCredential cred = makeGoogleCredential();
 
-        if(this.store.containsKey(UtilConst.TOKEN_NAME)){
+        if(this.store.containsKey(Util.TOKEN_NAME)){
             log.debug("Token present into the store.");
-            StoredCredential sc = this.store.get(UtilConst.TOKEN_NAME);
+            StoredCredential sc = this.store.get(Util.TOKEN_NAME);
             cred.setAccessToken(sc.getAccessToken());
             cred.setRefreshToken(sc.getRefreshToken());
         }else{
             log.debug("Token not present into the store.");
             cred.setFromTokenResponse(this.tokenResponse);
-            cred.setAccessToken(UtilConst.ACCESS_TOKEN);
-            this.store.set(UtilConst.TOKEN_NAME, new StoredCredential(cred));
+            cred.setAccessToken(Util.ACCESS_TOKEN);
+            this.store.set(Util.TOKEN_NAME, new StoredCredential(cred));
             this.storeCredential();
             log.debug("Token stored.");
         }
 
         if(service == null) {
             this.service = new Drive.Builder(this.httpTransport, this.jsonFactory, cred)
-                    .setApplicationName(UtilConst.APP_NAME).build();
+                    .setApplicationName(Util.APP_NAME).build();
         }
         setStatus(Status.AUTHORIZE);
         return this.service;

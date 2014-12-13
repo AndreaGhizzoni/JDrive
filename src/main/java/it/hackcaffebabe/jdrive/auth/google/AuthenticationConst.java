@@ -1,6 +1,6 @@
 package it.hackcaffebabe.jdrive.auth.google;
 
-public final class AuthenticationConst
+final class AuthenticationConst
 {
     static final String CLIENT_ID = "554076115302-cltvs8gdl42dns4q72fss6" +
                                          "7qhoodggrd.apps.googleusercontent.com";

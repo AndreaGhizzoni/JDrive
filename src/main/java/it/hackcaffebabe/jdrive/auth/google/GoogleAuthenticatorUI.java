@@ -3,8 +3,6 @@ package it.hackcaffebabe.jdrive.auth.google;
 import static javafx.concurrent.Worker.State.FAILED;
 import java.awt.*;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -24,7 +22,7 @@ import javax.swing.*;
 /**
  * TODO add doc
  */
-public class GoogleAuthenticatorUI implements Runnable
+class GoogleAuthenticatorUI implements Runnable
 {
     private static final Logger log = LogManager.getLogger("GoogleAuthenticatorUI");
 
@@ -50,7 +48,7 @@ public class GoogleAuthenticatorUI implements Runnable
         frame.setPreferredSize(new Dimension(1024, 600));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         initComponents();
-        loadURL(url);
+        Util.loadURL(url, engine);
         frame.pack();
         frame.setVisible(true);
     }
@@ -71,28 +69,6 @@ public class GoogleAuthenticatorUI implements Runnable
         panel.add(statusBar, BorderLayout.SOUTH);
 
         frame.getContentPane().add(panel);
-    }
-
-    public void loadURL(final String url) {
-        Platform.runLater(new Runnable() {
-            @Override public void run() {
-                String tmp = toURL(url);
-
-                if (tmp == null) {
-                    tmp = toURL("http://" + url);
-                }
-
-                engine.load(tmp);
-            }
-        });
-    }
-
-    private static String toURL(String str) {
-        try {
-            return new URL(str).toExternalForm();
-        } catch (MalformedURLException exception) {
-            return null;
-        }
     }
 
     private void createScene() {
