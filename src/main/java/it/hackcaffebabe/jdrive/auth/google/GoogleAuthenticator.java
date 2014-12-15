@@ -42,7 +42,14 @@ import java.util.Arrays;
  * Drive service = g.getService();
  * }</pre>
  *
- * @version 0.0.1
+ * Or simply request the UI login screen:
+ * <pre>{@code
+ * GoogleAuthenticator g = GoogleAuthenticator.getInstance();
+ * g.UIAuthentication();
+ * Drive service = g.getService();
+ * }</pre>
+ *
+ * @version 0.0.2
  * @author Andrea Ghizzoni
  */
 public final class GoogleAuthenticator
@@ -233,8 +240,8 @@ public final class GoogleAuthenticator
      */
     public Drive getService() throws IOException {
         if(getStatus().equals(Status.UNAUTHORIZED)) {
-            throw new UnAuthorizeException("User not authenticate. Use getAuthURL()" +
-                    " to get the authentication url.");
+            throw new UnAuthorizeException("User not authenticate. Use " +
+                    "getAuthURL() to get the authentication url.");
         }
 
         GoogleCredential cred = makeGoogleCredential();
@@ -254,25 +261,33 @@ public final class GoogleAuthenticator
         }
 
         if(service == null) {
-            this.service = new Drive.Builder(this.httpTransport, this.jsonFactory, cred)
-                    .setApplicationName(Util.APP_NAME).build();
+            this.service = new Drive.Builder(this.httpTransport,
+                    this.jsonFactory, cred).setApplicationName(Util.APP_NAME)
+                    .build();
         }
         setStatus(Status.AUTHORIZE);
         return this.service;
     }
 
-
+    /**
+     * This method implements the behavior of login process by graphical
+     * interface. Once the user is logged in you can call <code>getService()</code>
+     * to call api functions. If this method is called when the user is already
+     * authenticate, only <code>getService()</code> is called and no graphical
+     * interface is showed.
+     * @return {@link Drive}
+     * @throws IOException if there are errors in the authentication process.
+     */
     public Drive UIAuthentication() throws IOException {
-        if(getStatus().equals(Status.AUTHORIZE))
-            return null;//TODO manage the exception
-
-        GoogleAuthenticatorUI ui = new GoogleAuthenticatorUI(this);
-        SwingUtilities.invokeLater(ui);
-        while(!ui.isProcessFinish()){
-            try{
-                Thread.sleep(500);
-            }catch (InterruptedException e){
-                log.error(e.getMessage());
+        if(getStatus().equals(Status.UNAUTHORIZED)) {
+            GoogleAuthenticatorUI ui = new GoogleAuthenticatorUI(this);
+            SwingUtilities.invokeLater(ui);
+            while (!ui.isProcessFinish()) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    log.error(e.getMessage());
+                }
             }
         }
         return getService();

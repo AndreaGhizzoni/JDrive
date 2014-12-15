@@ -20,7 +20,7 @@ import org.w3c.dom.Element;
 import javax.swing.*;
 
 /**
- * TODO add doc
+ * GUI for {@link it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator} class.
  */
 class GoogleAuthenticatorUI implements Runnable
 {
@@ -32,10 +32,16 @@ class GoogleAuthenticatorUI implements Runnable
     private JLabel lblStatus = new JLabel();
     private JProgressBar progressBar = new JProgressBar();
 
-    private GoogleAuthenticator g;
     // used for sync between UI e GoogleAuthenticator class
+    // means when the user arrive to the page with authentication code.
     public boolean isFinish = false;
 
+    private GoogleAuthenticator g;
+
+    /**
+     * Constructor for GoogleAuthenticator user interface.
+     * @param g {@link GoogleAuthenticator}
+     */
     public GoogleAuthenticatorUI(GoogleAuthenticator g){
         this.g = g;
     }
@@ -54,6 +60,7 @@ class GoogleAuthenticatorUI implements Runnable
         frame.setVisible(true);
     }
 
+    /* initialize all the components */
     private void initComponents() {
         jfxPanel = new JFXPanel();
         createScene();
@@ -68,6 +75,7 @@ class GoogleAuthenticatorUI implements Runnable
         frame.getContentPane().add(panel);
     }
 
+    /* create JavaFX Scene */
     private void createScene() {
         Platform.runLater(new Runnable() {
             @Override public void run() {
@@ -86,10 +94,12 @@ class GoogleAuthenticatorUI implements Runnable
         });
     }
 
+    /* package method that allows GoogleAuthenticator class to poll the UI */
     synchronized boolean isProcessFinish(){
         return this.isFinish;
     }
 
+    /* utility method to load the url into the JavaFX main thread */
     private void loadURL(final String url) {
         Platform.runLater(new Runnable() {
             @Override public void run() {
@@ -104,6 +114,7 @@ class GoogleAuthenticatorUI implements Runnable
 //==============================================================================
 // INNER CLASS
 //==============================================================================
+    /* Object that is called every time a page is loaded */
     private class StateChangeListener implements ChangeListener<Worker.State>
     {
         @Override
@@ -127,6 +138,7 @@ class GoogleAuthenticatorUI implements Runnable
         }
     }
 
+    /* Object to change the title based on the url loaded */
     private class TitleChangeListener implements ChangeListener<String>
     {
         @Override
@@ -142,6 +154,7 @@ class GoogleAuthenticatorUI implements Runnable
         }
     }
 
+    /* Change the status bar */
     private class StatusChangeHandler implements EventHandler<WebEvent<String>>
     {
         @Override
@@ -155,6 +168,7 @@ class GoogleAuthenticatorUI implements Runnable
         }
     }
 
+    /* Change the progress bar loading status */
     private class WorkDoneProperty implements ChangeListener<Number>
     {
         @Override
@@ -168,6 +182,7 @@ class GoogleAuthenticatorUI implements Runnable
         }
     }
 
+    /* Manage some exception */
     private class ExceptionProperty implements ChangeListener<Throwable>
     {
         @Override
@@ -177,7 +192,6 @@ class GoogleAuthenticatorUI implements Runnable
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        //TODO log this error case
                         String l = engine.getLocation()+"\n";
                         String v;
                         if(value != null)
@@ -185,10 +199,9 @@ class GoogleAuthenticatorUI implements Runnable
                         else
                             v = l +"Unexpected error.";
 
-                        JOptionPane.showMessageDialog(
-                                frame.getContentPane(), v,
-                                "Loading error...",
-                                JOptionPane.ERROR_MESSAGE);
+                        log.error(v);
+                        JOptionPane.showMessageDialog(frame.getContentPane(), v,
+                                "Loading error...", JOptionPane.ERROR_MESSAGE);
                     }
                 });
             }
