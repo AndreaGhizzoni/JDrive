@@ -2,6 +2,7 @@ bin/
 out/
 test/
 log/
+build/reports
 build/classes
 build/tmp
 build/dependency-cache

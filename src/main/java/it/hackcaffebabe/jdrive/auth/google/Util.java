@@ -5,7 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * TODO add doc
+ * Utility class for this set of package class
  */
 final class Util
 {
@@ -23,9 +23,9 @@ final class Util
     public static final File JSON_FILE = new File("test/test.json");
 
     /**
-     * TODO add doc
-     * @param str
-     * @return
+     * Convert a string in {@link URL}.
+     * @param str {@link String}
+     * @return the URL of null if MalformedURLException is thrown.
      */
     static String toURL(String str) {
         try {

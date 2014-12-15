@@ -22,7 +22,7 @@ import javax.swing.*;
 /**
  * GUI for {@link it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator} class.
  */
-class GoogleAuthenticatorUI implements Runnable
+final class GoogleAuthenticatorUI implements Runnable
 {
     private static final Logger log = LogManager.getLogger("GoogleAuthenticatorUI");
 

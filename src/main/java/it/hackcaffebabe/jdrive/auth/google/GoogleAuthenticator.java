@@ -117,6 +117,7 @@ public final class GoogleAuthenticator
         if(Util.JSON_FILE.exists() && !Util.JSON_FILE.delete())
             throw new IOException("Error while deleting old authentication token.");
 
+        log.info("Store credential called: try to store...");
         com.fasterxml.jackson.core.JsonGenerator j = new
                 com.fasterxml.jackson.core.JsonFactory().createGenerator(
                 Util.JSON_FILE, JsonEncoding.UTF8 );
@@ -130,6 +131,7 @@ public final class GoogleAuthenticator
         j.writeEndObject();// }
         j.flush();
         j.close();
+        log.info("Credential stored.");
     }
 
     /* load the stored credential */
@@ -137,7 +139,7 @@ public final class GoogleAuthenticator
         if(!Util.JSON_FILE.exists())
             return;
 
-        log.info("Credential found: try to load.");
+        log.info("Credential found: try to load...");
         JsonParser p = new com.fasterxml.jackson.core.JsonFactory()
                    .createJsonParser(Util.JSON_FILE);
 
@@ -168,17 +170,21 @@ public final class GoogleAuthenticator
         return new GoogleCredential.Builder()
                 .setTransport(this.httpTransport)
                 .setJsonFactory(this.jsonFactory)
-                .setClientSecrets(AuthenticationConst.CLIENT_ID, AuthenticationConst.CLIENT_SECRET)
+                .setClientSecrets(
+                        AuthenticationConst.CLIENT_ID,
+                        AuthenticationConst.CLIENT_SECRET)
                 .addRefreshListener(new CredentialRefreshListener() {
                     @Override
-                    public void onTokenResponse(Credential credential,
-                                                TokenResponse tokenResponse) throws IOException {
+                    public void onTokenResponse(
+                            Credential credential,
+                            TokenResponse tokenResponse) throws IOException {
                         log.info("Refresh listener: token response.");
                     }
                     @Override
-                    public void onTokenErrorResponse(Credential credential,
-                                                     TokenErrorResponse tokenErrorResponse) throws IOException {
-                        log.info("Refresh listener: token response error.");
+                    public void onTokenErrorResponse(
+                            Credential credential,
+                            TokenErrorResponse tokenErrorResponse) throws IOException {
+                        log.error("Refresh listener: token response error.");
                     }
                 })
                 .build();
@@ -190,10 +196,16 @@ public final class GoogleAuthenticator
     /**
      * This method is used set the code in response of the authentication url
      * from method <code>getAuthUrl()</code>.
+     * Once the code has been set successfully, every this method do nothing.
+     * If is passed null or empty string IllegalArgumentException will thrown.
      * @param code {@link String} the response code.
      * @throws IOException if something goes wrong.
      */
     public void setAuthResponseCode(String code) throws IOException{
+        if(code == null || code.isEmpty())
+            throw new IllegalArgumentException("Response code can not be null " +
+                    "or empty string.");
+
         if(getStatus().equals(Status.UNAUTHORIZED)) {
             this.tokenResponse = this.googleAuthCodeFlow.newTokenRequest(code)
                     .setRedirectUri(AuthenticationConst.REDIRECT_URI).execute();
@@ -245,19 +257,18 @@ public final class GoogleAuthenticator
         }
 
         GoogleCredential cred = makeGoogleCredential();
-
         if(this.store.containsKey(Util.TOKEN_NAME)){
-            log.debug("Token present into the store.");
+            log.info("Token present into the store.");
             StoredCredential sc = this.store.get(Util.TOKEN_NAME);
             cred.setAccessToken(sc.getAccessToken());
             cred.setRefreshToken(sc.getRefreshToken());
         }else{
-            log.debug("Token not present into the store.");
+            log.info("Token not present into the store.");
             cred.setFromTokenResponse(this.tokenResponse);
             cred.setAccessToken(Util.ACCESS_TOKEN);
             this.store.set(Util.TOKEN_NAME, new StoredCredential(cred));
             this.storeCredential();
-            log.debug("Token stored.");
+            log.info("Token stored.");
         }
 
         if(service == null) {
