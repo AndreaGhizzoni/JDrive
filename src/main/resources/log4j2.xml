@@ -27,6 +27,14 @@
             <AppenderRef ref="Console"/>
         </Logger>
 
+        <Logger name="TestWatcherService" level="all" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="Watcher" level="all" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
         <Logger name="GoogleAuthenticator" level="all" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
