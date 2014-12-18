@@ -15,8 +15,13 @@ public class TestWatcherService
 
     public static void main(String...args){
         try {
-            Watcher t = Watcher.getInstance();
-            new Thread(t).start();
+            Watcher w = Watcher.getInstance();
+            Thread t = new Thread(w);
+            t.start();
+
+//            Thread.sleep(1000);
+//
+//            t.stop();
         }catch (IOException ioe){
             log.error("IOException Throw:" + ioe.getMessage());
         }catch (Exception e){

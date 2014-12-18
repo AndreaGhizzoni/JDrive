@@ -40,23 +40,25 @@ public final class Watcher implements Runnable
      * @throws IOException
      */
     private Watcher() throws IOException{
+        log.entry();
         this.watcher = FileSystems.getDefault().newWatchService();
+        log.info("Watch Service retrieved correctly from FS.");
     }
 
 //==============================================================================
 //  METHOD
 //==============================================================================
-    /* TODO add description*/
-    private void register(Path start) throws IOException{
-        boolean isDir = Files.isDirectory(start, LinkOption.NOFOLLOW_LINKS);
-        if(isDir){
-            Files.walkFileTree(start, new WatchServiceAdder() );
-        }else{
-            //register the received path
-            WatchKey key = start.register(this.watcher, mod );
-            //storeCredential the key and path
-            directories.put(key, start);
-        }
+    /* TODO add description */
+    private void registerTree(Path start) throws IOException {
+        Files.walkFileTree(start, new WatchServiceAdder() );
+    }
+
+    /* TODO add description */
+    private void registerPath(Path path) throws IOException {
+        //register the received path
+        WatchKey key = path.register(this.watcher, mod );
+        //storeCredential the key and path
+        directories.put(key, path);
     }
 
 //==============================================================================
@@ -76,7 +78,7 @@ public final class Watcher implements Runnable
     @Override
     public void run() {
         try {
-            register(BASE);
+            registerTree(BASE);
             WatchKey key;
             WatchEvent.Kind<?> kind;
             Path filename;
@@ -89,18 +91,19 @@ public final class Watcher implements Runnable
                     //get the kind of event (create, modify, delete)
                     kind = watchEvent.kind();
 
+                    //get the filename for the event
+                    filename = ((WatchEvent<Path>) watchEvent).context();
+
                     //handle OVERFLOW event
                     if( kind.equals(OVERFLOW) )
                         continue;
-
-                    //get the filename for the event
-                    filename = ((WatchEvent<Path>) watchEvent).context();
 
                     Path child = directories.get(key).resolve(filename);
 
                     //handle CREATE event
                     if( kind == ENTRY_CREATE ){
-                        register(child);
+                        if(Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS))
+                            registerTree(child);
                     }
 
                     log.info(kind + " -> " + child);
@@ -131,8 +134,8 @@ public final class Watcher implements Runnable
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes a)
                 throws IOException {
-            log.info("Registering:" + dir);
-            register(dir);
+            log.info("Registering new path:" + dir);
+            registerPath(dir);
             return FileVisitResult.CONTINUE;
         }
     }
