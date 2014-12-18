@@ -43,6 +43,9 @@ public final class Watcher implements Runnable
         this.watcher = FileSystems.getDefault().newWatchService();
     }
 
+//==============================================================================
+//  METHOD
+//==============================================================================
     /* TODO add description*/
     private void register(Path start) throws IOException{
         boolean isDir = Files.isDirectory(start, LinkOption.NOFOLLOW_LINKS);
@@ -54,6 +57,17 @@ public final class Watcher implements Runnable
             //storeCredential the key and path
             directories.put(key, start);
         }
+    }
+
+//==============================================================================
+//  GETTER
+//==============================================================================
+    /**
+     * TODO add description
+     * @return
+     */
+    public Path getBase(){
+        return BASE;
     }
 
 //==============================================================================
@@ -96,12 +110,12 @@ public final class Watcher implements Runnable
                 //remove the key if it is not valid
                 if( !valid ){
                     directories.remove(key);
-                    if (directories.isEmpty())
-                        break;
+//                    if (directories.isEmpty())
+//                        break;
                 }
             }
 
-            this.watcher.close();
+//            this.watcher.close();
 
         }catch(InterruptedException inter){
             log.error("Interrupted Exit. "+inter.getMessage());
@@ -115,7 +129,7 @@ public final class Watcher implements Runnable
 //==============================================================================
     private class WatchServiceAdder extends SimpleFileVisitor<Path> {
         @Override
-        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes a)
                 throws IOException {
             log.info("Registering:" + dir);
             register(dir);

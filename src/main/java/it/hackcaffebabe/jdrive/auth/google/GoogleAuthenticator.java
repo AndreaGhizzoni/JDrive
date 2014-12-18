@@ -89,7 +89,7 @@ public final class GoogleAuthenticator
     }
 
 //==============================================================================
-// METHOD
+//  METHOD
 //==============================================================================
     /* build up the HTTPTransport and JsonFactory */
     private void buildHTTPTransportJsonFactory() {
@@ -191,7 +191,7 @@ public final class GoogleAuthenticator
     }
 
 //==============================================================================
-// SETTER
+//  SETTER
 //==============================================================================
     /**
      * This method is used set the code in response of the authentication url
@@ -221,7 +221,7 @@ public final class GoogleAuthenticator
     }
 
 //==============================================================================
-// GETTER
+//  GETTER
 //==============================================================================
     /** @return {@link GoogleAuthenticator.Status} the status of authorization */
     public GoogleAuthenticator.Status getStatus(){
@@ -305,7 +305,7 @@ public final class GoogleAuthenticator
     }
 
 //==============================================================================
-// INNER CLASS
+//  INNER CLASS
 //==============================================================================
     /** Represents the Authorization status */
     public enum Status { AUTHORIZE, UNAUTHORIZED }

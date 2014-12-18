@@ -112,7 +112,7 @@ final class GoogleAuthenticatorUI implements Runnable
     }
 
 //==============================================================================
-// INNER CLASS
+//  INNER CLASS
 //==============================================================================
     /* Object that is called every time a page is loaded */
     private class StateChangeListener implements ChangeListener<Worker.State>
