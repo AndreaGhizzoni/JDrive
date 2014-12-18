@@ -113,17 +113,20 @@ public final class Watcher implements Runnable
                 //remove the key if it is not valid
                 if( !valid ){
                     directories.remove(key);
-//                    if (directories.isEmpty())
-//                        break;
                 }
             }
 
-//            this.watcher.close();
-
         }catch(InterruptedException inter){
-            log.error("Interrupted Exit. "+inter.getMessage());
+            log.error("Watcher interrupted. Exit.");
         }catch(IOException ioe){
             log.error("IOException Exit. "+ioe.getMessage());
+        }finally {
+            try {
+                this.watcher.close();
+                log.info("Watch service closed correctly.");
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
         }
     }
 

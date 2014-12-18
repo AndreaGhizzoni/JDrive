@@ -4,7 +4,7 @@
     <Properties>
         <Property name="logFileName">log</Property>
         <Property name="logFilePath">log/${logFileName}</Property>
-        <Property name="pattern">[%-5p] %d [%r] [%t] %x %c %M - %m%n</Property>
+        <Property name="pattern">[%-5p] %d [%t] %x %c %M - %m%n</Property>
     </Properties>
 
     <!-- List of appender, responsibly to display the log somewhere -->
