@@ -8,41 +8,42 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import static java.nio.file.StandardWatchEventKinds.*;
+import static it.hackcaffebabe.jdrive.fs.WatcherUtil.*;
 
 /**
  * http://docs.oracle.com/javase/tutorial/essential/io/notification.html
  */
-public class Watcher implements Runnable
+public final class Watcher implements Runnable
 {
     private static final Logger log = LogManager.getLogger("Watcher");
 
-    private Path dir = Paths.get("/home/andrea/test");//TODO move this outside
     private WatchService watcher;
     private final Map<WatchKey, Path> directories = new HashMap<WatchKey,Path>();
     private static final WatchEvent.Kind[] mod = {
             ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
     };
 
+    private static Watcher instance;
+
     /**
-     * TODO add doc
+     * TODO add docs
+     * @return
+     */
+    public static Watcher getInstance() throws IOException {
+        if(instance == null)
+            instance = new Watcher();
+        return instance;
+    }
+
+    /*
+     * TODO add description
      * @throws IOException
      */
-    public Watcher() throws IOException{
+    private Watcher() throws IOException{
         this.watcher = FileSystems.getDefault().newWatchService();
     }
 
-//    private void registerTree(Path start) throws IOException {
-//        TODO check not null
-//        Files.walkFileTree(start, new WatchServiceAdder() );
-//    }
-//
-//    private void registerPath(Path path) throws IOException {
-//        register the received path
-//        WatchKey key = path.register(this.watcher, mod );
-//        storeCredential the key and path
-//        directories.put(key, path);
-//    }
-
+    /* TODO add description*/
     private void register(Path start) throws IOException{
         boolean isDir = Files.isDirectory(start, LinkOption.NOFOLLOW_LINKS);
         if(isDir){
@@ -61,7 +62,7 @@ public class Watcher implements Runnable
     @Override
     public void run() {
         try {
-            register(this.dir);
+            register(BASE);
             WatchKey key;
             WatchEvent.Kind<?> kind;
             Path filename;
@@ -73,12 +74,13 @@ public class Watcher implements Runnable
                 for( WatchEvent<?> watchEvent : key.pollEvents() ) {
                     //get the kind of event (create, modify, delete)
                     kind = watchEvent.kind();
-                    //get the filename for the event
-                    filename = ((WatchEvent<Path>) watchEvent).context();
 
                     //handle OVERFLOW event
                     if( kind.equals(OVERFLOW) )
                         continue;
+
+                    //get the filename for the event
+                    filename = ((WatchEvent<Path>) watchEvent).context();
 
                     Path child = directories.get(key).resolve(filename);
 
