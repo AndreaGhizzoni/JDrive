@@ -8,7 +8,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import static java.nio.file.StandardWatchEventKinds.*;
-import static it.hackcaffebabe.jdrive.fs.WatcherUtil.*;
 
 /**
  * http://docs.oracle.com/javase/tutorial/essential/io/notification.html
@@ -17,13 +16,12 @@ public final class Watcher implements Runnable
 {
     private static final Logger log = LogManager.getLogger("Watcher");
 
+    private static Watcher instance;
     private WatchService watcher;
     private final Map<WatchKey, Path> directories = new HashMap<WatchKey,Path>();
     private static final WatchEvent.Kind[] mod = {
             ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
     };
-
-    private static Watcher instance;
 
     /**
      * TODO add docs
@@ -32,6 +30,20 @@ public final class Watcher implements Runnable
     public static Watcher getInstance() throws IOException {
         if(instance == null)
             instance = new Watcher();
+        return instance;
+    }
+
+    /**
+     * TODO add docs
+     * @param base
+     * @return
+     * @throws IOException
+     */
+    public static Watcher getInstance( Path base ) throws IOException {
+        if(instance == null){
+            WatcherUtil.setBase(base);
+            instance = new Watcher();
+        }
         return instance;
     }
 
@@ -62,23 +74,12 @@ public final class Watcher implements Runnable
     }
 
 //==============================================================================
-//  GETTER
-//==============================================================================
-    /**
-     * TODO add description
-     * @return
-     */
-    public Path getBase(){
-        return BASE;
-    }
-
-//==============================================================================
 //  OVERRIDE
 //==============================================================================
     @Override
     public void run() {
         try {
-            registerTree(BASE);
+            registerTree(WatcherUtil.getBase());
             WatchKey key;
             WatchEvent.Kind<?> kind;
             Path filename;
