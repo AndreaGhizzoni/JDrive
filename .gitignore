@@ -1,6 +1,6 @@
 bin/
 out/
-test/
+test_resources/
 log/
 build/reports
 build/classes
