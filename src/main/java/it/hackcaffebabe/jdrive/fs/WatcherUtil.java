@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * TODO add doc
+ * Class that manage the base path of {@link it.hackcaffebabe.jdrive.fs.Watcher}
  */
 final class WatcherUtil
 {
