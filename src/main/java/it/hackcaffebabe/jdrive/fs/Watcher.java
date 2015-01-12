@@ -11,6 +11,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
  * http://docs.oracle.com/javase/tutorial/essential/io/notification.html
+ * TODO add doc and examples
  */
 public final class Watcher implements Runnable
 {
@@ -20,12 +21,13 @@ public final class Watcher implements Runnable
     private WatchService watcher;
     private final Map<WatchKey, Path> directories = new HashMap<WatchKey,Path>();
     private static final WatchEvent.Kind[] mod = {
-            ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
+        ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
     };
 
     /**
-     * TODO add docs
-     * @return
+     * Retrieve the instance of Watcher with the default base path.
+     * @return {@link Watcher} instance.
+     * @throws IOException if creation of watcher fail.
      */
     public static Watcher getInstance() throws IOException {
         if(instance == null)
@@ -34,10 +36,12 @@ public final class Watcher implements Runnable
     }
 
     /**
-     * TODO add docs
-     * @param base
-     * @return
-     * @throws IOException
+     * Retrieve the instance of Watcher with a base path given. If Watcher is
+     * not instanced yet then the new instance will have the given base path,
+     * otherwise will be returned the instanced one.
+     * @param base {@link java.nio.file.Path} the base path of directory.
+     * @return {@link Watcher} instance.
+     * @throws IOException if creation of watcher fail.
      */
     public static Watcher getInstance( Path base ) throws IOException {
         if(instance == null){
@@ -47,10 +51,7 @@ public final class Watcher implements Runnable
         return instance;
     }
 
-    /*
-     * TODO add description
-     * @throws IOException
-     */
+    /* Constructor method. IOException if newWatchService() fail. */
     private Watcher() throws IOException{
         log.entry();
         this.watcher = FileSystems.getDefault().newWatchService();
@@ -60,12 +61,13 @@ public final class Watcher implements Runnable
 //==============================================================================
 //  METHOD
 //==============================================================================
-    /* TODO add description */
+    /* method to walk down a path given recursively and meanwhile register all
+    * the directory */
     private void registerTree(Path start) throws IOException {
         Files.walkFileTree(start, new WatchServiceAdder() );
     }
 
-    /* TODO add description */
+    /* register the single path given as argument under the watcher service. */
     private void registerPath(Path path) throws IOException {
         //register the received path
         WatchKey key = path.register(this.watcher, mod );
@@ -134,6 +136,7 @@ public final class Watcher implements Runnable
 //==============================================================================
 //  INNER CLASS
 //==============================================================================
+    /* inner class that walk down a given path and register all the folder. */
     private class WatchServiceAdder extends SimpleFileVisitor<Path> {
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes a)
