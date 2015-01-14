@@ -3,6 +3,7 @@ package it.hackcaffebabe.jdrive.fs;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -26,14 +27,11 @@ public class WatcherTest
 //  TEST CASE UTIL METHOD
 //==============================================================================
     public Path getBasePath(){
-        try {
-            Path base = WatcherUtil.getBase();
-            if(!base.toFile().createNewFile())
-                return null;
-            return base;
-        } catch (IOException e) {
-           return null;
-        }
+        Path base = WatcherUtil.getBase();
+        File f = base.toFile();
+        if(!f.exists() && !f.mkdir())
+            return null;
+        return base;
     }
 
     public Watcher retrieveTheWatcher(Path base){
