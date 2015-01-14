@@ -1,5 +1,11 @@
 package it.hackcaffebabe.jdrive.auth.google;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.google.api.client.auth.oauth2.StoredCredential;
+
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -15,11 +21,34 @@ final class Util
      * @param str {@link String}
      * @return the URL of null if MalformedURLException is thrown.
      */
-    static String toURL(String str) {
+    static String toURL( String str ) {
         try {
             return new URL(str).toExternalForm();
         } catch (MalformedURLException exception) {
             return null;
         }
+    }
+
+    /**
+     * TODO add doc
+     * @param s
+     */
+    static void populateStoredCredential( StoredCredential s ) throws IOException {
+        JsonParser p = new JsonFactory().createJsonParser(TokenConst.getTokenFile());
+
+        String fieldName;
+        while (p.nextToken() != JsonToken.END_OBJECT) {
+            fieldName = p.getCurrentName();
+            if(TokenConst.JSON_AC.equals(fieldName)){
+                p.nextToken();
+                s.setAccessToken(p.getText());
+            }
+
+            if(TokenConst.JSON_RT.equals(fieldName)){
+                p.nextToken();
+                s.setRefreshToken(p.getText());
+            }
+        }
+        p.close();
     }
 }

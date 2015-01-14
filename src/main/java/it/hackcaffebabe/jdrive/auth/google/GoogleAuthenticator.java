@@ -140,26 +140,8 @@ public final class GoogleAuthenticator
             return;
 
         log.info("Credential found: try to load...");
-        JsonParser p = new com.fasterxml.jackson.core.JsonFactory()
-                   .createJsonParser(TokenConst.getTokenFile());
-
         StoredCredential s = new StoredCredential(makeGoogleCredential());
-
-        String fieldName;
-        while (p.nextToken() != JsonToken.END_OBJECT) {
-            fieldName = p.getCurrentName();
-            if(TokenConst.JSON_AC.equals(fieldName)){
-                p.nextToken();
-                s.setAccessToken(p.getText());
-            }
-
-            if(TokenConst.JSON_RT.equals(fieldName)){
-                p.nextToken();
-                s.setRefreshToken(p.getText());
-            }
-        }
-        p.close();
-
+        Util.populateStoredCredential(s);
         this.store.set(TokenConst.TOKEN_NAME, s);
         setStatus(Status.AUTHORIZE);
         log.info("Credential loaded.");
