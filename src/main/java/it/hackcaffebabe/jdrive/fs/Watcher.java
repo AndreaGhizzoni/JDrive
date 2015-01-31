@@ -70,9 +70,17 @@ public final class Watcher implements Runnable
     /* register the single path given as argument under the watcher service. */
     private void registerPath(Path path) throws IOException {
         //register the received path
-        WatchKey key = path.register(this.watcher, mod );
+        WatchKey key = path.register(this.watcher, mod);
         //storeCredential the key and path
         directories.put(key, path);
+    }
+
+//==============================================================================
+//  GETTER
+//==============================================================================
+    public int getNumberFolderWatched(){
+        log.debug(this.directories.size());
+        return this.directories.size();
     }
 
 //==============================================================================
