@@ -32,19 +32,9 @@ public class WatcherTest
         if(newSubFolder == null)
             Assert.fail("Fail to create sub-folder of base path.");
 
-//        if(w.getNumberFolderWatched() == 2)
-//            Assert.fail("Number of folder watched must be 2.");
-        if(!w.isFileWatched(newSubFolder.toPath()))
-            Assert.fail("Fail to watch new sub folder.");
-
         File newFile = createTestFile(newSubFolder, "test");
         if(newFile == null)
             Assert.fail("Fail to create test file into sub-folder.");
-
-        if(!w.isFileWatched(newSubFolder.toPath()))
-            Assert.fail("Fail to watch new file.");
-//        if(w.getNumberFolderWatched() == 3)
-//            Assert.fail("Number of folder watched must be 3.");
     }
 
 //==============================================================================

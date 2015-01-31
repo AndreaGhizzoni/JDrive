@@ -17,8 +17,8 @@ public class TestWatcherService
         try {
             Thread t = new Thread(Watcher.getInstance());
             t.start();
-            Thread.sleep(1000);
-            t.interrupt();
+//            Thread.sleep(1000);
+//            t.interrupt();
         }catch (IOException ioe){
             log.error("IOException Throw:" + ioe.getMessage());
         }catch (Exception e){
