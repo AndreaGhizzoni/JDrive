@@ -2,6 +2,8 @@ package it.hackcaffebabe.jdrive.fs;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -69,15 +71,26 @@ public final class Watcher implements Runnable
 
     /* register the single path given as argument under the watcher service. */
     private void registerPath(Path path) throws IOException {
-        //register the received path
         WatchKey key = path.register(this.watcher, mod);
-        //storeCredential the key and path
         directories.put(key, path);
+        log.debug(String.format("Path %s saved by watcher.",path));
     }
 
 //==============================================================================
 //  GETTER
 //==============================================================================
+    /**
+     *
+     * @param f
+     * @return
+     */
+    public boolean isFileWatched( Path f ){
+       return this.directories.containsValue(f);
+    }
+
+    /**
+     * TODO add doc
+     */
     public int getNumberFolderWatched(){
         log.debug(this.directories.size());
         return this.directories.size();
