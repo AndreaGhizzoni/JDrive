@@ -54,7 +54,6 @@ public final class Watcher implements Runnable
 
     /* Constructor method. IOException if newWatchService() fail. */
     private Watcher() throws IOException{
-        log.entry();
         this.watcher = FileSystems.getDefault().newWatchService();
         log.info("Watch Service retrieved correctly from FS.");
     }
@@ -81,9 +80,18 @@ public final class Watcher implements Runnable
     /**
      * TODO add doc
      */
-    public int getNumberFolderWatched(){
+    public synchronized int getNumberFolderWatched(){
         log.debug(this.directories.size());
         return this.directories.size();
+    }
+
+    /**
+     * TODO add doc
+     * @param p
+     * @return
+     */
+    public synchronized boolean isPathWatched( Path p ){
+        return this.directories.containsValue(p);
     }
 
 //==============================================================================
