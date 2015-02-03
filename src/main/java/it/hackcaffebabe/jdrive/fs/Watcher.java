@@ -122,13 +122,12 @@ public final class Watcher implements Runnable
 
                     Path child = directories.get(key).resolve(filename);
 
+                    log.info(kind+" -> "+child+" at "+child.toFile().lastModified());
                     //handle CREATE event
                     if( kind == ENTRY_CREATE ){
                         if(Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS))
                             registerTree(child);
                     }
-
-                    log.info(kind + " -> " + child);
                 }
 
                 boolean valid = key.reset();
