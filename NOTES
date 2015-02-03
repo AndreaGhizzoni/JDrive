@@ -1,0 +1,21 @@
+================================================================================
+~ General Structure of the program
+================================================================================
+GoogleAuthenticator provide the required token to do upload/download from client
+Google Drive.
+If token is aquired, WatcherService start monitoring the base path set (*)
+When WatcherService detects some changes, adds an Object to the upload
+queue. More in specific this Object must hold these basic informations:
+- type of event ( ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY )
+- the path of file/directory
+- timestamp
+This queue is managed by another Thread that pop from it and upload what the
+event object tells her to do.
+
+
+
+At this point we have:
+- Google Authenticator that holds a authenticated token
+- Watcher Service that catch every event from a base path given.
+
+
