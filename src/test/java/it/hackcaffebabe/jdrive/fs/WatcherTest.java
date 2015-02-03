@@ -25,8 +25,7 @@ public class WatcherTest
         Thread tw = new Thread(w);
         tw.start();
 
-        spawnFolder(base.toFile(), 10);
-//        File newSubFolder = createSubFolder(base.toFile(), "f1");
+//        spawnFolder(base.toFile(), 10);
 //        spawnFolder(newSubFolder, 10);
 //        fillFolder(newSubFolder, 10);
     }
@@ -48,13 +47,6 @@ public class WatcherTest
         } catch (IOException e) {
             return null;
         }
-    }
-
-    public File createSubFolder( File parent, String name ){
-        File newFile = new File(parent, name);
-        if(!newFile.mkdir())
-            Assert.fail("Fail to create sub-folder of base path.");
-        return newFile;
     }
 
     public void spawnFolder( File parent, int n ){
