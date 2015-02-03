@@ -71,7 +71,7 @@ public final class Watcher implements Runnable
     private void registerPath(Path path) throws IOException {
         WatchKey key = path.register(this.watcher, mod);
         directories.put(key, path);
-        log.debug(String.format("Path %s saved by watcher.",path));
+        log.info(String.format("Path %s saved by watcher.",path));
     }
 
 //==============================================================================
@@ -160,7 +160,6 @@ public final class Watcher implements Runnable
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes a)
                 throws IOException {
-            log.info("Registering new path:" + dir);
             registerPath(dir);
             return FileVisitResult.CONTINUE;
         }
