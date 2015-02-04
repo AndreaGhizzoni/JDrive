@@ -20,6 +20,13 @@ This queue is managed by another Thread that pop from it and upload what the
 event object tells her to do.
 
 
+================================================================================
+~ Configuration file structure
+================================================================================
+base = <path>          #absolute path to start the watcher
+token = <path>         #absolute path to google token, dunno if is a good idea 
+
+
 
 At this point we have:
 - Google Authenticator that holds a authenticated token
