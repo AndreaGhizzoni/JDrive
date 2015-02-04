@@ -16,6 +16,8 @@ event object tells her to do.
 
 At this point we have:
 - Google Authenticator that holds a authenticated token
+    - and tests
 - Watcher Service that catch every event from a base path given.
+    - and tests
 
 
