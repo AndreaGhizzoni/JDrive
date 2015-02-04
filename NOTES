@@ -1,9 +1,16 @@
 ================================================================================
 ~ General Structure of the program
 ================================================================================
+> Application Loading
+In this phase a launcher program will set up all the cofigurations path necessary
+to the GoogleAuthentication and WatcherService.
+
+> Authentication
 GoogleAuthenticator provide the required token to do upload/download from client
 Google Drive.
-If token is aquired, WatcherService start monitoring the base path set (*)
+
+> Monitoring (program loop)
+If token is aquired, WatcherService start monitoring the base path set.
 When WatcherService detects some changes, adds an Object to the upload
 queue. More in specific this Object must hold these basic informations:
 - type of event ( ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY )
@@ -19,5 +26,6 @@ At this point we have:
     - and tests
 - Watcher Service that catch every event from a base path given.
     - and tests
+- Configurator ( VERY WIP )
 
 
