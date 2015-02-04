@@ -44,6 +44,10 @@
             <AppenderRef ref="Console"/>
         </Logger>
 
+        <Logger name="Configurator" level="all" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
         <!--<Root level="error">-->
             <!--<AppenderRef ref="File"/>-->
         <!--</Root>-->
