@@ -6,6 +6,8 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+
 
 /**
  * commons.apache.org/proper/commons-configuration/userguide_v1.10/howto_properties.html#Properties_files
