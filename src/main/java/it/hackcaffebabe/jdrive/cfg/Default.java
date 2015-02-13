@@ -5,6 +5,7 @@ package it.hackcaffebabe.jdrive.cfg;
  */
 public final class Default
 {
+    private static final String DEF_USER_DIR = "";
 
 
 }
