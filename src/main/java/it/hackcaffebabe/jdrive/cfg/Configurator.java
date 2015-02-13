@@ -23,7 +23,7 @@ public final class Configurator
     private HashMap<String, Object> cfgMap;
 
     /**
-     * TODO add doc
+     * Returns the instance of Configurator.
      */
     public static Configurator getInstance(){
         if(instance==null)
@@ -41,7 +41,7 @@ public final class Configurator
     }
 
     /**
-     * TODO add doc
+     * This method populate the map with the value from configuration file
      */
     public void load(){
         try{
@@ -67,9 +67,10 @@ public final class Configurator
     }
 
     /**
-     * TODO add doc
-     * @param key
-     * @return
+     * Returns the value of the specific key given.
+     * @param key {@link java.lang.String} the key.
+     * @return {@link java.lang.Object} the object of specific key or null if
+     *                                  the key is null or not found.
      */
     public Object get(String key){
         return this.cfgMap.get(key);

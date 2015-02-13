@@ -14,6 +14,10 @@ public class Paths
     public static final String PATH_APP = USER_HOME +SEP+ ".jdrive";
     public static final String PATH_CFG= PATH_APP +SEP+ "jdrive.conf";
 
+    /**
+     * This method check if PATH_APP exists, if not creates it.
+     * @throws IOException if mkdirs returns false.
+     */
     public static void build() throws IOException{
         File f = new File( PATH_APP );
         if(!f.exists() && !f.mkdirs()){
