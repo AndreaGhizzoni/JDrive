@@ -31,8 +31,15 @@ public final class Configurator
         return instance;
     }
 
-    /* TODO add description */
-    private Configurator(){
+    /**
+     * Basic empty constructor
+     */
+    private Configurator(){}
+
+    /**
+     * TODO add doc
+     */
+    public void load(){
         try{
             //if this rise an Exception, load default configuration
             this.cfg = new PropertiesConfiguration(cfgFile);
