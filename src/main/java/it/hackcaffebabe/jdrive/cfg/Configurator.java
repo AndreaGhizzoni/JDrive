@@ -11,8 +11,7 @@ import java.io.File;
 
 /**
  * NB: this class needs his own basic folder in (user home)/.jdrive
- *
- * commons.apache.org/proper/commons-configuration/userguide_v1.10/howto_properties.html#Properties_files
+ * TODO add description and HOW TO USE
  */
 public final class Configurator
 {
@@ -35,15 +34,12 @@ public final class Configurator
     /* TODO add description */
     private Configurator(){
         try{
+            //if this rise an Exception, load default configuration
             this.cfg = new PropertiesConfiguration(cfgFile);
-
-            if(cfgFile.exists()){
-                this.loadFromFile();
-            }else{
-                this.loadDefault();
-            }
+            this.loadFromFile();
         }catch (ConfigurationException e){
-            log.error("Error while parsing configuration file!");
+            log.error(e.getMessage());
+            this.loadDefault();
         }
     }
 
