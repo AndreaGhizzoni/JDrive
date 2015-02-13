@@ -5,8 +5,8 @@ package it.hackcaffebabe.jdrive;
  */
 public class Paths
 {
-    private static final String USER_HOME = System.getProperty("user.home");
-    private static final String SEP = System.getProperty("file.separator");
+    public static final String USER_HOME = System.getProperty("user.home");
+    public static final String SEP = System.getProperty("file.separator");
 
     public static final String PATH_APP = USER_HOME +SEP+ ".jdrive";
     public static final String PATH_CFG= PATH_APP +SEP+ "jdrive.conf";
