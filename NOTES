@@ -23,8 +23,8 @@ event object tells her to do.
 ================================================================================
 ~ Configuration file structure
 ================================================================================
-base = <path>          #absolute path to start the watcher
-token = <path>         #absolute path to google token, dunno if is a good idea 
+base = ""        #absolute path to start the watcher
+token =          #absolute path to google token, dunno if is a good idea 
 
 
 

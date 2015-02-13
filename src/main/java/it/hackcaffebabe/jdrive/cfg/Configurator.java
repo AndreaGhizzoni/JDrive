@@ -18,8 +18,7 @@ public final class Configurator
     private static Logger log = LogManager.getLogger(Configurator.class.getSimpleName());
     private static Configurator instance;
 
-    //set config file to default
-    private File cfgFile = new File(Default.PATH_CFG);
+    private File cfgFile;
     private PropertiesConfiguration cfg;
 
     /**
@@ -34,7 +33,10 @@ public final class Configurator
     /**
      * Basic empty constructor
      */
-    private Configurator(){}
+    private Configurator(){
+        //set config file to default
+        this.cfgFile = new File(Default.PATH_CFG);
+    }
 
     /**
      * TODO add doc
