@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive;
+package it.hackcaffebabe.jdrive.mysimpletest;
 
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;

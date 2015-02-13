@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive;
+package it.hackcaffebabe.jdrive.mysimpletest;
 
 import it.hackcaffebabe.jdrive.fs.Watcher;
 import org.apache.logging.log4j.LogManager;
