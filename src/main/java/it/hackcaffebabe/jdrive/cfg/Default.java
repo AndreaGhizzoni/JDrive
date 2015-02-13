@@ -11,5 +11,5 @@ public final class Default
     public static final String DIR_NAME = ".jdrive";
     public static final String PATH_APP = USER_HOME +SEP+ DIR_NAME;
 
-    public static final String PATH_CFG_= PATH_APP +SEP+ "jdrive.conf";
+    public static final String PATH_CFG= PATH_APP +SEP+ "jdrive.conf";
 }

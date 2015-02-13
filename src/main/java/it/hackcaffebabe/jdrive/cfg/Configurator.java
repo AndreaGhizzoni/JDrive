@@ -10,6 +10,8 @@ import java.io.File;
 
 
 /**
+ * NB: this class needs his own basic folder in (user home)/.jdrive
+ *
  * commons.apache.org/proper/commons-configuration/userguide_v1.10/howto_properties.html#Properties_files
  */
 public final class Configurator
@@ -17,6 +19,8 @@ public final class Configurator
     private static Logger log = LogManager.getLogger(Configurator.class.getSimpleName());
     private static Configurator instance;
 
+    //set config file to default
+    private File cfgFile = new File(Default.PATH_CFG);
     private PropertiesConfiguration cfg;
 
     /**
@@ -31,12 +35,26 @@ public final class Configurator
     /* TODO add description */
     private Configurator(){
         try{
-            // if file.properties exists
-            // than load it
-            // else load default configurations
-            this.cfg = new PropertiesConfiguration("");
+            this.cfg = new PropertiesConfiguration(cfgFile);
+
+            if(cfgFile.exists()){
+                this.loadFromFile();
+            }else{
+                this.loadDefault();
+            }
         }catch (ConfigurationException e){
-            log.error(e.getMessage());
+            log.error("Error while parsing configuration file!");
         }
+    }
+
+    /* this method is used to parse the EXISTING configuration file */
+    private void loadFromFile(){
+
+    }
+
+    /* this method is used to create a new configuration file if NOT EXISTS
+     * whit default configuration*/
+    private void loadDefault(){
+
     }
 }
