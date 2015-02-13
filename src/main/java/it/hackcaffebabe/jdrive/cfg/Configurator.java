@@ -1,6 +1,6 @@
 package it.hackcaffebabe.jdrive.cfg;
 
-import org.apache.commons.configuration.Configuration;
+import it.hackcaffebabe.jdrive.Paths;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.logging.log4j.LogManager;
@@ -35,7 +35,7 @@ public final class Configurator
      */
     private Configurator(){
         //set config file to default
-        this.cfgFile = new File(Default.PATH_CFG);
+        this.cfgFile = new File(Paths.PATH_CFG);
     }
 
     /**
