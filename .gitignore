@@ -10,4 +10,5 @@ build/test-results
 build/docs
 .idea/
 .gradle/
+*.swp
 JDrive.iml
