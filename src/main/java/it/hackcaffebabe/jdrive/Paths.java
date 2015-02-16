@@ -2,6 +2,8 @@ package it.hackcaffebabe.jdrive;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Utility class to provide the basic path of the program
@@ -18,10 +20,12 @@ public class Paths
      * This method check if PATH_APP exists, if not creates it.
      * @throws IOException if mkdirs returns false.
      */
-    public static void build() throws IOException{
-        File f = new File( PATH_APP );
-        if(!f.exists() && !f.mkdirs()){
-            throw new IOException("Fail to build working directory "+ PATH_APP);
-        }
+    public static void buildWorkingDirectory() throws IOException{
+        Path p = java.nio.file.Paths.get(PATH_APP);
+        Files.createDirectories(p);
+//        File f = new File( PATH_APP );
+//        if(!f.exists() && !f.mkdirs()){
+//            throw new IOException("Fail to build working directory "+ PATH_APP);
+//        }
     }
 }
