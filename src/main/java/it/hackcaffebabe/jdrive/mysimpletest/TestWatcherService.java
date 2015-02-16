@@ -11,7 +11,7 @@ import java.io.IOException;
  */
 public class TestWatcherService
 {
-    private static final Logger log = LogManager.getLogger("TestWatcherService");
+    private static final Logger log = LogManager.getLogger("MyTest");
 
     public static void main(String...args){
         try {

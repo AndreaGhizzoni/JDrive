@@ -19,7 +19,7 @@ import java.util.List;
  * Testing Google API
  */
 public class TestGoogleAPI {
-    public static final Logger log = LogManager.getLogger("TestGoogleAuthenticator");
+    public static final Logger log = LogManager.getLogger("MyTest");
 
     public static void main(String[] args){
         try{
