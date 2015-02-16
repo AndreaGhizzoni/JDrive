@@ -24,7 +24,7 @@ public final class Configurator
     private static Configurator instance;
 
     private File cfgFile;
-    private PropertiesConfiguration propertiesconfigurations;
+    private PropertiesConfiguration cfgProp;
     private HashMap<String, Object> cfgMap;
 
     /**
@@ -49,12 +49,12 @@ public final class Configurator
      * This method populate the map with the value from configuration file
      */
     public void load(){
-        if(this.propertiesconfigurations != null )
+        if(this.cfgProp != null )
             return;
 
         try{
-            this.propertiesconfigurations = new PropertiesConfiguration(cfgFile);
-            this.propertiesconfigurations.setAutoSave(true);
+            this.cfgProp = new PropertiesConfiguration(cfgFile);
+            this.cfgProp.setAutoSave(true);
         }catch (ConfigurationException e) {
            log.error(e.getMessage());
         }
@@ -69,7 +69,7 @@ public final class Configurator
     private void loadFromFile(){
         log.info("Try to load configuration from jdrive.conf...");
 
-        this.cfgMap.put("base", this.propertiesconfigurations.getString("base"));
+        this.cfgMap.put("base", this.cfgProp.getString("base"));
         //add settings here
 
         log.info("Configuration file loaded properly.");
@@ -113,7 +113,10 @@ public final class Configurator
      * @return true if there wasn't that object with that key, false otherwise
      */
     public boolean put(String key, Object obj){
-        this.propertiesconfigurations.setProperty(key, obj);
+        if(key == null || key.isEmpty() )
+            return false;
+
+        this.cfgProp.setProperty(key, obj);
         return this.cfgMap.put(key, obj) == null;
     }
 
@@ -123,7 +126,7 @@ public final class Configurator
      */
     public void remove(String key){
         if(key != null && !key.isEmpty()) {
-            this.propertiesconfigurations.clearProperty(key);
+            this.cfgProp.clearProperty(key);
             this.cfgMap.remove(key);
         }
     }
