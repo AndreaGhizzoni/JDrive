@@ -48,13 +48,17 @@ public final class Configurator
      * This method populate the map with the value from configuration file
      */
     public void load(){
+        PropertiesConfiguration p = null;
         try{
-            //if this rise an Exception, load default configuration
-            this.loadFromFile( new PropertiesConfiguration(cfgFile) );
-        }catch (ConfigurationException e){
-            log.error(e.getMessage());
-            this.loadDefault();
+            p = new PropertiesConfiguration(cfgFile);
+        }catch (ConfigurationException e) {
+           log.error(e.getMessage());
         }
+
+        if(cfgFile.exists())
+            loadFromFile(p);
+        else
+            loadDefault();
     }
 
     /* this method is used to parse the EXISTING configuration file */
@@ -77,11 +81,12 @@ public final class Configurator
             Files.createFile(p);
 
             PropertiesConfiguration cfg = new PropertiesConfiguration(cfgFile);
+
             this.cfgMap.put("base", Default.BASE);
             cfg.addProperty("base", Default.BASE);
+            // add default settings here
 
             cfg.save();
-            // add default settings here
         }catch( FileAlreadyExistsException fae ){
             log.error(fae.getMessage());
         }catch( IOException ioe ){
