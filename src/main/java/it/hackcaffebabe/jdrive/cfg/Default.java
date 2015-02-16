@@ -8,8 +8,4 @@ import it.hackcaffebabe.jdrive.Paths;
 public final class Default
 {
     public static final String BASE = Paths.USER_HOME +Paths.SEP+ "Google Drive";
-
-
-
-
 }
