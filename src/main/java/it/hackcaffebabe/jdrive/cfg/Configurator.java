@@ -7,6 +7,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 
 
@@ -57,13 +61,29 @@ public final class Configurator
     private void loadFromFile(PropertiesConfiguration cfg){
         log.info("Try to load configuration from jdrive.conf...");
 
+        this.cfgMap.put("base", cfg.getString("base"));
+        //add settings here
+
+        log.info("Configuration file loaded properly.");
     }
 
     /* this method is used to create a new configuration file if NOT EXISTS
      * whit default configuration*/
     private void loadDefault(){
         log.info("Try to load default configuration...");
+        try{
+            Path p = java.nio.file.Paths.get(Paths.PATH_CFG);
+            //Files.createDirectories(p.getParent());
+            Files.createFile(p);
 
+            this.cfgMap.put("base", Default.BASE);
+            // add default settings here
+        }catch (FileAlreadyExistsException fae)  {
+            log.error(fae.getMessage());
+        }catch (IOException ioe){
+            log.error(ioe.getMessage());
+        }
+        log.info("Configuration file create and loaded properly.");
     }
 
     /**
