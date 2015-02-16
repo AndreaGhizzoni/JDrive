@@ -24,6 +24,7 @@ public final class Configurator
     private static Configurator instance;
 
     private File cfgFile;
+    private PropertiesConfiguration propertiesconfigurations;
     private HashMap<String, Object> cfgMap;
 
     /**
@@ -48,24 +49,27 @@ public final class Configurator
      * This method populate the map with the value from configuration file
      */
     public void load(){
-        PropertiesConfiguration p = null;
+        if(this.propertiesconfigurations != null )
+            return;
+
         try{
-            p = new PropertiesConfiguration(cfgFile);
+            this.propertiesconfigurations = new PropertiesConfiguration(cfgFile);
+            this.propertiesconfigurations.setAutoSave(true);
         }catch (ConfigurationException e) {
            log.error(e.getMessage());
         }
 
         if(cfgFile.exists())
-            loadFromFile(p);
+            loadFromFile();
         else
             loadDefault();
     }
 
     /* this method is used to parse the EXISTING configuration file */
-    private void loadFromFile(PropertiesConfiguration cfg){
+    private void loadFromFile(){
         log.info("Try to load configuration from jdrive.conf...");
 
-        this.cfgMap.put("base", cfg.getString("base"));
+        this.cfgMap.put("base", this.propertiesconfigurations.getString("base"));
         //add settings here
 
         log.info("Configuration file loaded properly.");
@@ -80,19 +84,13 @@ public final class Configurator
             //Files.createDirectories(p.getParent());
             Files.createFile(p);
 
-            PropertiesConfiguration cfg = new PropertiesConfiguration(cfgFile);
-
-            this.cfgMap.put("base", Default.BASE);
-            cfg.addProperty("base", Default.BASE);
+            put("base", Default.BASE);
             // add default settings here
 
-            cfg.save();
         }catch( FileAlreadyExistsException fae ){
             log.error(fae.getMessage());
         }catch( IOException ioe ){
             log.error(ioe.getMessage());
-        }catch( ConfigurationException ce ){
-            log.error(ce.getMessage());
         }
         log.info("Configuration file create and loaded properly.");
     }
@@ -105,5 +103,28 @@ public final class Configurator
      */
     public Object get(String key){
         return this.cfgMap.get(key);
+    }
+
+    /**
+     * Put a new value into the configuration file. If this key already exists,
+     * the value associated with will be replaced with the newest one.
+     * @param key {@link java.lang.String} the key string
+     * @param obj {@link java.lang.Object} to put
+     * @return true if there wasn't that object with that key, false otherwise
+     */
+    public boolean put(String key, Object obj){
+        this.propertiesconfigurations.setProperty(key, obj);
+        return this.cfgMap.put(key, obj) == null;
+    }
+
+    /**
+     * Remove the value from key given.
+     * @param key {@link java.lang.String} the key  of properties
+     */
+    public void remove(String key){
+        if(key != null && !key.isEmpty()) {
+            this.propertiesconfigurations.clearProperty(key);
+            this.cfgMap.remove(key);
+        }
     }
 }
