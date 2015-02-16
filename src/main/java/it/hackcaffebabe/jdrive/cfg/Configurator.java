@@ -76,12 +76,18 @@ public final class Configurator
             //Files.createDirectories(p.getParent());
             Files.createFile(p);
 
+            PropertiesConfiguration cfg = new PropertiesConfiguration(cfgFile);
             this.cfgMap.put("base", Default.BASE);
+            cfg.addProperty("base", Default.BASE);
+
+            cfg.save();
             // add default settings here
-        }catch (FileAlreadyExistsException fae)  {
+        }catch( FileAlreadyExistsException fae ){
             log.error(fae.getMessage());
-        }catch (IOException ioe){
+        }catch( IOException ioe ){
             log.error(ioe.getMessage());
+        }catch( ConfigurationException ce ){
+            log.error(ce.getMessage());
         }
         log.info("Configuration file create and loaded properly.");
     }
