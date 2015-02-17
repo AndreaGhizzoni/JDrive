@@ -46,23 +46,27 @@ public final class Configurator
     }
 
     /**
-     * This method populate the map with the value from configuration file
+     * TODO add doc
+     * @return
      */
-    public void load(){
+    public boolean load(){
         if(this.cfgProp != null )
-            return; // safe condition: avoid multiple calls of load()
+            return false; // safe condition: avoid multiple calls of load()
 
         try{
             this.cfgProp = new PropertiesConfiguration(cfgFile);
             this.cfgProp.setAutoSave(true);
         }catch (ConfigurationException e) {
-           log.error(e.getMessage());
+            log.error(e.getMessage());
+            return false;
         }
 
         if(cfgFile.exists())
             loadFromFile();
         else
             loadDefault();
+
+        return true;
     }
 
     /* this method is used to parse the EXISTING configuration file */
