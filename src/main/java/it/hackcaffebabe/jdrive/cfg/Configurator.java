@@ -50,7 +50,7 @@ public final class Configurator
      */
     public void load(){
         if(this.cfgProp != null )
-            return;
+            return; // safe condition: avoid multiple calls of load()
 
         try{
             this.cfgProp = new PropertiesConfiguration(cfgFile);
