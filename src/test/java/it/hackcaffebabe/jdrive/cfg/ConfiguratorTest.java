@@ -1,17 +1,19 @@
 package it.hackcaffebabe.jdrive.cfg;
 
-import it.hackcaffebabe.jdrive.Paths;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Unit test for {@link it.hackcaffebabe.jdrive.cfg.Configurator}
  */
 public class ConfiguratorTest
 {
+    private Path p = java.nio.file.Paths.get("/tmp/testing");
+
     @Test
     public void testConfigurator(){
         buildWD();
@@ -25,7 +27,7 @@ public class ConfiguratorTest
     // create a method to build working directory
     public void buildWD(){
         try {
-            Paths.buildWorkingDirectory();
+            Files.createDirectories(this.p);
         } catch (IOException e) {
             Assert.fail("Fail to build wd.");
         }
@@ -34,7 +36,7 @@ public class ConfiguratorTest
     // create a method to clean the working directory
     public void cleanWD(){
         try {
-            Files.delete(java.nio.file.Paths.get(Paths.PATH_APP));
+            Files.delete(this.p);
         } catch (IOException e) {
             Assert.fail("Fail to clean wd.");
         }
