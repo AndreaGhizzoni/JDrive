@@ -1,6 +1,5 @@
 package it.hackcaffebabe.jdrive;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,9 +22,5 @@ public class Paths
     public static void buildWorkingDirectory() throws IOException{
         Path p = java.nio.file.Paths.get(PATH_APP);
         Files.createDirectories(p);
-//        File f = new File( PATH_APP );
-//        if(!f.exists() && !f.mkdirs()){
-//            throw new IOException("Fail to build working directory "+ PATH_APP);
-//        }
     }
 }
