@@ -3,11 +3,8 @@ package it.hackcaffebabe.jdrive.cfg;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
@@ -15,11 +12,32 @@ import java.nio.file.Paths;
  */
 public class ConfiguratorTest
 {
-    private Path p = Paths.get("/tmp/testing");
-
     @Test
     public void testConfigurator(){
         buildWD();
+        Configurator c = Configurator.getInstance();
+        c.load();
+        c.load(); // testing multiple calling
+
+        Object n = c.get(null);
+        Assert.assertNull("Expecting to retrieve null object from null key.", n);
+        Object e = c.get("");
+        Assert.assertNull("Expecting to retrieve null object from empty key.", e);
+
+        String b = (String)c.get("base");
+        Assert.assertEquals("Expecting the same base path.", Default.BASE, b);
+
+        boolean pNK = c.put(null,1);
+        boolean pEK = c.put("",1);
+        boolean ok = c.put("testing", 42);
+
+        Assert.assertFalse("Expecting false from put with null key.", pNK);
+        Assert.assertFalse("Expecting false from put with empty key.", pEK);
+        Assert.assertTrue("Expecting true from put with valid key.", ok);
+
+        Integer i = (Integer)c.get("testing");
+        Assert.assertEquals("Expecting to retrieve the latest properties",
+                new Integer(42), i);
 
         cleanWD();
     }
@@ -27,40 +45,21 @@ public class ConfiguratorTest
 //==============================================================================
 //  TEST CASE UTIL METHOD
 //==============================================================================
-    // create a method that spawn a configuration test file
-    public void buildConfigurationTest(){
-        try{
-            Path file = Paths.get("/tmp/testing/cfg.config");
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file.toFile()));
-            bw.write("test = 42");
-            bw.newLine();
-            bw.write("my.string = hello");
-            bw.newLine();
-            bw.write("my.path = /path/to/star");
-            bw.newLine();
-            bw.flush();
-            bw.close();
-        } catch (IOException e) {
-            Assert.fail(e.getMessage());
-        }
-    }
-
-
     // create a method to build working directory
     public void buildWD(){
         try {
-            Files.createDirectories(this.p);
+            it.hackcaffebabe.jdrive.Paths.buildWorkingDirectory();
         } catch (IOException e) {
-            Assert.fail("Fail to build wd.");
+            Assert.fail(e.getMessage());
         }
     }
 
     // create a method to clean the working directory
     public void cleanWD(){
         try {
-            Files.delete(this.p);
+            Files.delete(Paths.get(it.hackcaffebabe.jdrive.Paths.PATH_CFG));
         } catch (IOException e) {
-            Assert.fail("Fail to clean wd.");
+            Assert.fail(e.getMessage());
         }
     }
 }
