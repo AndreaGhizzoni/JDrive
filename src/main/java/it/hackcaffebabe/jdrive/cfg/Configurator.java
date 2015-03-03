@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 
 
 /**
@@ -25,7 +24,6 @@ public final class Configurator
 
     private File cfgFile;
     private PropertiesConfiguration cfgProp;
-    private HashMap<String, Object> cfgMap;
 
     /**
      * Returns the instance of Configurator.
@@ -42,7 +40,6 @@ public final class Configurator
     private Configurator(){
         //set config file to default
         this.cfgFile = new File(Paths.PATH_CFG);
-        this.cfgMap  = new HashMap<String, Object>();
     }
 
     /**
@@ -61,22 +58,11 @@ public final class Configurator
             return false;
         }
 
-        if(cfgFile.exists())
-            loadFromFile();
-        else
+        // if file exists the cfgProp already holds the map of values
+        if(!cfgFile.exists())
             loadDefault();
 
         return true;
-    }
-
-    /* this method is used to parse the EXISTING configuration file */
-    private void loadFromFile(){
-        log.info("Try to load configuration from jdrive.conf...");
-
-        this.cfgMap.put("base", this.cfgProp.getString("base"));
-        //add settings here
-
-        log.info("Configuration file loaded properly.");
     }
 
     /* this method is used to create a new configuration file if NOT EXISTS
@@ -85,7 +71,6 @@ public final class Configurator
         log.info("Try to load default configuration...");
         try{
             Path p = java.nio.file.Paths.get(Paths.PATH_CFG);
-            //Files.createDirectories(p.getParent());
             Files.createFile(p);
 
             put("base", Default.BASE);
@@ -106,7 +91,7 @@ public final class Configurator
      *                                  the key is null or not found.
      */
     public Object get(String key){
-        return this.cfgMap.get(key);
+        return this.cfgProp.getProperty(key);
     }
 
     /**
@@ -117,11 +102,18 @@ public final class Configurator
      * @return true if there wasn't that object with that key, false otherwise
      */
     public boolean put(String key, Object obj){
-        if(key == null || key.isEmpty() )
-            return false;
-
+        boolean hasOverride = exists(key);
         this.cfgProp.setProperty(key, obj);
-        return this.cfgMap.put(key, obj) == null;
+        return hasOverride;
+    }
+
+    /**
+     * Check if given key is associated with existing value in the map.
+     * @param key {@link java.lang.String} the key as string.
+     * @return true if exists, otherwise false.
+     */
+    public boolean exists(String key){
+        return get(key)!= null;
     }
 
     /**
@@ -131,7 +123,6 @@ public final class Configurator
     public void remove(String key){
         if(key != null && !key.isEmpty()) {
             this.cfgProp.clearProperty(key);
-            this.cfgMap.remove(key);
         }
     }
 }
