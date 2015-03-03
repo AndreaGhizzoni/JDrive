@@ -1,4 +1,18 @@
 ================================================================================
+~ Conceptual idea of the program
+================================================================================
+JDrive is proposing as a client sync for your Google Drive folder (like Dropbox).
+This application needs to have access of file system events in order to detect
+if a file has been created, modified or deleted.
+
+Once launched it needs to log into a Google account to download/upload
+drive files. Downloading and Uploading processes are executed asynchronously.
+  > if a file has been modify/created will be put in uploading queue
+  > if a file has been uploded from somewhere else, the download queue needs to 
+    detects it and proced to balance the remote and local file tree. 
+
+
+================================================================================
 ~ General Structure of the program
 ================================================================================
 > Application Loading
