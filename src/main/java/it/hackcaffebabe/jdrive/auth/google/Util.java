@@ -34,7 +34,7 @@ final class Util
      * @param s
      */
     static void populateStoredCredential( StoredCredential s ) throws IOException {
-        JsonParser p = new JsonFactory().createJsonParser(TokenConst.getTokenFile());
+        JsonParser p = new JsonFactory().createJsonParser(TokenConst.FILE);
 
         String fieldName;
         while (p.nextToken() != JsonToken.END_OBJECT) {

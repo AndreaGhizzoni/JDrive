@@ -4,6 +4,7 @@ import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import it.hackcaffebabe.jdrive.Paths;
 import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +24,7 @@ public class TestGoogleAPI {
 
     public static void main(String[] args){
         try{
+            Paths.buildWorkingDirectory();
             Drive d = GoogleLoginWithGUI();
         }catch (IOException e){
             log.error(e.getMessage());
