@@ -1,6 +1,9 @@
 package it.hackcaffebabe.jdrive.mysimpletest;
 
 import com.google.api.client.http.FileContent;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.util.IOUtils;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
@@ -9,9 +12,8 @@ import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,6 +28,7 @@ public class TestGoogleAPI {
         try{
             Paths.buildWorkingDirectory();
             Drive d = GoogleLoginWithGUI();
+            downloadFilesFromRoot(d);
         }catch (IOException e){
             log.error(e.getMessage());
         }
@@ -74,12 +77,44 @@ public class TestGoogleAPI {
         log.info("retrieve file list");
         List<File> result = new ArrayList<File>();
         Drive.Files.List r = d.files().list();
-        FileList fileList = r.setQ("not trashed and ('root' in parents)").execute();
+        FileList fileList = r.setQ("'root' in parents and not trashed").execute();
         result.addAll(fileList.getItems());
 
         for(File f : result ) {
-            log.info(f.getTitle());
             log.info("====");
+            log.info("Title: "+f.getTitle());
+//            log.info("Created date: " + f.getCreatedDate());
+//            log.info("Download url: "+f.getDownloadUrl());
+//            log.info("====");
+        }
+    }
+
+    public static void downloadFilesFromRoot( Drive d ) throws IOException{
+        log.info("downloading files from root");
+        Path base = java.nio.file.Paths.get("/home/andrea/Google Drive");
+
+        List<File> result = new ArrayList<File>();
+        Drive.Files.List r = d.files().list();
+        FileList fileList = r.setQ("'root' in parents and not trashed").execute();
+        result.addAll(fileList.getItems());
+
+        for(File f : result ) {
+            if( f.getDownloadUrl() != null && f.getDownloadUrl().length() > 0) {
+                HttpResponse resp = d.getRequestFactory().buildGetRequest(
+                        new GenericUrl(f.getDownloadUrl())
+                ).execute();
+                InputStream is = resp.getContent();
+                OutputStream out = new FileOutputStream(
+                        new java.io.File(base.toFile(), f.getTitle())
+                );
+
+                log.info(String.format("try to download %s...", f.getTitle()));
+                IOUtils.copy(is, out, true);
+                out.close();
+                log.info(String.format("file: %s downloaded.", f.getTitle()));
+            } else {
+                log.info("The file doesn't have any content stored on Drive");
+            }
         }
     }
 }
