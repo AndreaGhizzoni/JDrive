@@ -33,8 +33,7 @@ public class TestGoogleAPI {
 
     public static Drive GoogleLoginWithGUI() throws IOException{
         GoogleAuthenticator g = GoogleAuthenticator.getInstance();
-        g.UIAuthentication();
-        Drive d = g.getService();
+        Drive d = g.UIAuthentication();
         log.info("Service get.");
         return d;
     }
