@@ -9,6 +9,7 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import it.hackcaffebabe.jdrive.Paths;
 import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
+import it.hackcaffebabe.jdrive.cfg.Configurator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,8 +28,10 @@ public class TestGoogleAPI {
     public static void main(String[] args){
         try{
             Paths.buildWorkingDirectory();
+            Configurator.getInstance().load();
+
             Drive d = GoogleLoginWithGUI();
-            downloadFilesFromRoot(d);
+            recList(d, "root");
         }catch (IOException e){
             log.error(e.getMessage());
         }
@@ -84,15 +87,33 @@ public class TestGoogleAPI {
         for(File f : result ) {
             log.info("====");
             log.info("Title: "+f.getTitle());
-//            log.info("Created date: " + f.getCreatedDate());
-//            log.info("Download url: "+f.getDownloadUrl());
-//            log.info("====");
+            log.info("ID: "+f.getId());
+            log.info("MimeType: "+f.getMimeType());
         }
     }
 
+    public static void recList(Drive d, String parentID) throws IOException{
+        log.info("retrieve file list");
+        List<File> result = new ArrayList<File>();
+        Drive.Files.List r = d.files().list();
+        FileList fileList = r.setQ("'"+parentID+"' in parents and not trashed").execute();
+        r.setPageToken(fileList.getNextPageToken());
+        result.addAll(fileList.getItems());
+
+        for(File f : result ) {
+            log.info("====");
+            log.info("Title: "+f.getTitle());
+            log.info("ID: "+f.getId());
+            log.info("MimeType: "+f.getMimeType());
+            if(f.getMimeType().endsWith("folder"))
+                recList(d, f.getId());
+        }
+    }
+
+
     public static void downloadFilesFromRoot( Drive d ) throws IOException{
         log.info("downloading files from root");
-        Path base = java.nio.file.Paths.get("/home/andrea/Google Drive");
+        Path base = java.nio.file.Paths.get( (String)Configurator.getInstance().get("base") );
 
         List<File> result = new ArrayList<File>();
         Drive.Files.List r = d.files().list();
