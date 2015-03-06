@@ -115,7 +115,12 @@ public class TestGoogleAPI {
                 out.close();
                 log.info(String.format("file: %s downloaded.", f.getTitle()));
             } else {
-                log.info("The file doesn't have any content stored on Drive");
+                if( f.getMimeType().endsWith("folder") ){
+                    log.info("The file is a folder");
+                    new java.io.File(base.toFile(), f.getTitle()).mkdirs();
+                }else{
+                    log.info("File not recognized.");
+                }
             }
         }
     }
