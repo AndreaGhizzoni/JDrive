@@ -78,6 +78,7 @@ public class TestGoogleAPI {
         List<File> result = new ArrayList<File>();
         Drive.Files.List r = d.files().list();
         FileList fileList = r.setQ("'root' in parents and not trashed").execute();
+        r.setPageToken(fileList.getNextPageToken());
         result.addAll(fileList.getItems());
 
         for(File f : result ) {
@@ -96,10 +97,12 @@ public class TestGoogleAPI {
         List<File> result = new ArrayList<File>();
         Drive.Files.List r = d.files().list();
         FileList fileList = r.setQ("'root' in parents and not trashed").execute();
+        r.setPageToken(fileList.getNextPageToken());
         result.addAll(fileList.getItems());
 
         for(File f : result ) {
             if( f.getDownloadUrl() != null && f.getDownloadUrl().length() > 0) {
+                log.info(String.format("try to download %s...", f.getTitle()));
                 HttpResponse resp = d.getRequestFactory().buildGetRequest(
                         new GenericUrl(f.getDownloadUrl())
                 ).execute();
@@ -108,7 +111,6 @@ public class TestGoogleAPI {
                         new java.io.File(base.toFile(), f.getTitle())
                 );
 
-                log.info(String.format("try to download %s...", f.getTitle()));
                 IOUtils.copy(is, out, true);
                 out.close();
                 log.info(String.format("file: %s downloaded.", f.getTitle()));
