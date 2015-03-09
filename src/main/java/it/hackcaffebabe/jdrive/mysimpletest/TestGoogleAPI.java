@@ -76,22 +76,6 @@ public class TestGoogleAPI {
         log.info("File uploaded with ID:" +file.getId());
     }
 
-    public static void listFilesInRoot( Drive d ) throws IOException{
-        log.info("retrieve file list");
-        List<File> result = new ArrayList<File>();
-        Drive.Files.List r = d.files().list();
-        FileList fileList = r.setQ("'root' in parents and not trashed").execute();
-        r.setPageToken(fileList.getNextPageToken());
-        result.addAll(fileList.getItems());
-
-        for(File f : result ) {
-            log.info("====");
-            log.info("Title: "+f.getTitle());
-            log.info("ID: "+f.getId());
-            log.info("MimeType: "+f.getMimeType());
-        }
-    }
-
     public static void recList(Drive d, String parentID) throws IOException{
         log.info("retrieve file list");
         List<File> result = new ArrayList<File>();
