@@ -15,9 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Testing Google API
@@ -31,7 +29,7 @@ public class TestGoogleAPI {
             Configurator.getInstance().load();
 
             Drive d = GoogleLoginWithGUI();
-            recList(d, "root");
+            recDownload(d, "root", null);
         }catch (IOException e){
             log.error(e.getMessage());
         }
@@ -78,34 +76,69 @@ public class TestGoogleAPI {
 
     public static void recList(Drive d, String parentID) throws IOException{
         log.info("retrieve file list");
-        List<File> result = new ArrayList<File>();
         Drive.Files.List r = d.files().list();
         FileList fileList = r.setQ("'"+parentID+"' in parents and not trashed").execute();
         r.setPageToken(fileList.getNextPageToken());
-        result.addAll(fileList.getItems());
 
-        for(File f : result ) {
+        for(File f : fileList.getItems()) {
             log.info("====");
             log.info("Title: "+f.getTitle());
             log.info("ID: "+f.getId());
             log.info("MimeType: "+f.getMimeType());
+            log.info("ParentID: "+f.getId());
+            log.info("Parents:");
+            for(int i=0; i<f.getParents().size(); i++){
+                log.info(String.format("%d) %s", i, f.getParents().get(i).getId()));
+            }
             if(f.getMimeType().endsWith("folder"))
                 recList(d, f.getId());
         }
     }
 
+    public static void recDownload(Drive d, String remoteID, String localID ) throws IOException {
+        log.info("downloading files from "+ localID);
+        Drive.Files.List r = d.files().list();
+        FileList fileList = r.setQ("'"+remoteID+"' in parents and not trashed").execute();
+        r.setPageToken(fileList.getNextPageToken());
+
+        for( File f : fileList.getItems() ){
+            // this is the local file
+            java.io.File local;
+            if( localID == null ) { // means remoteID == root
+                Path base = java.nio.file.Paths.get( (String)Configurator.getInstance().get("base") );
+                local = new java.io.File(base.toFile(), f.getTitle());
+            }else {
+                local = new java.io.File(new java.io.File(localID), f.getTitle());
+            }
+
+            InputStream is = downloadFile(d, f);
+
+            if( is != null ){
+                OutputStream out = new FileOutputStream(local);
+                IOUtils.copy(is, out, true);
+                out.close();
+                log.info(String.format("file: %s downloaded.", f.getTitle()));
+            } else {
+                if( f.getMimeType().endsWith("folder") ){
+                    log.info("The file is a folder");
+                    local.mkdirs(); // TODO maybe manage the false return
+                    recDownload( d, f.getId(), f.getTitle() );
+                }else{
+                    log.info("File not recognized.");
+                }
+            }
+        }
+    }
 
     public static void downloadFilesFromRoot( Drive d ) throws IOException{
         log.info("downloading files from root");
         Path base = java.nio.file.Paths.get( (String)Configurator.getInstance().get("base") );
 
-        List<File> result = new ArrayList<File>();
         Drive.Files.List r = d.files().list();
         FileList fileList = r.setQ("'root' in parents and not trashed").execute();
         r.setPageToken(fileList.getNextPageToken());
-        result.addAll(fileList.getItems());
 
-        for(File f : result ) {
+        for(File f : fileList.getItems()) {
             InputStream is = downloadFile(d, f);
 
             if( is != null ){
