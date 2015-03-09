@@ -122,16 +122,12 @@ public class TestGoogleAPI {
         result.addAll(fileList.getItems());
 
         for(File f : result ) {
-            if( f.getDownloadUrl() != null && f.getDownloadUrl().length() > 0) {
-                log.info(String.format("try to download %s...", f.getTitle()));
-                HttpResponse resp = d.getRequestFactory().buildGetRequest(
-                        new GenericUrl(f.getDownloadUrl())
-                ).execute();
-                InputStream is = resp.getContent();
+            InputStream is = downloadFile(d, f);
+
+            if( is != null ){
                 OutputStream out = new FileOutputStream(
                         new java.io.File(base.toFile(), f.getTitle())
                 );
-
                 IOUtils.copy(is, out, true);
                 out.close();
                 log.info(String.format("file: %s downloaded.", f.getTitle()));
@@ -143,6 +139,19 @@ public class TestGoogleAPI {
                     log.info("File not recognized.");
                 }
             }
+        }
+    }
+
+    private static InputStream downloadFile(Drive service, File f) throws IOException{
+        if (f.getDownloadUrl() != null && f.getDownloadUrl().length() > 0) {
+            log.info(String.format("try to download %s...", f.getTitle()));
+            HttpResponse resp = service.getRequestFactory().buildGetRequest(
+                    new GenericUrl(f.getDownloadUrl())
+            ).execute();
+            return resp.getContent();
+        } else {
+            // The file doesn't have any content stored on Drive.
+            return null;
         }
     }
 }
