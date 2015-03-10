@@ -96,7 +96,7 @@ public class TestGoogleAPI {
     }
 
     public static void recDownload(Drive d, String remoteID, String localID ) throws IOException {
-        log.info("downloading files from "+ localID);
+        log.info("downloading files from "+ (localID==null?"root": localID) );
         Drive.Files.List r = d.files().list();
         FileList fileList = r.setQ("'"+remoteID+"' in parents and not trashed").execute();
         r.setPageToken(fileList.getNextPageToken());
@@ -104,15 +104,15 @@ public class TestGoogleAPI {
         for( File f : fileList.getItems() ){
             // this is the local file
             java.io.File local;
+            Path base = java.nio.file.Paths.get( (String)Configurator.getInstance().get("base") );
             if( localID == null ) { // means remoteID == root
-                Path base = java.nio.file.Paths.get( (String)Configurator.getInstance().get("base") );
                 local = new java.io.File(base.toFile(), f.getTitle());
             }else {
-                local = new java.io.File(new java.io.File(localID), f.getTitle());
+                Path p = base.resolve(localID);
+                local = new java.io.File(p.toFile(), f.getTitle());
             }
 
             InputStream is = downloadFile(d, f);
-
             if( is != null ){
                 OutputStream out = new FileOutputStream(local);
                 IOUtils.copy(is, out, true);
@@ -123,35 +123,6 @@ public class TestGoogleAPI {
                     log.info("The file is a folder");
                     local.mkdirs(); // TODO maybe manage the false return
                     recDownload( d, f.getId(), f.getTitle() );
-                }else{
-                    log.info("File not recognized.");
-                }
-            }
-        }
-    }
-
-    public static void downloadFilesFromRoot( Drive d ) throws IOException{
-        log.info("downloading files from root");
-        Path base = java.nio.file.Paths.get( (String)Configurator.getInstance().get("base") );
-
-        Drive.Files.List r = d.files().list();
-        FileList fileList = r.setQ("'root' in parents and not trashed").execute();
-        r.setPageToken(fileList.getNextPageToken());
-
-        for(File f : fileList.getItems()) {
-            InputStream is = downloadFile(d, f);
-
-            if( is != null ){
-                OutputStream out = new FileOutputStream(
-                        new java.io.File(base.toFile(), f.getTitle())
-                );
-                IOUtils.copy(is, out, true);
-                out.close();
-                log.info(String.format("file: %s downloaded.", f.getTitle()));
-            } else {
-                if( f.getMimeType().endsWith("folder") ){
-                    log.info("The file is a folder");
-                    new java.io.File(base.toFile(), f.getTitle()).mkdirs();
                 }else{
                     log.info("File not recognized.");
                 }
