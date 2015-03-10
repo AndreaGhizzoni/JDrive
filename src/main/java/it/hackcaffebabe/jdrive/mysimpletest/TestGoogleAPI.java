@@ -121,7 +121,8 @@ public class TestGoogleAPI {
             } else {
                 if( f.getMimeType().endsWith("folder") ){
                     log.info("The file is a folder");
-                    local.mkdirs(); // TODO maybe manage the false return
+                    if(!local.mkdirs())
+                        throw new IOException("local.mkdirs() returns false.");
                     recDownload( d, f.getId(), f.getTitle() );
                 }else{
                     log.info("File not recognized.");
