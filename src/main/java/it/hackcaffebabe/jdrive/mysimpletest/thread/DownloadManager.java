@@ -33,12 +33,11 @@ public class DownloadManager extends Thread {
                 msg = this.queue.take();
                 processIt(msg);
             } catch (InterruptedException e) {
-                log.info("Stop by Interruption.");
+                log.info("Interrupted Exception calling...");
+                //TODO IMPORTANT! check if queue is empty! if not flush it.
                 this.setRunning(false);
-                return;
             }
         }
-        log.info("Stop by terminate method invocation.");
     }
 
     public void processIt(String it){
