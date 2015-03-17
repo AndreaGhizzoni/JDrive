@@ -1,6 +1,5 @@
 bin/
 out/
-test_resources/
 log/
 build/reports
 build/classes
@@ -8,7 +7,8 @@ build/tmp
 build/dependency-cache
 build/test-results
 build/docs
-.idea/
 .gradle/
+.gradletasknamecache
 *.swp
 JDrive.iml
+.idea/*
