@@ -29,13 +29,14 @@ public class TestGoogleAPI {
             Configurator.getInstance().load();
 
             Drive d = GoogleLoginWithGUI();
-            recDownload(d, "root", null);
         }catch (IOException e){
             log.error(e.getMessage());
+        }catch (InterruptedException ie){
+            log.error(ie.getMessage());
         }
     }
 
-    public static Drive GoogleLoginWithGUI() throws IOException{
+    public static Drive GoogleLoginWithGUI() throws IOException, InterruptedException {
         GoogleAuthenticator g = GoogleAuthenticator.getInstance();
         Drive d = g.UIAuthentication();
         log.info("Service get.");

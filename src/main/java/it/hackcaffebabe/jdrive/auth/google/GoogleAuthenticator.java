@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import javax.swing.*;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /*
  * https://stackoverflow.com/questions/20684238/authorization-to-google-client
@@ -269,17 +270,17 @@ public final class GoogleAuthenticator
      * @return {@link Drive}
      * @throws IOException if there are errors in the authentication process.
      */
-    public Drive UIAuthentication() throws IOException {
+    public Drive UIAuthentication() throws IOException, InterruptedException {
         if(getStatus().equals(Status.UNAUTHORIZED)) {
-            GoogleAuthenticatorUI ui = new GoogleAuthenticatorUI(this);
+            LinkedBlockingQueue<String> fromUI = new LinkedBlockingQueue<String>();
+            GoogleAuthenticatorUI ui = new GoogleAuthenticatorUI(
+                    this.getAuthURL(),
+                    fromUI
+            );
             SwingUtilities.invokeLater(ui);
-            while (!ui.isProcessFinish()) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    log.error(e.getMessage());
-                }
-            }
+
+            String v = fromUI.take();
+            this.setAuthResponseCode(v);
         }
         return getService();
     }

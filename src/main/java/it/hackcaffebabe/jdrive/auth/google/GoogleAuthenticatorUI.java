@@ -2,7 +2,8 @@ package it.hackcaffebabe.jdrive.auth.google;
 
 import static javafx.concurrent.Worker.State.FAILED;
 import java.awt.*;
-import java.io.IOException;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -36,21 +37,23 @@ final class GoogleAuthenticatorUI implements Runnable
 
     // used for sync between UI e GoogleAuthenticator class
     // means when the user arrive to the page with authentication code.
-    public boolean isFinish = false;
-
-    private GoogleAuthenticator g;
+    public LinkedBlockingQueue<String> out;
+    public String url;
 
     /**
-     * Constructor for GoogleAuthenticator user interface.
-     * @param g {@link GoogleAuthenticator}
+     * GoogleAuthenticatorUI constructor.
+     * @param url {@link java.lang.String} authentication url to call.
+     * @param out {@link java.util.concurrent.LinkedBlockingQueue} blocking queue
+     *            to returns asynchronously the value from the web view.
      */
-    public GoogleAuthenticatorUI(GoogleAuthenticator g){
-        this.g = g;
+    public GoogleAuthenticatorUI(String url, LinkedBlockingQueue<String> out){
+        this.out = out;
+        this.url = url;
     }
 
     @Override
     public void run() {
-        String url = g.getAuthURL();
+        String url = this.url;
         if(url==null)
             return;
 
@@ -96,11 +99,6 @@ final class GoogleAuthenticatorUI implements Runnable
         });
     }
 
-    /* package method that allows GoogleAuthenticator class to poll the UI */
-    synchronized boolean isProcessFinish(){
-        return this.isFinish;
-    }
-
     /* utility method to load the url into the JavaFX main thread */
     private void loadURL(final String url) {
         Platform.runLater(new Runnable() {
@@ -128,12 +126,11 @@ final class GoogleAuthenticatorUI implements Runnable
                 if(e != null) {
                     String value = e.getAttribute("value");
                     log.debug("Value :" +value);
-                    try{
-                        g.setAuthResponseCode(value);
-                    }catch (IOException ex){
-                        log.error(ex.getMessage());
+                    try {
+                        out.put(value);
+                    } catch (InterruptedException e1) {
+                        log.error(e1.getMessage());
                     }
-                    isFinish = true;
                     frame.dispose();
                 }
             }
