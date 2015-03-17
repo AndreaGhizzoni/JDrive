@@ -34,16 +34,16 @@ public class WatcherTest
 //  TEST CASE UTIL METHOD
 //==============================================================================
     public Path getBasePath(){
-        Path base = WatcherUtil.getBase();
-        File f = base.toFile();
-        if(!f.exists() && !f.mkdir())
+//        Path base = WatcherUtil.getBase();
+//        File f = base.toFile();
+//        if(!f.exists() && !f.mkdir())
             return null;
-        return base;
+//        return base;
     }
 
     public Watcher retrieveTheWatcher(Path base){
         try {
-            return Watcher.getInstance(base);
+            return Watcher.getInstance();
         } catch (IOException e) {
             return null;
         }

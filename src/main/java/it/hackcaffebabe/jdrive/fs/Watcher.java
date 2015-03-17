@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.fs;
 
+import it.hackcaffebabe.jdrive.cfg.Configurator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,29 +28,18 @@ public final class Watcher implements Runnable
         ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
     };
 
+    // base path of the watcher
+    private static Path BASE;
+
     /**
      * Retrieve the instance of Watcher with the default base path.
      * @return {@link Watcher} instance.
      * @throws IOException if creation of watcher fail.
      */
     public static Watcher getInstance() throws IOException {
-        if(instance == null)
+        if(instance == null) {
             instance = new Watcher();
-        return instance;
-    }
-
-    /**
-     * Retrieve the instance of Watcher with a base path given. If Watcher is
-     * not instanced yet then the new instance will have the given base path,
-     * otherwise will be returned the instanced one.
-     * @param base {@link java.nio.file.Path} the base path of directory.
-     * @return {@link Watcher} instance.
-     * @throws IOException if creation of watcher fail.
-     */
-    public static Watcher getInstance( Path base ) throws IOException {
-        if(instance == null){
-            WatcherUtil.setBase(base);
-            instance = new Watcher();
+            BASE = Paths.get((String)Configurator.getInstance().get("base"));
         }
         return instance;
     }
@@ -102,7 +92,7 @@ public final class Watcher implements Runnable
     @Override
     public void run() {
         try {
-            registerTree(WatcherUtil.getBase());
+            registerTree(BASE);
             WatchKey key;
             WatchEvent.Kind<?> kind;
             Path filename;
