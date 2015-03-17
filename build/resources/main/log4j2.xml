@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="OFF">
+<!--
+- How to change the output level before to put in production?
+> change the level o every loggers into INFO
+
+-->
+<Configuration strict="true">
     <!-- List of properties -->
     <Properties>
         <Property name="logFileName">log</Property>
         <Property name="logFilePath">log/${logFileName}</Property>
-        <Property name="pattern">%d{HH:mm:ss yyyy-MM-dd} | %-5p | %t | %C{1}.%M: %m%n</Property>
+        <Property name="pattern">
+            %d{HH:mm:ss yyyy-MM-dd} | %-5p | %t | %C{1}.%M: %m%n
+        </Property>
     </Properties>
 
     <!-- List of appender, responsibly to display the log somewhere -->
@@ -23,15 +30,31 @@
         <Root level="error">
             <AppenderRef ref="Console"/>
         </Root>
+<!--
+================================================================================
+======= File Loggers
+================================================================================
+-->
+        <Logger name="fileLog" level="all" additivity="false">
+            <AppenderRef ref="File"/>
+        </Logger>
 
+<!--
+================================================================================
+======= Console Loggers
+================================================================================
+-->
+        <!-- logger for package it.hackcafffebabe.jdrive.mysimpletest -->
         <Logger name="MyTest" level="all" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
 
+        <!-- logger for package it.hackcafffebabe.jdrive.fs -->
         <Logger name="Watcher" level="all" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
 
+        <!-- logger for package it.hackcafffebabe.jdrive.auth.google -->
         <Logger name="GoogleAuthenticator" level="all" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
@@ -40,19 +63,15 @@
             <AppenderRef ref="Console"/>
         </Logger>
 
+        <!-- logger for package it.hackcafffebabe.jdrive.cfg -->
         <Logger name="Configurator" level="all" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
 
+        <!--  -->
         <Logger name="DownloadManager" level="all" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
 
-        <!--<Root level="error">-->
-            <!--<AppenderRef ref="File"/>-->
-        <!--</Root>-->
-        <Logger name="fileLog" level="all" additivity="false">
-            <AppenderRef ref="File"/>
-        </Logger>
     </Loggers>
 </Configuration>
