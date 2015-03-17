@@ -13,7 +13,15 @@ import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
  * http://docs.oracle.com/javase/tutorial/essential/io/notification.html
- * TODO add doc and examples
+ *
+ * How to use:
+ * <pre>{@code
+ * Paths.buildWorkingDirectory();
+ * Configurator.getInstance().load();
+ * Thread t = new Thread(Watcher.getInstance());
+ * t.start();
+ * }</pre>
+ *
  */
 public final class Watcher implements Runnable
 {
@@ -28,11 +36,13 @@ public final class Watcher implements Runnable
         ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
     };
 
-    // base path of the watcher
+    // watcher base path
     private static Path BASE;
 
     /**
      * Retrieve the instance of Watcher with the default base path.
+     * NB: Be sure that Configurator.getInstance().load() is called before to get
+     * this instance.
      * @return {@link Watcher} instance.
      * @throws IOException if creation of watcher fail.
      */
@@ -70,7 +80,9 @@ public final class Watcher implements Runnable
 //  GETTER
 //==============================================================================
     /**
-     * TODO add doc
+     * Synchronized method that returns the number of folder watched
+     * ( root included ).
+     * @return int number of folder.
      */
     public synchronized int getNumberFolderWatched(){
         log.debug(this.directories.size());
@@ -78,9 +90,9 @@ public final class Watcher implements Runnable
     }
 
     /**
-     * TODO add doc
-     * @param p
-     * @return
+     * Synchronized method tha check if given path is watched or not.
+     * @param p {@link java.nio.file.Path} path to check.
+     * @return true if path is watchd, false otherwise.
      */
     public synchronized boolean isPathWatched( Path p ){
         return this.directories.containsValue(p);
