@@ -19,7 +19,9 @@ import java.nio.file.Path;
  */
 public final class Configurator
 {
-    private static Logger log = LogManager.getLogger("Configurator");
+    private static Logger log = LogManager.getLogger(
+        Configurator.class.getSimpleName()
+    );
     private static Configurator instance;
 
     private File cfgFile;

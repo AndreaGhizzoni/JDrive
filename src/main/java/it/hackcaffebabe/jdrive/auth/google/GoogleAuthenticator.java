@@ -1,8 +1,6 @@
 package it.hackcaffebabe.jdrive.auth.google;
 
 import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import com.google.api.client.auth.oauth2.*;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -56,7 +54,7 @@ public final class GoogleAuthenticator
 {
     private static GoogleAuthenticator instance;
     private static final Logger log = LogManager.getLogger(
-            GoogleAuthenticator.class.getSimpleName()
+        GoogleAuthenticator.class.getSimpleName()
     );
 
     /**

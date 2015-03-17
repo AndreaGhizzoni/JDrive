@@ -24,7 +24,9 @@ import javax.swing.*;
  */
 final class GoogleAuthenticatorUI implements Runnable
 {
-    private static final Logger log = LogManager.getLogger("GoogleAuthenticatorUI");
+    private static final Logger log = LogManager.getLogger(
+        GoogleAuthenticatorUI.class.getSimpleName()
+    );
 
     private JFXPanel jfxPanel;
     private WebEngine engine;
