@@ -13,6 +13,8 @@ import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
  * http://docs.oracle.com/javase/tutorial/essential/io/notification.html
+ * Watcher class is a singleton Object that can detect event from a base path.
+ * The events that can detect are: create, delete and modify.
  *
  * How to use:
  * <pre>{@code

@@ -104,6 +104,9 @@ public final class Configurator
      * @return true if there wasn't that object with that key, false otherwise
      */
     public boolean put(String key, Object obj){
+        if(key == null || key.isEmpty())
+            return false;
+
         boolean hasOverride = exists(key);
         this.cfgProp.setProperty(key, obj);
         return hasOverride;

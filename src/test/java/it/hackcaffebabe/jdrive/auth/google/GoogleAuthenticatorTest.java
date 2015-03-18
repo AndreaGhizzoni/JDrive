@@ -1,9 +1,12 @@
 package it.hackcaffebabe.jdrive.auth.google;
 
+import it.hackcaffebabe.jdrive.Paths;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Files;
+
 import static it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator.Status;
 
 /**
@@ -13,6 +16,9 @@ public class GoogleAuthenticatorTest
 {
     @Test
     public void testGoogleAuthenticator(){
+        buildWD();
+        cleanTokenIfPresent();
+
         GoogleAuthenticator g = makeGA();
         Assert.assertNotNull("getInstance() not returns null", g);
 
@@ -48,6 +54,22 @@ public class GoogleAuthenticatorTest
 //==============================================================================
 //  TEST CASE UTIL METHOD
 //==============================================================================
+    public void buildWD(){
+        try {
+            it.hackcaffebabe.jdrive.Paths.buildWorkingDirectory();
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    public void cleanTokenIfPresent(){
+        try{
+            Files.delete(TokenConst.FILE.toPath());
+        }catch (IOException ioe){
+            Assert.fail(ioe.getMessage());
+        }
+    }
+
     private static boolean canSetInvalidAuthResponseCode( GoogleAuthenticator g,
                                                           String c){
         try {

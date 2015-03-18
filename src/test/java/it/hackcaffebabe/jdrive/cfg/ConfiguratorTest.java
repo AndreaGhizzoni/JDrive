@@ -31,9 +31,10 @@ public class ConfiguratorTest
         boolean pEK = c.put("",1);
         boolean ok = c.put("testing", 42);
 
-        Assert.assertFalse("Expecting false from put with null key.", pNK);
-        Assert.assertFalse("Expecting false from put with empty key.", pEK);
-        Assert.assertTrue("Expecting true from put with valid key.", ok);
+        Assert.assertFalse("Expecting false from put() with null key.", pNK);
+        Assert.assertFalse("Expecting false from put() with empty key.", pEK);
+        Assert.assertFalse("Expecting false from put() with valid key " +
+                "because does not exists before.", ok);
 
         Integer i = (Integer)c.get("testing");
         Assert.assertEquals("Expecting to retrieve the latest properties",
