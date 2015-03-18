@@ -84,9 +84,7 @@ public final class Configurator
     private void loadDefault(){
         log.info("Try to load default configuration...");
         try{
-            // create file ~/.jdrive/.jdrive.conf
-            Path p = java.nio.file.Paths.get(Paths.PATH_CFG);
-            Files.createFile(p);
+            Paths.createEmptyConfigurationFile();
 
             // load default settings from Default class
             for(Map.Entry<String, Object> i : Default.cfg.entrySet() ){
