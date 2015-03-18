@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
+import java.util.Map;
 
 /**
  * NB: this class needs his own basic folder in (user home)/.jdrive
@@ -36,14 +36,15 @@ public final class Configurator
         return instance;
     }
 
-    /**
-     * Basic empty constructor
-     */
+    /* Basic constructor */
     private Configurator(){
         //set config file to default
         this.cfgFile = new File(Paths.PATH_CFG);
     }
 
+//==============================================================================
+//  METHOD
+//==============================================================================
     /**
      * TODO add doc
      * @return
@@ -60,7 +61,7 @@ public final class Configurator
             return false;
         }
 
-        // if file exists the cfgProp already holds the map of values
+        // if file exists the cfgProp already holds the cfg of values
         if(!cfgFile.exists())
             loadDefault();
 
@@ -72,12 +73,14 @@ public final class Configurator
     private void loadDefault(){
         log.info("Try to load default configuration...");
         try{
+            // create file ~/.jdrive/.jdrive.conf
             Path p = java.nio.file.Paths.get(Paths.PATH_CFG);
             Files.createFile(p);
 
-            put("base", Default.BASE);
-            // add default settings here
-
+            // load default settings from Default class
+            for(Map.Entry<String, Object> i : Default.cfg.entrySet() ){
+                put(i.getKey(), i.getValue());
+            }
         }catch( FileAlreadyExistsException fae ){
             log.error(fae.getMessage());
         }catch( IOException ioe ){
@@ -87,23 +90,48 @@ public final class Configurator
     }
 
     /**
-     * Returns the value of the specific key given.
-     * @param key {@link java.lang.String} the key.
-     * @return {@link java.lang.Object} the object of specific key or null if
-     *                                  the key is null or not found.
+     * Check if given key is associated with existing value in the cfg.
+     * @param key {@link java.lang.String} the key as string.
+     * @return true if exists, otherwise false.
+     * @throws java.lang.IllegalStateException if load method is not called fist.
      */
-    public Object get(String key){
-        return this.cfgProp.getProperty(key);
+    public boolean exists(String key) throws IllegalStateException{
+        checkLoaded();
+        return get(key)!= null;
     }
 
+    /**
+     * Remove the value from key given.
+     * @param key {@link java.lang.String} the key  of properties
+     * @throws java.lang.IllegalStateException if load method is not called fist.
+     */
+    public void remove(String key) throws  IllegalStateException{
+        checkLoaded();
+        if(key != null && !key.isEmpty()) {
+            this.cfgProp.clearProperty(key);
+        }
+    }
+
+    // check if method load() is called.
+    private void checkLoaded() throws IllegalStateException{
+        if(this.cfgProp == null)
+            throw new IllegalStateException("Configuration File not loaded. " +
+                    "Call Configuration.getInstance().load() first.");
+    }
+
+//==============================================================================
+//  SETTER
+//==============================================================================
     /**
      * Put a new value into the configuration file. If this key already exists,
      * the value associated with will be replaced with the newest one.
      * @param key {@link java.lang.String} the key string
      * @param obj {@link java.lang.Object} to put
      * @return true if there wasn't that object with that key, false otherwise
+     * @throws java.lang.IllegalStateException if load method is not called fist.
      */
-    public boolean put(String key, Object obj){
+    public boolean put(String key, Object obj) throws IllegalStateException {
+        checkLoaded();
         if(key == null || key.isEmpty())
             return false;
 
@@ -112,22 +140,18 @@ public final class Configurator
         return hasOverride;
     }
 
+//==============================================================================
+//  GETTER
+//==============================================================================
     /**
-     * Check if given key is associated with existing value in the map.
-     * @param key {@link java.lang.String} the key as string.
-     * @return true if exists, otherwise false.
+     * Returns the value of the specific key given.
+     * @param key {@link java.lang.String} the key.
+     * @return {@link java.lang.Object} the object of specific key or null if
+     *                                  the key is null or not found.
+     * @throws java.lang.IllegalStateException if load method is not called fist.
      */
-    public boolean exists(String key){
-        return get(key)!= null;
-    }
-
-    /**
-     * Remove the value from key given.
-     * @param key {@link java.lang.String} the key  of properties
-     */
-    public void remove(String key){
-        if(key != null && !key.isEmpty()) {
-            this.cfgProp.clearProperty(key);
-        }
+    public Object get(String key) throws IllegalStateException{
+        checkLoaded();
+        return this.cfgProp.getProperty(key);
     }
 }
