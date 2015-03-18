@@ -15,7 +15,14 @@ import java.util.Map;
 
 /**
  * NB: this class needs his own basic folder in (user home)/.jdrive
- * TODO add description and HOW TO USE
+ *
+ * How to use:
+ * <pre>{@code
+ * Paths.buildWorkingDirectory(); // this class needs a folder (user home)/.jdrive
+ * Configuration c = Configuration.getInstance();
+ * c.load();
+ * String s = c.get("key");
+ * }</pre>
  */
 public final class Configurator
 {
@@ -46,8 +53,12 @@ public final class Configurator
 //  METHOD
 //==============================================================================
     /**
-     * TODO add doc
-     * @return
+     * Load data from configuration file in Paths.PATH_CFG. If this file exists,
+     * the configuration will be loaded from there, otherwise will be create a
+     * new file with the default configuration.
+     * @return true if configuration file will be successfully parsed, otherwise
+     * if load() method is called multiple times or loading defaults data rise an
+     * exception, will return false.
      */
     public boolean load(){
         if(this.cfgProp != null )
