@@ -30,8 +30,8 @@ final class Util
     }
 
     /**
-     * TODO add doc
-     * @param s
+     * Populate the StoredCredential object given.
+     * @param s {@link com.google.api.client.auth.oauth2.StoredCredential}
      */
     static void populateStoredCredential( StoredCredential s ) throws IOException {
         JsonParser p = new JsonFactory().createJsonParser(TokenConst.FILE);

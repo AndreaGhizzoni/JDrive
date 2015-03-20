@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Default values for configuration files.
+ * Default and required values for configuration files.
  */
 public final class Default
 {

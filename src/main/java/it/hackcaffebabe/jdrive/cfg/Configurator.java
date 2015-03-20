@@ -73,8 +73,11 @@ public final class Configurator
         }
 
         // if file exists the cfgProp already holds the cfg of values
-        if(!cfgFile.exists())
+        if(!cfgFile.exists()){
             loadDefault();
+        }else{
+            restoresDefaultIfNotPresents();
+        }
 
         return true;
     }
@@ -121,11 +124,27 @@ public final class Configurator
         }
     }
 
-    // check if method load() is called.
+    /*
+     * check if method load() is called.
+     */
     private void checkLoaded() throws IllegalStateException{
         if(this.cfgProp == null)
             throw new IllegalStateException("Configuration File not loaded. " +
                     "Call Configuration.getInstance().load() first.");
+    }
+
+    /*
+     * This method check if the required value are set in the configuration file.
+     * If not, restores the defaults.
+     */
+    private void restoresDefaultIfNotPresents(){
+        log.info("Check for minimum values are presents");
+        for(Map.Entry<String, Object> i : Default.cfg.entrySet()){
+            if(get(i.getKey()) == null) { //miss minimum value
+                log.error("Value for "+i.getKey()+" is missing: restoring default.");
+                put(i.getKey(), i.getValue());
+            }
+        }
     }
 
 //==============================================================================
@@ -146,6 +165,7 @@ public final class Configurator
 
         boolean hasOverride = exists(key);
         this.cfgProp.setProperty(key, obj);
+        log.info(key+" : "+obj.toString()+" loaded");
         return hasOverride;
     }
 
