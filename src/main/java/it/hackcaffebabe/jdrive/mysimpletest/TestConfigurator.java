@@ -19,7 +19,7 @@ public class TestConfigurator
             Configurator c = Configurator.getInstance();
             c.load();
 
-            log.debug("Base retried from cfg file is "+ c.get(Keys.WORKING_DIR));
+            log.debug("Base retried from cfg file is "+ c.get(Keys.WATCHED_DIR));
         }catch (Exception e){
             log.error(e.getMessage());
         }

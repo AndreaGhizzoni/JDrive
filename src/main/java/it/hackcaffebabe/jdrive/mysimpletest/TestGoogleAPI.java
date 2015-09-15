@@ -106,7 +106,7 @@ public class TestGoogleAPI {
         for( File f : fileList.getItems() ){
             // this is the local file
             java.io.File local;
-            Path base = java.nio.file.Paths.get( (String)Configurator.getInstance().get(Keys.WORKING_DIR) );
+            Path base = java.nio.file.Paths.get( (String)Configurator.getInstance().get(Keys.WATCHED_DIR) );
             if( localID == null ) { // means remoteID == root
                 local = new java.io.File(base.toFile(), f.getTitle());
             }else {

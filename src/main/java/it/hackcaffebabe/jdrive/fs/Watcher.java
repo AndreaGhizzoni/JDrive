@@ -52,7 +52,7 @@ public final class Watcher implements Runnable
     public static Watcher getInstance() throws IOException {
         if(instance == null) {
             instance = new Watcher();
-            BASE = Paths.get((String)Configurator.getInstance().get(Keys.WORKING_DIR));
+            BASE = Paths.get((String)Configurator.getInstance().get(Keys.WATCHED_DIR));
         }
         return instance;
     }

@@ -5,5 +5,5 @@ package it.hackcaffebabe.jdrive.cfg;
  */
 public final class Keys {
     // key of configuration file for the working directory of Watcher class
-    public static final String WORKING_DIR = "working_dir";
+    public static final String WATCHED_DIR = "watched_dir";
 }

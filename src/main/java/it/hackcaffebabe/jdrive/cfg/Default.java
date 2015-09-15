@@ -19,7 +19,7 @@ public class Default
     // map of default configuration
     public static final Map<String, Object> cfg = new HashMap<String, Object>();
     static{
-        cfg.put(Keys.WORKING_DIR, USER_HOME + SEP + "Google Drive");
+        cfg.put(Keys.WATCHED_DIR, USER_HOME + SEP + "Google Drive");
 
         // add default settings here
     }
