@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.mysimpletest;
+package it.hackcaffebabe.jdrive.z_testingstuff;
 
 import com.google.api.client.http.FileContent;
 import com.google.api.client.http.GenericUrl;

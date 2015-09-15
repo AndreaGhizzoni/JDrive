@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.mysimpletest;
+package it.hackcaffebabe.jdrive.z_testingstuff;
 
 import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.util.PathsUtil;

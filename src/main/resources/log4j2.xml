@@ -44,7 +44,7 @@
 ======= Console Loggers
 ================================================================================
 -->
-        <!-- logger for package it.hackcafffebabe.jdrive.mysimpletest -->
+        <!-- logger for package it.hackcafffebabe.jdrive.z_testingstuff -->
         <Logger name="MyTest" level="all" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>

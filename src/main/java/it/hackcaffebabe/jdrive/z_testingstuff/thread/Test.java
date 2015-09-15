@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.mysimpletest.thread;
+package it.hackcaffebabe.jdrive.z_testingstuff.thread;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
