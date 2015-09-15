@@ -1,6 +1,7 @@
 package it.hackcaffebabe.jdrive.fs;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
+import it.hackcaffebabe.jdrive.cfg.Keys;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,7 +52,7 @@ public final class Watcher implements Runnable
     public static Watcher getInstance() throws IOException {
         if(instance == null) {
             instance = new Watcher();
-            BASE = Paths.get((String)Configurator.getInstance().get("base"));
+            BASE = Paths.get((String)Configurator.getInstance().get(Keys.WORKING_DIR));
         }
         return instance;
     }
@@ -94,7 +95,7 @@ public final class Watcher implements Runnable
     /**
      * Synchronized method tha check if given path is watched or not.
      * @param p {@link java.nio.file.Path} path to check.
-     * @return true if path is watchd, false otherwise.
+     * @return true if path is watched, false otherwise.
      */
     public synchronized boolean isPathWatched( Path p ){
         return this.directories.containsValue(p);

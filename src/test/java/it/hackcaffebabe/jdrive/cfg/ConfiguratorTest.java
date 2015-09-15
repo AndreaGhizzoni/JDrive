@@ -25,8 +25,8 @@ public class ConfiguratorTest
         Object e = c.get("");
         Assert.assertNull("Expecting to retrieve null object from empty key.", e);
 
-        String b = (String)c.get("base");
-        Assert.assertEquals("Expecting the same base path.", Default.cfg.get("base"), b);
+        String b = (String)c.get(Keys.WORKING_DIR);
+        Assert.assertEquals("Expecting the same base path.", Default.cfg.get(Keys.WORKING_DIR), b);
 
         boolean pNK = c.put(null,1);
         boolean pEK = c.put("",1);

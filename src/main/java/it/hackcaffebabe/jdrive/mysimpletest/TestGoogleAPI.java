@@ -7,6 +7,7 @@ import com.google.api.client.util.IOUtils;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
@@ -105,7 +106,7 @@ public class TestGoogleAPI {
         for( File f : fileList.getItems() ){
             // this is the local file
             java.io.File local;
-            Path base = java.nio.file.Paths.get( (String)Configurator.getInstance().get("base") );
+            Path base = java.nio.file.Paths.get( (String)Configurator.getInstance().get(Keys.WORKING_DIR) );
             if( localID == null ) { // means remoteID == root
                 local = new java.io.File(base.toFile(), f.getTitle());
             }else {

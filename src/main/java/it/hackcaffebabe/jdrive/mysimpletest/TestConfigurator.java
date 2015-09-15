@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.mysimpletest;
 
+import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import org.apache.logging.log4j.LogManager;
@@ -18,7 +19,7 @@ public class TestConfigurator
             Configurator c = Configurator.getInstance();
             c.load();
 
-            log.debug("Base retried from cfg file is "+ c.get("base"));
+            log.debug("Base retried from cfg file is "+ c.get(Keys.WORKING_DIR));
         }catch (Exception e){
             log.error(e.getMessage());
         }
