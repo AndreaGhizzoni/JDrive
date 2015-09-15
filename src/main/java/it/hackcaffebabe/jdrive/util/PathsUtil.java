@@ -16,7 +16,7 @@ public class PathsUtil
      * @throws IOException if make new directory fail.
      */
     public static void buildWorkingDirectory() throws IOException{
-        Path p = java.nio.file.Paths.get(Default.APP_CGF_FILE);
+        Path p = java.nio.file.Paths.get(Default.APP_HOME);
         Files.createDirectories(p);
     }
 
