@@ -44,14 +44,14 @@ public final class Configurator
     /* Basic constructor */
     private Configurator(){
         //set config file to default
-        this.cfgFile = new File(PathsUtil.PATH_CFG);
+        this.cfgFile = new File(Default.APP_CGF_FILE);
     }
 
 //==============================================================================
 //  METHOD
 //==============================================================================
     /**
-     * Load data from configuration file in Paths.PATH_CFG. If this file exists,
+     * Load data from configuration file in Paths.APP_CGF_FILE. If this file exists,
      * the configuration will be loaded from there, otherwise will be create a
      * new file with the default configuration.
      * @return true if configuration file will be successfully parsed, otherwise
