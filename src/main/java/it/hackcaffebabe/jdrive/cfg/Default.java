@@ -1,6 +1,6 @@
 package it.hackcaffebabe.jdrive.cfg;
 
-import it.hackcaffebabe.jdrive.Paths;
+import it.hackcaffebabe.jdrive.util.Paths;
 import java.util.HashMap;
 import java.util.Map;
 

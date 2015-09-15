@@ -1,6 +1,6 @@
 package it.hackcaffebabe.jdrive.cfg;
 
-import it.hackcaffebabe.jdrive.Paths;
+import it.hackcaffebabe.jdrive.util.Paths;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.logging.log4j.LogManager;
@@ -9,8 +9,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 
 /**

@@ -1,6 +1,6 @@
 package it.hackcaffebabe.jdrive.auth.google;
 
-import it.hackcaffebabe.jdrive.Paths;
+import it.hackcaffebabe.jdrive.util.Paths;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -56,7 +56,7 @@ public class GoogleAuthenticatorTest
 //==============================================================================
     public void buildWD(){
         try {
-            it.hackcaffebabe.jdrive.Paths.buildWorkingDirectory();
+            Paths.buildWorkingDirectory();
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }

@@ -1,6 +1,6 @@
 package it.hackcaffebabe.jdrive.auth.google;
 
-import it.hackcaffebabe.jdrive.Paths;
+import it.hackcaffebabe.jdrive.util.Paths;
 
 import java.io.File;
 

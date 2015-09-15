@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive;
+package it.hackcaffebabe.jdrive.util;
 
 import java.io.IOException;
 import java.nio.file.Files;

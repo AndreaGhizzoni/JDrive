@@ -1,6 +1,6 @@
 package it.hackcaffebabe.jdrive.mysimpletest;
 
-import it.hackcaffebabe.jdrive.Paths;
+import it.hackcaffebabe.jdrive.util.Paths;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.Watcher;
 import org.apache.logging.log4j.LogManager;
