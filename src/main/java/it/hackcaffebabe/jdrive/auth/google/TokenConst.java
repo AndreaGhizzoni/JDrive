@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.auth.google;
 
+import it.hackcaffebabe.jdrive.cfg.Default;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 
 import java.io.File;
@@ -20,5 +21,5 @@ public final class TokenConst
     public static final String JSON_AC = "at";
     public static final String JSON_RT = "rt";
 
-    public static final File FILE = new File(PathsUtil.PATH_APP+ PathsUtil.SEP+"t.json");
+    public static final File FILE = new File(Default.APP_HOME + Default.SEP + "t.json");
 }
