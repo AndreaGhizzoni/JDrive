@@ -4,7 +4,11 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.google.api.client.auth.oauth2.StoredCredential;
+import it.hackcaffebabe.jdrive.cfg.Configurator;
+import it.hackcaffebabe.jdrive.cfg.Default;
+import it.hackcaffebabe.jdrive.cfg.Keys;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,7 +38,7 @@ final class Util
      * @param s {@link com.google.api.client.auth.oauth2.StoredCredential}
      */
     static void populateStoredCredential( StoredCredential s ) throws IOException {
-        JsonParser p = new JsonFactory().createJsonParser(TokenConst.FILE);
+        JsonParser p = new JsonFactory().createJsonParser(Default.G_TOKEN);
 
         String fieldName;
         while (p.nextToken() != JsonToken.END_OBJECT) {

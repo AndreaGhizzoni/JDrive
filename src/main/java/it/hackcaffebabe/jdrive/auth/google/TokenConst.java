@@ -20,6 +20,4 @@ public final class TokenConst
     // json stuff to save the authentication token
     public static final String JSON_AC = "at";
     public static final String JSON_RT = "rt";
-
-    public static final File FILE = new File(Default.APP_HOME + Default.SEP + "t.json");
 }

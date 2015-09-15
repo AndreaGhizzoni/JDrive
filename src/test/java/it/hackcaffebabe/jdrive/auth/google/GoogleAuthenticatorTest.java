@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.auth.google;
 
+import it.hackcaffebabe.jdrive.cfg.Default;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -64,8 +65,8 @@ public class GoogleAuthenticatorTest
 
     public void cleanTokenIfPresent(){
         try{
-            if(TokenConst.FILE.exists())
-                Files.delete(TokenConst.FILE.toPath());
+            if(Default.G_TOKEN.exists())
+                Files.delete(Default.G_TOKEN.toPath());
         }catch (IOException ioe){
             Assert.fail(ioe.getMessage());
         }

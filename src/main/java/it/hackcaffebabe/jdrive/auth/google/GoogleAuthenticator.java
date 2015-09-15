@@ -13,6 +13,7 @@ import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import it.hackcaffebabe.jdrive.cfg.Default;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -113,13 +114,13 @@ public final class GoogleAuthenticator
 
     /* store the user credential */
     private void storeCredential() throws IOException{
-        if(TokenConst.FILE.exists() && !TokenConst.FILE.delete())
+        if(Default.G_TOKEN.exists() && !Default.G_TOKEN.delete())
             throw new IOException("Error while deleting old authentication token.");
 
         log.info("Store credential called: try to store...");
         com.fasterxml.jackson.core.JsonGenerator j = new
                 com.fasterxml.jackson.core.JsonFactory().createGenerator(
-                TokenConst.FILE, JsonEncoding.UTF8 );
+                Default.G_TOKEN, JsonEncoding.UTF8 );
 
         StoredCredential c = this.store.get(TokenConst.TOKEN_NAME);
         j.writeStartObject();// {
@@ -135,7 +136,7 @@ public final class GoogleAuthenticator
 
     /* load the stored credential */
     private void loadCredential() throws  IOException{
-        if(!TokenConst.FILE.exists())
+        if(!Default.G_TOKEN.exists())
             return;
 
         log.info("Credential found: try to load...");
