@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive;
 
+import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,6 +21,10 @@ public class Launcher {
         }catch(IOException ioE){
             fatal(ioE.getMessage(), ioE);
         }
+
+        boolean cfgOK = Configurator.getInstance().load();
+        if( !cfgOK )
+            fatal("Configurator Error. Program Exit.", null);
     }
 
 //==============================================================================
