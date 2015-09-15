@@ -1,6 +1,6 @@
 package it.hackcaffebabe.jdrive.cfg;
 
-import it.hackcaffebabe.jdrive.util.Paths;
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.logging.log4j.LogManager;
@@ -44,7 +44,7 @@ public final class Configurator
     /* Basic constructor */
     private Configurator(){
         //set config file to default
-        this.cfgFile = new File(Paths.PATH_CFG);
+        this.cfgFile = new File(PathsUtil.PATH_CFG);
     }
 
 //==============================================================================
@@ -85,7 +85,7 @@ public final class Configurator
     private void loadDefault(){
         log.info("Try to load default configuration...");
         try{
-            Paths.createEmptyConfigurationFile();
+            PathsUtil.createEmptyConfigurationFile();
 
             // load default settings from Default class
             for(Map.Entry<String, Object> i : Default.cfg.entrySet() ){

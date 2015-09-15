@@ -1,7 +1,7 @@
 package it.hackcaffebabe.jdrive.fs;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
-import it.hackcaffebabe.jdrive.util.Paths;
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import java.io.*;
@@ -30,7 +30,7 @@ public class WatcherTest
 //==============================================================================
     public void buildWD(){
         try {
-            Paths.buildWorkingDirectory();
+            PathsUtil.buildWorkingDirectory();
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }

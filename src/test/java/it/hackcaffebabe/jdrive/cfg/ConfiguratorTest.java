@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.cfg;
 
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -49,7 +50,7 @@ public class ConfiguratorTest
     // create a method to build working directory
     public void buildWD(){
         try {
-            it.hackcaffebabe.jdrive.util.Paths.buildWorkingDirectory();
+            PathsUtil.buildWorkingDirectory();
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
@@ -58,7 +59,7 @@ public class ConfiguratorTest
     // create a method to clean the working directory
     public void cleanWD(){
         try {
-            Files.delete(Paths.get(it.hackcaffebabe.jdrive.util.Paths.PATH_CFG));
+            Files.delete(Paths.get(PathsUtil.PATH_CFG));
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }

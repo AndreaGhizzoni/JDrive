@@ -1,6 +1,6 @@
 package it.hackcaffebabe.jdrive.cfg;
 
-import it.hackcaffebabe.jdrive.util.Paths;
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +12,7 @@ public final class Default
     public static final Map<String, Object> cfg = new HashMap<String, Object>();
 
     static{
-        cfg.put("base", Paths.USER_HOME+Paths.SEP+"Google Drive");
+        cfg.put("base", PathsUtil.USER_HOME+ PathsUtil.SEP+"Google Drive");
 
         // add default settings here
     }

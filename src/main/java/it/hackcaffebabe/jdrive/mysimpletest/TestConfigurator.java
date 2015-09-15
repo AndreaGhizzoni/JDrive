@@ -1,6 +1,6 @@
 package it.hackcaffebabe.jdrive.mysimpletest;
 
-import it.hackcaffebabe.jdrive.util.Paths;
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +14,7 @@ public class TestConfigurator
 
     public static void main( String...args){
         try{
-            Paths.buildWorkingDirectory();
+            PathsUtil.buildWorkingDirectory();
             Configurator c = Configurator.getInstance();
             c.load();
 

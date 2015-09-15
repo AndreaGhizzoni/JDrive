@@ -7,7 +7,7 @@ import java.nio.file.Path;
 /**
  * Utility class to provide the basic path of the program
  */
-public class Paths
+public class PathsUtil
 {
     public static final String USER_HOME = System.getProperty("user.home");
     public static final String SEP = System.getProperty("file.separator");
@@ -31,7 +31,7 @@ public class Paths
      */
     public static void createEmptyConfigurationFile() throws IOException {
         // create file ~/.jdrive/.jdrive.conf
-        Path p = java.nio.file.Paths.get(Paths.PATH_CFG);
+        Path p = java.nio.file.Paths.get(PathsUtil.PATH_CFG);
         Files.createFile(p);
     }
 }
