@@ -75,37 +75,37 @@ public final class Watcher implements Runnable
         Files.walkFileTree(start, new WatchServiceAdder() );
     }
 
-    /* register the single path given as argument under the watcher service. */
-    private void registerPath(Path path) throws IOException {
-        WatchKey key = path.register(this.watcher, mod);
-        directories.put(key, path);
-        log.debug(String.format("Path %s saved by watcher.", path));
-    }
+//    /* register the single path given as argument under the watcher service. */
+//    private void registerPath(Path path) throws IOException {
+//        WatchKey key = path.register(this.watcher, mod);
+//        directories.put(key, path);
+//        log.debug(String.format("Path %s saved by watcher.", path));
+//    }
 
     /* create or update the Watcher data file in working directory. */
     private void updateWatcherDataFile() throws IOException {
         Path timeStampFile = WATCHED_DIR.resolve(".jwatch");
         if( !timeStampFile.toFile().exists() ) {
             timeStampFile = Files.createFile(timeStampFile);
+            log.info("New watched folder found.");
         }
 
         BufferedReader in = new BufferedReader(new FileReader(
                 timeStampFile.toFile()));
         String lineRead = in.readLine();
-        if( lineRead != null ) { // file is not empty read the last update
+        in.close();
+        if( lineRead != null ) { // file is not empty
             String d = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss")
-                            .format(new Date(Long.valueOf(lineRead)));
-            in.close();
-            log.info("Last update since "+d);
-        }else{ // if file is empty write the timestamp
-            in.close();
-            BufferedWriter out = new BufferedWriter(new FileWriter(
-                    timeStampFile.toFile()));
-            out.write( String.valueOf( new Date().getTime() ));
-            out.newLine();
-            out.close();
-            log.info("New watched folder found.");
+                    .format(new Date(Long.valueOf(lineRead)));
+            log.info("Last update since " + d);
         }
+
+        // then write the timestamp
+        BufferedWriter out = new BufferedWriter(new FileWriter(
+                timeStampFile.toFile()));
+        out.write( String.valueOf( new Date().getTime() ));
+        out.newLine();
+        out.close();
     }
 
 //==============================================================================
@@ -200,8 +200,15 @@ public final class Watcher implements Runnable
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes a)
                 throws IOException {
-            registerPath(dir);
+            this.registerPath(dir);
             return FileVisitResult.CONTINUE;
+        }
+
+        /* register the single path given as argument under the watcher service. */
+        private void registerPath(Path path) throws IOException {
+            WatchKey key = path.register(watcher, mod);
+            directories.put(key, path);
+            log.debug(String.format("Path %s saved by watcher.", path));
         }
     }
 }
