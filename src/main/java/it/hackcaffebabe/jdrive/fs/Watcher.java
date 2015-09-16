@@ -5,9 +5,12 @@ import it.hackcaffebabe.jdrive.cfg.Keys;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -40,7 +43,7 @@ public final class Watcher implements Runnable
     };
 
     // watcher base path
-    private static Path BASE;
+    private static Path WATCHED_DIR;
 
     /**
      * Retrieve the instance of Watcher with the default base path.
@@ -52,7 +55,9 @@ public final class Watcher implements Runnable
     public static Watcher getInstance() throws IOException {
         if(instance == null) {
             instance = new Watcher();
-            BASE = Paths.get((String)Configurator.getInstance().get(Keys.WATCHED_DIR));
+            WATCHED_DIR = Paths.get((String)Configurator.getInstance().get(Keys.WATCHED_DIR));
+            if( !WATCHED_DIR.toFile().exists() )
+                Files.createDirectories(WATCHED_DIR);
         }
         return instance;
     }
@@ -76,7 +81,17 @@ public final class Watcher implements Runnable
     private void registerPath(Path path) throws IOException {
         WatchKey key = path.register(this.watcher, mod);
         directories.put(key, path);
-        log.info(String.format("Path %s saved by watcher.",path));
+        log.debug(String.format("Path %s saved by watcher.",path));
+    }
+
+    /* create or update the Watcher data file in working directory. */
+    private void updateWatcherDataFile( Path root ) throws IOException {
+        Path timeStampFile = java.nio.file.Paths.get(".jwatch");
+        if( !timeStampFile.toFile().exists() )
+            timeStampFile = Files.createFile(timeStampFile);
+        BufferedWriter out = new BufferedWriter(new FileWriter(timeStampFile.toFile()));
+        out.write( String.valueOf( new Date().getTime() ) );
+        out.close();
     }
 
 //==============================================================================
@@ -107,7 +122,7 @@ public final class Watcher implements Runnable
     @Override
     public void run() {
         try {
-            registerTree(BASE);
+            registerTree(WATCHED_DIR);
             WatchKey key;
             WatchEvent.Kind<?> kind;
             Path filename;

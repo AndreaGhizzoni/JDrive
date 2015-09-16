@@ -1,6 +1,7 @@
 package it.hackcaffebabe.jdrive;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
+import it.hackcaffebabe.jdrive.fs.Watcher;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,13 +19,22 @@ public class Launcher {
     public static void main( String... args ){
         try{
             PathsUtil.buildWorkingDirectory();
-        }catch(IOException ioE){
+        }catch( IOException ioE ){
             fatal(ioE.getMessage(), ioE);
         }
 
         boolean cfgOK = Configurator.getInstance().load();
         if( !cfgOK )
             fatal("Configurator Error. Program Exit.", null);
+
+        try{
+            Thread watcherThread = new Thread(Watcher.getInstance());
+            watcherThread.start();
+            Thread.sleep(10 * 1000); // debug purpose
+
+        }catch( Exception ex ){
+            fatal(ex.getMessage(), ex);
+        }
     }
 
 //==============================================================================

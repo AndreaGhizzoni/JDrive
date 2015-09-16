@@ -45,6 +45,7 @@ public final class Configurator
     private Configurator(){
         //set config file to default
         this.cfgFile = new File(Default.APP_CGF_FILE);
+        log.info("Configuration init");
     }
 
 //==============================================================================
@@ -74,7 +75,7 @@ public final class Configurator
         if(!cfgFile.exists()){
             loadDefault();
         }else{
-            restoresDefaultIfNotPresents();
+            loadConfigurationFromFile();
         }
 
         return true;
@@ -83,18 +84,32 @@ public final class Configurator
     /* this method is used to create a new configuration file if NOT EXISTS
      * whit default configuration*/
     private void loadDefault(){
-        log.info("Try to load default configuration...");
+        log.info("User configuration not Found. Try to load default...");
         try{
             PathsUtil.createEmptyConfigurationFile();
-
             // load default settings from Default class
             for(Map.Entry<String, Object> i : Default.cfg.entrySet() ){
                 put(i.getKey(), i.getValue());
             }
+            log.info("Configuration file create and loaded properly.");
         }catch( FileAlreadyExistsException fae ){
             log.error(fae.getMessage());
         }catch( IOException ioe ){
             log.error(ioe.getMessage());
+        }
+    }
+
+    /*
+     * This method check if the required value are set in the configuration file.
+     * If not, restores the defaults.
+     */
+    private void loadConfigurationFromFile(){
+        log.info("User configuration Found. Try to load...");
+        for(Map.Entry<String, Object> i : Default.cfg.entrySet()){
+            if(get(i.getKey()) == null) { //miss minimum value
+                log.error("Value for \""+i.getKey()+"\" is missing: restoring default.");
+                put(i.getKey(), i.getValue());
+            }
         }
         log.info("Configuration file create and loaded properly.");
     }
@@ -131,20 +146,6 @@ public final class Configurator
                     "Call Configuration.getInstance().load() first.");
     }
 
-    /*
-     * This method check if the required value are set in the configuration file.
-     * If not, restores the defaults.
-     */
-    private void restoresDefaultIfNotPresents(){
-        log.info("Check for minimum values are presents");
-        for(Map.Entry<String, Object> i : Default.cfg.entrySet()){
-            if(get(i.getKey()) == null) { //miss minimum value
-                log.error("Value for "+i.getKey()+" is missing: restoring default.");
-                put(i.getKey(), i.getValue());
-            }
-        }
-    }
-
 //==============================================================================
 //  SETTER
 //==============================================================================
@@ -163,7 +164,7 @@ public final class Configurator
 
         boolean hasOverride = exists(key);
         this.cfgProp.setProperty(key, obj);
-        log.info(key+" : "+obj.toString()+" loaded");
+        log.debug("Loaded > Key: "+key+" : \""+obj.toString()+"\"");
         return hasOverride;
     }
 

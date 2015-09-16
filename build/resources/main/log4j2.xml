@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-- How to change the output level before to put in production?
+- How to change the output level, before put in production?
 > change the level o every loggers into INFO
 
 -->
@@ -44,8 +44,17 @@
 ======= Console Loggers
 ================================================================================
 -->
-        <!-- logger for package it.hackcafffebabe.jdrive.mysimpletest -->
+        <!-- logger for package it.hackcafffebabe.jdrive.z_testingstuff -->
         <Logger name="MyTest" level="all" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="DownloadManager" level="all" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- logger for package it.hackcafffebabe.jdrive -->
+        <Logger name="Launcher" level="all" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
 
@@ -65,11 +74,6 @@
 
         <!-- logger for package it.hackcafffebabe.jdrive.cfg -->
         <Logger name="Configurator" level="all" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-
-        <!--  -->
-        <Logger name="DownloadManager" level="all" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
 
