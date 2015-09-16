@@ -30,8 +30,7 @@ public class Launcher {
         try{
             Thread watcherThread = new Thread(Watcher.getInstance());
             watcherThread.start();
-            Thread.sleep(10 * 1000); // debug purpose
-
+            Thread.sleep(1000); // debug purpose
         }catch( Exception ex ){
             fatal(ex.getMessage(), ex);
         }
