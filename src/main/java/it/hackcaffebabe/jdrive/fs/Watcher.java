@@ -45,6 +45,7 @@ public final class Watcher implements Runnable
     // watcher base path
     private static Path WATCHED_DIR;
     private static Path WATCHED_DATA_FILE;
+    private static final String WATCHED_DATA_FILE_NAME = ".jwatch";
 
     /**
      * Retrieve the instance of Watcher with the default base path.
@@ -64,7 +65,7 @@ public final class Watcher implements Runnable
     private Watcher() throws IOException{
         this.watcher = FileSystems.getDefault().newWatchService();
         WATCHED_DIR = PathsUtil.createWatchedDirectory();
-        WATCHED_DATA_FILE = WATCHED_DIR.resolve(".jwatch");
+        WATCHED_DATA_FILE = WATCHED_DIR.resolve(WATCHED_DATA_FILE_NAME);
         log.info("Watch Service retrieved correctly from FS.");
     }
 
@@ -147,8 +148,7 @@ public final class Watcher implements Runnable
                     //get the filename for the event
                     filename = ((WatchEvent<Path>) watchEvent).context();
                     // if file detected is .jwatch, skip it
-                    if( filename.toFile().getName()
-                            .equals(WATCHED_DATA_FILE.toFile().getName()))
+                    if( filename.toFile().getName().equals(WATCHED_DATA_FILE_NAME) )
                         continue;
                     //handle OVERFLOW event
                     if( kind.equals(OVERFLOW) )
