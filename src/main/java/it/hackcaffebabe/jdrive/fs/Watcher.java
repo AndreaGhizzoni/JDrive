@@ -44,6 +44,7 @@ public final class Watcher implements Runnable
 
     // watcher base path
     private static Path WATCHED_DIR;
+    private static Path WATCHED_DATA_FILE;
 
     /**
      * Retrieve the instance of Watcher with the default base path.
@@ -63,6 +64,7 @@ public final class Watcher implements Runnable
     private Watcher() throws IOException{
         this.watcher = FileSystems.getDefault().newWatchService();
         WATCHED_DIR = PathsUtil.createWatchedDirectory();
+        WATCHED_DATA_FILE = WATCHED_DIR.resolve(".jwatch");
         log.info("Watch Service retrieved correctly from FS.");
     }
 
@@ -75,23 +77,15 @@ public final class Watcher implements Runnable
         Files.walkFileTree(start, new WatchServiceAdder() );
     }
 
-//    /* register the single path given as argument under the watcher service. */
-//    private void registerPath(Path path) throws IOException {
-//        WatchKey key = path.register(this.watcher, mod);
-//        directories.put(key, path);
-//        log.debug(String.format("Path %s saved by watcher.", path));
-//    }
-
     /* create or update the Watcher data file in working directory. */
     private void updateWatcherDataFile() throws IOException {
-        Path timeStampFile = WATCHED_DIR.resolve(".jwatch");
-        if( !timeStampFile.toFile().exists() ) {
-            timeStampFile = Files.createFile(timeStampFile);
+        if( !WATCHED_DATA_FILE.toFile().exists() ) {
+            WATCHED_DATA_FILE = Files.createFile(WATCHED_DATA_FILE);
             log.info("New watched folder found.");
         }
 
         BufferedReader in = new BufferedReader(new FileReader(
-                timeStampFile.toFile()));
+                WATCHED_DATA_FILE.toFile()));
         String lineRead = in.readLine();
         in.close();
         if( lineRead != null ) { // file is not empty
@@ -102,7 +96,7 @@ public final class Watcher implements Runnable
 
         // then write the timestamp
         BufferedWriter out = new BufferedWriter(new FileWriter(
-                timeStampFile.toFile()));
+                WATCHED_DATA_FILE.toFile()));
         out.write( String.valueOf( new Date().getTime() ));
         out.newLine();
         out.close();
@@ -152,20 +146,24 @@ public final class Watcher implements Runnable
 
                     //get the filename for the event
                     filename = ((WatchEvent<Path>) watchEvent).context();
-
+                    // if file detected is .jwatch, skip it
+                    if( filename.toFile().getName()
+                            .equals(WATCHED_DATA_FILE.toFile().getName()))
+                        continue;
                     //handle OVERFLOW event
                     if( kind.equals(OVERFLOW) )
                         continue;
 
                     Path child = directories.get(key).resolve(filename);
-                    // if child == .jwatch -> continue. Change not detected for this file
-
                     log.info(kind+" -> "+child+" at "+child.toFile().lastModified());
                     //handle CREATE event
                     if( kind == ENTRY_CREATE ){
                         if(Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS))
                             registerTree(child);
                     }
+
+                    // update the .jwatch data file
+                    updateWatcherDataFile();
                 }
 
                 boolean valid = key.reset();
@@ -173,9 +171,6 @@ public final class Watcher implements Runnable
                 if( !valid ){
                     directories.remove(key);
                 }
-
-                // update the .jwatch data file
-                updateWatcherDataFile();
             }
 
         }catch(InterruptedException inter){
