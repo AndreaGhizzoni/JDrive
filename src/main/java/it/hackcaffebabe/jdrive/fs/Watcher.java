@@ -54,9 +54,6 @@ public final class Watcher implements Runnable
     public static Watcher getInstance() throws IOException {
         if(instance == null) {
             instance = new Watcher();
-            WATCHED_DIR = Paths.get((String)Configurator.getInstance().get(Keys.WATCHED_DIR));
-            if( !WATCHED_DIR.toFile().exists() )
-                Files.createDirectories(WATCHED_DIR);
         }
         return instance;
     }
@@ -64,6 +61,9 @@ public final class Watcher implements Runnable
     /* Constructor method. IOException if newWatchService() fail. */
     private Watcher() throws IOException{
         this.watcher = FileSystems.getDefault().newWatchService();
+        WATCHED_DIR = Paths.get((String)Configurator.getInstance().get(Keys.WATCHED_DIR));
+        if( !WATCHED_DIR.toFile().exists() )
+            Files.createDirectories(WATCHED_DIR);
         log.info("Watch Service retrieved correctly from FS.");
     }
 
@@ -73,7 +73,6 @@ public final class Watcher implements Runnable
     /* method to walk down a path given recursively and meanwhile register all
     * the directory */
     private void registerTree(Path start) throws IOException {
-        updateWatcherDataFile(start);
         Files.walkFileTree(start, new WatchServiceAdder() );
     }
 
@@ -85,22 +84,24 @@ public final class Watcher implements Runnable
     }
 
     /* create or update the Watcher data file in working directory. */
-    private void updateWatcherDataFile( Path root ) throws IOException {
-        Path timeStampFile = root.resolve(".jwatch");
+    private void updateWatcherDataFile() throws IOException {
+        Path timeStampFile = WATCHED_DIR.resolve(".jwatch");
         if( !timeStampFile.toFile().exists() ) {
             timeStampFile = Files.createFile(timeStampFile);
         }
 
-        BufferedReader in = new BufferedReader(new FileReader(timeStampFile.toFile()));
+        BufferedReader in = new BufferedReader(new FileReader(
+                timeStampFile.toFile()));
         String lineRead = in.readLine();
         if( lineRead != null ) { // file is not empty read the last update
-            long l = Long.valueOf(lineRead);
-            String d = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss").format(new Date(l));
+            String d = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss")
+                            .format( new Date( Long.valueOf(lineRead) ) );
             in.close();
             log.info("Last update since "+d);
         }else{ // if file is empty write the timestamp
             in.close();
-            BufferedWriter out = new BufferedWriter(new FileWriter(timeStampFile.toFile()));
+            BufferedWriter out = new BufferedWriter(new FileWriter(
+                    timeStampFile.toFile()));
             out.write( String.valueOf( new Date().getTime() ));
             out.newLine();
             out.close();
@@ -136,6 +137,7 @@ public final class Watcher implements Runnable
     @Override
     public void run() {
         try {
+            updateWatcherDataFile();
             registerTree(WATCHED_DIR);
             WatchKey key;
             WatchEvent.Kind<?> kind;
@@ -171,6 +173,9 @@ public final class Watcher implements Runnable
                 if( !valid ){
                     directories.remove(key);
                 }
+
+                // update the .jwatch data file
+                updateWatcherDataFile();
             }
 
         }catch(InterruptedException inter){
