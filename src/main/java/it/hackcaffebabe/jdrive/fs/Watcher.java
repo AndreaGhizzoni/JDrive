@@ -1,7 +1,5 @@
 package it.hackcaffebabe.jdrive.fs;
 
-import it.hackcaffebabe.jdrive.cfg.Configurator;
-import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
