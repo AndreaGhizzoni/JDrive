@@ -26,7 +26,7 @@ public class TestGoogleAPI {
 
     public static void main(String[] args){
         try{
-            PathsUtil.buildWorkingDirectory();
+            PathsUtil.createApplicationHomeDirectory();
             Configurator.getInstance().load();
 
             Drive d = GoogleLoginWithGUI();

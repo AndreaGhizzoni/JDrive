@@ -2,6 +2,7 @@ package it.hackcaffebabe.jdrive.fs;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,7 +22,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
  *
  * How to use:
  * <pre>{@code
- * Paths.buildWorkingDirectory();
+ * Paths.createApplicationHomeDirectory();
  * Configurator.getInstance().load();
  * Thread t = new Thread(Watcher.getInstance());
  * t.start();
@@ -61,9 +62,7 @@ public final class Watcher implements Runnable
     /* Constructor method. IOException if newWatchService() fail. */
     private Watcher() throws IOException{
         this.watcher = FileSystems.getDefault().newWatchService();
-        WATCHED_DIR = Paths.get((String)Configurator.getInstance().get(Keys.WATCHED_DIR));
-        if( !WATCHED_DIR.toFile().exists() )
-            Files.createDirectories(WATCHED_DIR);
+        WATCHED_DIR = PathsUtil.createWatchedDirectory();
         log.info("Watch Service retrieved correctly from FS.");
     }
 
@@ -95,7 +94,7 @@ public final class Watcher implements Runnable
         String lineRead = in.readLine();
         if( lineRead != null ) { // file is not empty read the last update
             String d = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss")
-                            .format( new Date( Long.valueOf(lineRead) ) );
+                            .format(new Date(Long.valueOf(lineRead)));
             in.close();
             log.info("Last update since "+d);
         }else{ // if file is empty write the timestamp
@@ -159,6 +158,7 @@ public final class Watcher implements Runnable
                         continue;
 
                     Path child = directories.get(key).resolve(filename);
+                    // if child == .jwatch -> continue. Change not detected for this file
 
                     log.info(kind+" -> "+child+" at "+child.toFile().lastModified());
                     //handle CREATE event

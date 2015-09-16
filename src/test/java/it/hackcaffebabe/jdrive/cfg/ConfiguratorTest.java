@@ -50,7 +50,7 @@ public class ConfiguratorTest
     // create a method to build working directory
     public void buildWD(){
         try {
-            PathsUtil.buildWorkingDirectory();
+            PathsUtil.createApplicationHomeDirectory();
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }

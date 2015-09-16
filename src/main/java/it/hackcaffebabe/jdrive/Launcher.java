@@ -18,7 +18,7 @@ public class Launcher {
 
     public static void main( String... args ){
         try{
-            PathsUtil.buildWorkingDirectory();
+            PathsUtil.createApplicationHomeDirectory();
         }catch( IOException ioE ){
             fatal(ioE.getMessage(), ioE);
         }

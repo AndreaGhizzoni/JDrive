@@ -16,7 +16,7 @@ import java.util.Map;
  *
  * How to use:
  * <pre>{@code
- * Paths.buildWorkingDirectory(); // this class needs a folder (user home)/.jdrive
+ * Paths.createApplicationHomeDirectory(); // this class needs a folder (user home)/.jdrive
  * Configuration c = Configuration.getInstance();
  * c.load();
  * String s = c.get("key");
@@ -164,7 +164,7 @@ public final class Configurator
 
         boolean hasOverride = exists(key);
         this.cfgProp.setProperty(key, obj);
-        log.debug("Loaded > Key: "+key+" : \""+obj.toString()+"\"");
+        log.debug("Loaded > Key: " + key + " : \"" + obj.toString() + "\"");
         return hasOverride;
     }
 
