@@ -144,6 +144,12 @@ public class DetectedObject {
 //==============================================================================
     @Override
     public String toString(){
-        return "TODO";
+        StringBuilder b = new StringBuilder();
+        b.append("{");
+        b.append(" \"kind\": ").append("\"").append(getKind().toString()).append("\"").append(",");
+        b.append(" \"path\": ").append("\"").append(getPathAsString()).append("\"").append(",");
+        b.append(" \"lastModify \": ").append("\"").append(getLastModify()).append("\"");
+        b.append("}");
+        return b.toString();
     }
 }
