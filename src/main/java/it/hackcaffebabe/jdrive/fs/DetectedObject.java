@@ -9,7 +9,7 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 
 /**
- * Object created by Watcher class when a changing of File System is detected.
+ * Object created by Watcher class when a detect a change of File System.
  */
 public class DetectedObject {
     // -1 not set/error, 0 creation, 1 modify, 2 delete
@@ -17,8 +17,17 @@ public class DetectedObject {
     private String filePath = null;
     private long lastModify = -1L;
 
+    /**
+     * Create an empty DetectedObject
+     */
     public DetectedObject(){}
 
+    /**
+     * Create a DetectedObject.
+     * @param kind {@link java.nio.file.WatchEvent.Kind} the Kind of event.
+     * @param filePath {@link java.lang.String} the path of changing object.
+     * @param lastModify {@link java.lang.Long} the timestamp of last modify.
+     */
     public DetectedObject(WatchEvent.Kind kind, String filePath, long lastModify) {
         setKind(kind);
         setDetectedObject(filePath);
@@ -28,6 +37,10 @@ public class DetectedObject {
 //==============================================================================
 //  SETTER
 //==============================================================================
+    /**
+     * Set the Kind of detection.
+     * @param kind {@link java.nio.file.WatchEvent.Kind} the kind of detection.
+     */
     public void setKind( WatchEvent.Kind kind ) {
         if( kind.equals(StandardWatchEventKinds.OVERFLOW) )
             this.kindOfEvent = -1;
@@ -39,31 +52,54 @@ public class DetectedObject {
             this.kindOfEvent = 2;
     }
 
+    /**
+     * Set the Detected Object from Watcher in String format.
+     * If pass null or empty string, noting will set.
+     * @param filePath {@link java.lang.String} in string format.
+     */
     public void setDetectedObject( String filePath ) {
-        if( filePath == null || filePath.isEmpty() )
-            this.filePath = null;
-        else
+        if( filePath != null && !filePath.isEmpty() )
             this.filePath = filePath;
     }
 
+    /**
+     * Set the Detected Object from Watcher in File format.
+     * If file passing is null, nothing will set.
+     * @param file {@link java.io.File} in File format.
+     */
     public void setDetectedObject( File file ){
         if( file != null )
             this.filePath = file.getAbsolutePath();
     }
 
+    /**
+     * Set the Detected Object from Watcher in Path format.
+     * If path passing is null, nothing will set.
+     * @param path {@link java.nio.file.Path} in Path format.
+     */
     public void setDetectedObject( Path path ){
         if( path != null )
             this.filePath = path.toFile().getAbsolutePath();
     }
 
+    /**
+     * Set the last modify of Detected Object by Watcher.
+     * If lastModify passing is <= 0, nothing will set.
+     * @param lastModify {@link java.lang.Long} in long format.
+     */
     public void setLastModify(long lastModify) {
-        if( lastModify >= 0L )
+        if( lastModify > 0L )
             this.lastModify = lastModify;
     }
 
 //==============================================================================
 //  GETTER
 //==============================================================================
+    /**
+     * Return the kind of change detected. Returns null if kind of event set
+     * is not ENTRY_CREATE, ENTRY_MODIFY or ENTRY_DELETE.
+     * @return {@link java.nio.file.WatchEvent.Kind} the kind of change.
+     */
     public WatchEvent.Kind getKind() {
         switch (this.kindOfEvent){
             case -1: return null;
@@ -74,14 +110,31 @@ public class DetectedObject {
         }
     }
 
+    /**
+     * @return {@link java.lang.String} representation of detected object
+     * by watcher.
+     */
     public String getPathAsString(){ return this.filePath; }
 
+    /**
+     * @return {@link java.nio.file.Path} representation of detected object by
+     * watcher.
+     */
     public Path getPath(){ return Paths.get( this.getPathAsString() ); }
 
+    /**
+     * @return {@link java.io.File} representation of detected object by watcher.
+     */
     public File getFile(){ return this.getPath().toFile(); }
 
+    /**
+     * @return {@link java.lang.Long} the last modify of detected object.
+     */
     public long getLastModify(){ return lastModify; }
 
+    /**
+     * @return {@link java.lang.String} representation of last modify.
+     */
     public String getLastModifyAsString(){
         return DateUtils.fromLongToString( this.getLastModify(), null );
     }
