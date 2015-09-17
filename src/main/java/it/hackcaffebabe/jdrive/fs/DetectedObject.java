@@ -42,7 +42,9 @@ public class DetectedObject {
      * @param kind {@link java.nio.file.WatchEvent.Kind} the kind of detection.
      */
     public void setKind( WatchEvent.Kind kind ) {
-        if( kind.equals(StandardWatchEventKinds.OVERFLOW) )
+        if( kind == null )
+            this.kindOfEvent = -1;
+        else if( kind.equals(StandardWatchEventKinds.OVERFLOW) )
             this.kindOfEvent = -1;
         else if( kind.equals(StandardWatchEventKinds.ENTRY_CREATE))
             this.kindOfEvent = 0;
