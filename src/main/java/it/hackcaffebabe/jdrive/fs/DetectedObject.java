@@ -122,7 +122,13 @@ public class DetectedObject {
      * @return {@link java.nio.file.Path} representation of detected object by
      * watcher.
      */
-    public Path getPath(){ return Paths.get( this.getPathAsString() ); }
+    public Path getPath(){
+        String p = this.getPathAsString();
+        if( p == null )
+            return  null;
+        else
+            return Paths.get( p );
+    }
 
     /**
      * @return {@link java.io.File} representation of detected object by watcher.
