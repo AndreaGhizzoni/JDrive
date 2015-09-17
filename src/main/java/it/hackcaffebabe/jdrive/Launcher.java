@@ -1,12 +1,14 @@
 package it.hackcaffebabe.jdrive;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
+import it.hackcaffebabe.jdrive.fs.DetectedObject;
 import it.hackcaffebabe.jdrive.fs.Watcher;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * JDrive Application Launcher
@@ -28,9 +30,18 @@ public class Launcher {
             fatal("Configurator Error. Program Exit.", null);
 
         try{
-            Thread watcherThread = new Thread(Watcher.getInstance());
+            LinkedBlockingQueue<DetectedObject> lbq = new LinkedBlockingQueue<DetectedObject>();
+            Watcher w = Watcher.getInstance();
+            w.setDispatchingQueue(lbq);
+
+            Thread watcherThread = new Thread(w);
             watcherThread.start();
-            Thread.sleep(1000); // debug purpose
+
+            DetectedObject detObj;
+            while(true){
+                detObj = lbq.take();
+                log.debug(detObj.toString());
+            }
         }catch( Exception ex ){
             fatal(ex.getMessage(), ex);
         }

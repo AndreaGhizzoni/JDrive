@@ -12,6 +12,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
@@ -33,10 +35,6 @@ public final class Watcher implements Runnable
     private static final Logger log = LogManager.getLogger(
         Watcher.class.getSimpleName()
     );
-
-    private static Watcher instance;
-    private WatchService watcher;
-    private final Map<WatchKey, Path> directories = new HashMap<WatchKey,Path>();
     private static final WatchEvent.Kind[] mod = {
         ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
     };
@@ -45,6 +43,12 @@ public final class Watcher implements Runnable
     private static Path WATCHED_DIR;
     private static Path WATCHED_DATA_FILE;
     private static final String WATCHED_DATA_FILE_NAME = ".jwatch";
+
+
+    private static Watcher instance;
+    private WatchService watcher;
+    private final Map<WatchKey, Path> directories = new HashMap<WatchKey,Path>();
+    private LinkedBlockingQueue<DetectedObject> dispatchingQueue;
 
     /**
      * Retrieve the instance of Watcher with the default base path.
@@ -102,6 +106,18 @@ public final class Watcher implements Runnable
     }
 
 //==============================================================================
+//  SETTER
+//==============================================================================
+    /**
+     * Set the dispatching queue for all the events detected by Watcher.
+     * @param dq {@link java.util.concurrent.LinkedBlockingQueue} of
+     * {@link it.hackcaffebabe.jdrive.fs.DetectedObject}
+     */
+    public void setDispatchingQueue( LinkedBlockingQueue<DetectedObject> dq ){
+        this.dispatchingQueue = dq;
+    }
+
+//==============================================================================
 //  GETTER
 //==============================================================================
     /**
@@ -129,11 +145,15 @@ public final class Watcher implements Runnable
     @Override
     public void run() {
         try {
+            if( this.dispatchingQueue == null )
+                throw new InterruptedException("Dispatch Queue missing.");
+
             updateWatcherDataFile();
             registerTree(WATCHED_DIR);
             WatchKey key;
             WatchEvent.Kind<?> kind;
             Path filename;
+            DetectedObject detObj = null;
             while( true ){
                 //retrieve and remove the next watch key
                 key = this.watcher.take();
@@ -153,7 +173,14 @@ public final class Watcher implements Runnable
                         continue;
 
                     Path child = directories.get(key).resolve(filename);
-                    log.info(kind+" -> "+child+" at "+child.toFile().lastModified());
+                    detObj = new DetectedObject(
+                        kind,
+                        child.toFile().getAbsolutePath(),
+                        child.toFile().lastModified()
+                    );
+//                    log.debug(detObj.toString());
+                    this.dispatchingQueue.put(detObj);
+
                     //handle CREATE event
                     if( kind == ENTRY_CREATE ){
                         if(Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS))
@@ -172,7 +199,7 @@ public final class Watcher implements Runnable
             }
 
         }catch(InterruptedException inter){
-            log.error("Watcher interrupted. Exit.");
+            log.error(inter.getMessage()+". Exit.");
         }catch(IOException ioe){
             log.error("IOException Exit. "+ioe.getMessage());
         }finally {
@@ -188,7 +215,7 @@ public final class Watcher implements Runnable
 //==============================================================================
 //  INNER CLASS
 //==============================================================================
-    /* inner class that walk down a given path and register all the folder. */
+    /* inner class that walk down a given path and register all the folder.*/
     private class WatchServiceAdder extends SimpleFileVisitor<Path> {
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes a)
@@ -197,7 +224,7 @@ public final class Watcher implements Runnable
             return FileVisitResult.CONTINUE;
         }
 
-        /* register the single path given as argument under the watcher service. */
+        /* register the single path given as argument under the watcher service*/
         private void registerPath(Path path) throws IOException {
             WatchKey key = path.register(watcher, mod);
             directories.put(key, path);
