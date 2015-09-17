@@ -1,5 +1,7 @@
 package it.hackcaffebabe.jdrive.fs;
 
+import it.hackcaffebabe.jdrive.util.DateUtils;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -72,13 +74,17 @@ public class DetectedObject {
         }
     }
 
-    public String getPathAsString() { return this.filePath; }
+    public String getPathAsString(){ return this.filePath; }
 
     public Path getPath(){ return Paths.get( this.getPathAsString() ); }
 
     public File getFile(){ return this.getPath().toFile(); }
 
-    public long getLastModify() { return lastModify; }
+    public long getLastModify(){ return lastModify; }
+
+    public String getLastModifyAsString(){
+        return DateUtils.fromLongToString( this.getLastModify(), null );
+    }
 
 //==============================================================================
 //  OVERRIDE

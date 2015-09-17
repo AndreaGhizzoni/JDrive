@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.fs;
 
+import it.hackcaffebabe.jdrive.util.DateUtils;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,8 +89,7 @@ public final class Watcher implements Runnable
         String lineRead = in.readLine();
         in.close();
         if( lineRead != null ) { // file is not empty
-            String d = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss")
-                    .format(new Date(Long.valueOf(lineRead)));
+            String d = DateUtils.fromLongToString( Long.valueOf(lineRead), null);
             log.info("Last update since " + d);
         }
 
