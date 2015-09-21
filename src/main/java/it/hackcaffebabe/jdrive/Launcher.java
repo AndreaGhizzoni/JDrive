@@ -29,6 +29,8 @@ public class Launcher {
         if( !cfgOK )
             fatal("Configurator Error. Program Exit.", null);
 
+        // TODO insert here Google Authentication process
+
         try{
             LinkedBlockingQueue<DetectedObject> lbq = new LinkedBlockingQueue<DetectedObject>();
             Watcher w = Watcher.getInstance();
