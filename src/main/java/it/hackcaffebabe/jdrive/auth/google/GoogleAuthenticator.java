@@ -87,7 +87,7 @@ public final class GoogleAuthenticator
         this.buildHTTPTransportJsonFactory();
         this.buildDataStore();
         this.buildGoogleAuthCodeFlow();
-        log.info("Instance created correctly.");
+        log.debug("GoogleAuthenticator created correctly.");
     }
 
 //==============================================================================
@@ -120,7 +120,7 @@ public final class GoogleAuthenticator
         if(Default.G_TOKEN.exists() && !Default.G_TOKEN.delete())
             throw new IOException("Error while deleting old authentication token.");
 
-        log.info("Store credential called: try to store...");
+        log.debug("Store credential called: try to store...");
         com.fasterxml.jackson.core.JsonGenerator j = new
                 com.fasterxml.jackson.core.JsonFactory().createGenerator(
                 Default.G_TOKEN, JsonEncoding.UTF8 );
@@ -134,7 +134,7 @@ public final class GoogleAuthenticator
         j.writeEndObject();// }
         j.flush();
         j.close();
-        log.info("Credential stored.");
+        log.debug("Credential stored.");
     }
 
     /* load the stored credential */
@@ -163,13 +163,13 @@ public final class GoogleAuthenticator
                     public void onTokenResponse(
                             Credential credential,
                             TokenResponse tokenResponse) throws IOException {
-                        log.info("Refresh listener: token response.");
+                        log.debug("Refresh listener: token response.");
                     }
                     @Override
                     public void onTokenErrorResponse(
                             Credential credential,
                             TokenErrorResponse tokenErrorResponse) throws IOException {
-                        log.error("Refresh listener: token response error.");
+                        log.debug("Refresh listener: token response error.");
                     }
                 })
                 .build();
@@ -260,6 +260,8 @@ public final class GoogleAuthenticator
      * @throws IOException or UnAuthorizeException
      */
     public Drive getService() throws IOException {
+        log.info("Try to call Google authentication services...");
+
         if(getStatus().equals(Status.UNAUTHORIZED)) {
             throw new UnAuthorizeException("User not authenticate. Use " +
                     "getAuthURL() to get the authentication url.");
@@ -267,17 +269,17 @@ public final class GoogleAuthenticator
 
         GoogleCredential cred = makeGoogleCredential();
         if(this.store.containsKey(AuthenticationConst.TOKEN_NAME)){
-            log.info("Token present into the store.");
+            log.debug("Token present into the store.");
             StoredCredential sc = this.store.get(AuthenticationConst.TOKEN_NAME);
             cred.setAccessToken(sc.getAccessToken());
             cred.setRefreshToken(sc.getRefreshToken());
         }else{
-            log.info("Token not present into the store.");
+            log.debug("Token not present into the store.");
             cred.setFromTokenResponse(this.tokenResponse);
             cred.setAccessToken(AuthenticationConst.ACCESS_TOKEN);
             this.store.set(AuthenticationConst.TOKEN_NAME, new StoredCredential(cred));
             this.storeCredential();
-            log.info("Token stored.");
+            log.debug("Token stored.");
         }
 
         if(service == null) {
@@ -286,6 +288,8 @@ public final class GoogleAuthenticator
                     .setApplicationName(AuthenticationConst.APP_NAME)
                     .build();
         }
+
+        log.info("Google authentication Success.");
         setStatus(Status.AUTHORIZE);
         return this.service;
     }
