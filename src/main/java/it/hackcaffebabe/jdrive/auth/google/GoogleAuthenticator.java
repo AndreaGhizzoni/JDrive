@@ -99,7 +99,8 @@ public final class GoogleAuthenticator
 
     /* build up the data store and load stored credential if the are any */
     private void buildDataStore() throws IOException{
-        this.store = new MemoryDataStoreFactory().getDataStore(GoogleConst.STORE_NAME);
+        this.store = new MemoryDataStoreFactory()
+                .getDataStore(AuthenticationConst.STORE_NAME);
         loadCredential();
     }
 
@@ -122,11 +123,11 @@ public final class GoogleAuthenticator
                 com.fasterxml.jackson.core.JsonFactory().createGenerator(
                 Default.G_TOKEN, JsonEncoding.UTF8 );
 
-        StoredCredential c = this.store.get(GoogleConst.TOKEN_NAME);
+        StoredCredential c = this.store.get(AuthenticationConst.TOKEN_NAME);
         j.writeStartObject();// {
 
-        j.writeStringField(GoogleConst.JSON_AC, c.getAccessToken());
-        j.writeStringField(GoogleConst.JSON_RT, c.getRefreshToken());
+        j.writeStringField(AuthenticationConst.JSON_AC, c.getAccessToken());
+        j.writeStringField(AuthenticationConst.JSON_RT, c.getRefreshToken());
 
         j.writeEndObject();// }
         j.flush();
@@ -142,7 +143,7 @@ public final class GoogleAuthenticator
         log.info("Credential found: try to load...");
         StoredCredential s = new StoredCredential(makeGoogleCredential());
         Util.populateStoredCredential(s);
-        this.store.set(GoogleConst.TOKEN_NAME, s);
+        this.store.set(AuthenticationConst.TOKEN_NAME, s);
         setStatus(Status.AUTHORIZE);
         log.info("Credential loaded.");
     }
@@ -239,23 +240,24 @@ public final class GoogleAuthenticator
         }
 
         GoogleCredential cred = makeGoogleCredential();
-        if(this.store.containsKey(GoogleConst.TOKEN_NAME)){
+        if(this.store.containsKey(AuthenticationConst.TOKEN_NAME)){
             log.info("Token present into the store.");
-            StoredCredential sc = this.store.get(GoogleConst.TOKEN_NAME);
+            StoredCredential sc = this.store.get(AuthenticationConst.TOKEN_NAME);
             cred.setAccessToken(sc.getAccessToken());
             cred.setRefreshToken(sc.getRefreshToken());
         }else{
             log.info("Token not present into the store.");
             cred.setFromTokenResponse(this.tokenResponse);
-            cred.setAccessToken(GoogleConst.ACCESS_TOKEN);
-            this.store.set(GoogleConst.TOKEN_NAME, new StoredCredential(cred));
+            cred.setAccessToken(AuthenticationConst.ACCESS_TOKEN);
+            this.store.set(AuthenticationConst.TOKEN_NAME, new StoredCredential(cred));
             this.storeCredential();
             log.info("Token stored.");
         }
 
         if(service == null) {
             this.service = new Drive.Builder(this.httpTransport,
-                    this.jsonFactory, cred).setApplicationName(Util.APP_NAME)
+                    this.jsonFactory, cred)
+                    .setApplicationName(AuthenticationConst.APP_NAME)
                     .build();
         }
         setStatus(Status.AUTHORIZE);

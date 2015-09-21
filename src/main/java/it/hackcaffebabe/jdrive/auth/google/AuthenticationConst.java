@@ -6,4 +6,17 @@ final class AuthenticationConst
                                          "7qhoodggrd.apps.googleusercontent.com";
     static final String CLIENT_SECRET = "TR7FU-rJxK1JQTo69ILuksEG";
     static final String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
+
+    public static final String APP_NAME = "JDrive";
+
+    // key of the token into DataStore
+    public static final String TOKEN_NAME = "token";
+    // name of the DataStore
+    public static final String STORE_NAME = "storeCredential";
+    // name of access token
+    public static final String ACCESS_TOKEN = "access_token";
+
+    // json stuff to save the authentication token
+    public static final String JSON_AC = "at";
+    public static final String JSON_RT = "rt";
 }

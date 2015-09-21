@@ -15,8 +15,6 @@ import java.net.URL;
  */
 final class Util
 {
-    public static final String APP_NAME = "JDrive";
-
     /**
      * Convert a string in {@link URL}.
      * @param str {@link String}
@@ -40,12 +38,12 @@ final class Util
         String fieldName;
         while (p.nextToken() != JsonToken.END_OBJECT) {
             fieldName = p.getCurrentName();
-            if(GoogleConst.JSON_AC.equals(fieldName)){
+            if(AuthenticationConst.JSON_AC.equals(fieldName)){
                 p.nextToken();
                 s.setAccessToken(p.getText());
             }
 
-            if(GoogleConst.JSON_RT.equals(fieldName)){
+            if(AuthenticationConst.JSON_RT.equals(fieldName)){
                 p.nextToken();
                 s.setRefreshToken(p.getText());
             }
