@@ -2,6 +2,8 @@ package it.hackcaffebabe.jdrive.auth.google;
 
 import static javafx.concurrent.Worker.State.FAILED;
 import java.awt.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javafx.application.Platform;
@@ -103,12 +105,25 @@ final class GoogleAuthenticatorUI implements Runnable
     private void loadURL(final String url) {
         Platform.runLater(new Runnable() {
             @Override public void run() {
-                String tmp = Util.toURL(url);
+                String tmp = toURL(url);
                 if (tmp == null)
-                    tmp = Util.toURL("http://" + url);
+                    tmp = toURL("http://" + url);
                 engine.load(tmp);
             }
         });
+    }
+
+    /*
+     * Convert a string in {@link URL}.
+     * @param str {@link String}
+     * @return the URL of null if MalformedURLException is thrown.
+     */
+    private static String toURL( String str ) {
+        try {
+            return new URL(str).toExternalForm();
+        } catch (MalformedURLException exception) {
+            return null;
+        }
     }
 
 //==============================================================================

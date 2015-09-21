@@ -1,6 +1,7 @@
 package it.hackcaffebabe.jdrive.auth.google;
 
 import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonToken;
 import com.google.api.client.auth.oauth2.*;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -8,6 +9,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.JsonParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.DataStore;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
@@ -142,7 +144,7 @@ public final class GoogleAuthenticator
 
         log.info("Credential found: try to load...");
         StoredCredential s = new StoredCredential(makeGoogleCredential());
-        Util.populateStoredCredential(s);
+        this.populateStoredCredential(s);
         this.store.set(AuthenticationConst.TOKEN_NAME, s);
         setStatus(Status.AUTHORIZE);
         log.info("Credential loaded.");
@@ -171,6 +173,30 @@ public final class GoogleAuthenticator
                     }
                 })
                 .build();
+    }
+
+    /*
+     * Populate the StoredCredential object given.
+     * @param s {@link com.google.api.client.auth.oauth2.StoredCredential}
+     */
+    private void populateStoredCredential( StoredCredential s ) throws IOException {
+        com.fasterxml.jackson.core.JsonParser p = new com.fasterxml.jackson
+                .core.JsonFactory().createJsonParser(Default.G_TOKEN);
+
+        String fieldName;
+        while (p.nextToken() != JsonToken.END_OBJECT) {
+            fieldName = p.getCurrentName();
+            if(AuthenticationConst.JSON_AC.equals(fieldName)){
+                p.nextToken();
+                s.setAccessToken(p.getText());
+            }
+
+            if(AuthenticationConst.JSON_RT.equals(fieldName)){
+                p.nextToken();
+                s.setRefreshToken(p.getText());
+            }
+        }
+        p.close();
     }
 
 //==============================================================================
