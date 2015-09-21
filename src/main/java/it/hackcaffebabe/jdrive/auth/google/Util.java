@@ -4,11 +4,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.google.api.client.auth.oauth2.StoredCredential;
-import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Default;
-import it.hackcaffebabe.jdrive.cfg.Keys;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -43,12 +40,12 @@ final class Util
         String fieldName;
         while (p.nextToken() != JsonToken.END_OBJECT) {
             fieldName = p.getCurrentName();
-            if(TokenConst.JSON_AC.equals(fieldName)){
+            if(GoogleConst.JSON_AC.equals(fieldName)){
                 p.nextToken();
                 s.setAccessToken(p.getText());
             }
 
-            if(TokenConst.JSON_RT.equals(fieldName)){
+            if(GoogleConst.JSON_RT.equals(fieldName)){
                 p.nextToken();
                 s.setRefreshToken(p.getText());
             }

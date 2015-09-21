@@ -8,7 +8,7 @@ import java.io.File;
 /**
  * Class to hold all the Google token constant.
  */
-public final class TokenConst
+public final class GoogleConst
 {
     // key of the token into DataStore
     public static final String TOKEN_NAME = "token";
