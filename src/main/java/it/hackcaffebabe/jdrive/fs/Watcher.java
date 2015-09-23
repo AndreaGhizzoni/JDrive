@@ -153,7 +153,7 @@ public final class Watcher implements Runnable
             WatchKey key;
             WatchEvent.Kind<?> kind;
             Path pathFileDetected;
-            DetectedObject detObj = null;
+            DetectedObject detObj;
             while( true ){
                 //retrieve and remove the next watch key
                 key = this.watcher.take();
@@ -162,9 +162,9 @@ public final class Watcher implements Runnable
                 for( WatchEvent<?> watchEvent : key.pollEvents() ) {
                     //get the kind of event (create, modify, delete)
                     kind = watchEvent.kind();
-
                     //get the pathFileDetected for the event
                     pathFileDetected = ((WatchEvent<Path>) watchEvent).context();
+
                     // if file detected is .jwatch, skip it
                     if( pathFileDetected.toFile().getName().equals(WATCHED_DATA_FILE_NAME) )
                         continue;
