@@ -37,12 +37,12 @@ class WatcherCache {
         if( !cacheFile.toFile().exists() ) {
             Files.createFile(cacheFile);
             log.debug("Cache file created successfully.");
-        }else{
-            loadCache();
         }
+        loadCache();
     }
 
     private void loadCache() throws IOException{
+        log.debug("Try to load cache file.");
         BufferedReader br = new BufferedReader( new FileReader(cacheFile.toFile()) );
         StringBuilder b = new StringBuilder();
 
@@ -59,6 +59,9 @@ class WatcherCache {
         if( !json.isEmpty() ) {
             Type type = new TypeToken<Map<String, String>>(){}.getType();
             this.cache = new Gson().fromJson(json, type);
+            log.debug("cache: "+json);
+        }else{
+            log.debug("cache empty.");
         }
     }
 
@@ -87,6 +90,7 @@ class WatcherCache {
             fw.append(this.toString());
             fw.flush();
             fw.close();
+            log.debug("Cache flushed correctly");
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
