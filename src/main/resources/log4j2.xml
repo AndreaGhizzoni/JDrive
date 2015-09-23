@@ -63,6 +63,14 @@
             <AppenderRef ref="Console"/>
         </Logger>
 
+        <Logger name="WatcherCache" level="all" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="Syncer" level="all" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
         <!-- logger for package it.hackcafffebabe.jdrive.auth.google -->
         <Logger name="GoogleAuthenticator" level="all" additivity="false">
             <AppenderRef ref="Console"/>
