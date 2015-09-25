@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.fs;
+package it.hackcaffebabe.jdrive.fs.watcher;
 
 import java.nio.file.Path;
 import java.util.Set;

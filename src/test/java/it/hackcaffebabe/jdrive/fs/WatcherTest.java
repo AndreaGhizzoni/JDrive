@@ -2,6 +2,7 @@ package it.hackcaffebabe.jdrive.fs;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
+import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * Test case for {@link it.hackcaffebabe.jdrive.fs.Watcher}
+ * Test case for {@link it.hackcaffebabe.jdrive.fs.watcher.Watcher}
  */
 public class WatcherTest
 {

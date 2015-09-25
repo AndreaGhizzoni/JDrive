@@ -2,7 +2,7 @@ package it.hackcaffebabe.jdrive;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.DetectedObject;
-import it.hackcaffebabe.jdrive.fs.Watcher;
+import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

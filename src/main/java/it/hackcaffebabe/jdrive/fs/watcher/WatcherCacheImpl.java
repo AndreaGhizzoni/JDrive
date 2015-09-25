@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.fs;
+package it.hackcaffebabe.jdrive.fs.watcher;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

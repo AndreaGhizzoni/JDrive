@@ -1,5 +1,6 @@
-package it.hackcaffebabe.jdrive.fs;
+package it.hackcaffebabe.jdrive.fs.watcher;
 
+import it.hackcaffebabe.jdrive.fs.DetectedObject;
 import it.hackcaffebabe.jdrive.util.DateUtils;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
@@ -8,10 +9,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static java.nio.file.StandardWatchEventKinds.*;
