@@ -1,7 +1,8 @@
-package it.hackcaffebabe.jdrive.fs;
+package it.hackcaffebabe.jdrive.fs.watcher;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
+import it.hackcaffebabe.jdrive.fs.DetectedObject;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.junit.Assert;
