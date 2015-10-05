@@ -10,6 +10,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -45,6 +46,8 @@ public final class Watcher implements Runnable
 
     private static Watcher instance;
     private WatchService watcher;
+    private final HashMap<WatchKey, Path> directories = new HashMap<>();
+
     private LinkedBlockingQueue<DetectedObject> dispatchingQueue;
     private WatcherCache cache;
 
@@ -78,6 +81,16 @@ public final class Watcher implements Runnable
     * the directory */
     private void registerTree(Path start) throws IOException {
         Files.walkFileTree(start, new WatchServiceAdder() );
+    }
+
+    /* this method register the watcher from cache paths */
+    private void registerWatcherFromCache() throws IOException {
+        WatchServiceAdder wsa = new WatchServiceAdder();
+        wsa.registerPath(WATCHED_DIR);
+        for( Path p : this.cache.getCachedPaths() ){
+            if( Files.isDirectory(p,LinkOption.NOFOLLOW_LINKS) )
+                wsa.registerPath(p);
+        }
     }
 
     /* create or update the Watcher data file in working directory. */
@@ -126,10 +139,10 @@ public final class Watcher implements Runnable
                 throw new InterruptedException("Dispatch Queue missing.");
 
             updateWatcherDataFile();
-            registerTree(WATCHED_DIR);
+            registerWatcherFromCache();
             WatchKey key;
             WatchEvent.Kind<?> kind;
-            Path pathFileDetected;
+            Path pathFileDetected, context;
             DetectedObject detObj;
             while( true ){
                 //retrieve and remove the next watch key
@@ -140,7 +153,8 @@ public final class Watcher implements Runnable
                     //get the kind of event (create, modify, delete)
                     kind = watchEvent.kind();
                     //get the pathFileDetected for the event
-                    pathFileDetected = ((WatchEvent<Path>) watchEvent).context();
+                    context = ((WatchEvent<Path>) watchEvent).context();
+                    pathFileDetected = directories.get(key).resolve(context);
 
                     // if file detected is .jwatch, skip it
                     if( pathFileDetected.toFile().getName()
@@ -149,6 +163,11 @@ public final class Watcher implements Runnable
                     //handle OVERFLOW event
                     if( kind.equals(OVERFLOW) )
                         continue;
+
+                    // ========== DEBUG OPTION!
+                    if( pathFileDetected.toFile().getName().equals("exit") )
+                        throw new InterruptedException("Controlled Exit.");
+                    // ========== DEBUG OPTION!
 
                     //dispatch detected object into queue
                     File f = pathFileDetected.toFile();
@@ -170,12 +189,14 @@ public final class Watcher implements Runnable
                             pathFileDetected.toFile().lastModified()
                         );
                     }else if( kind.equals(ENTRY_DELETE) ){
-                        // remove from cache
+                        this.cache.remove(pathFileDetected);
                     }
+
+                    // update the .jwatch data file
+                    updateWatcherDataFile();
                 }
 
-                // update the .jwatch data file
-                updateWatcherDataFile();
+                if( !key.reset() )  directories.remove(key);
             }
 
         }catch(InterruptedException inter){
@@ -185,6 +206,7 @@ public final class Watcher implements Runnable
         }finally {
             try {
                 this.watcher.close();
+                this.cache.flush();
                 log.info("Watch service closed correctly.");
             } catch (IOException e) {
                 log.error(e.getMessage());
@@ -205,8 +227,9 @@ public final class Watcher implements Runnable
         }
 
         /* register the single path given as argument under the watcher service*/
-        private void registerPath(Path path) throws IOException {
-            path.register(watcher, mod);
+        public void registerPath(Path path) throws IOException {
+            WatchKey k = path.register(watcher, mod);
+            directories.put(k, path);
             log.debug(String.format("Path %s saved by watcher.", path));
         }
     }
