@@ -55,7 +55,7 @@ public final class Syncer {
 //        private WatcherCache cache;
 //        public ServiceAdder(){
 //            try {
-//                cache = WatcherCache.getInstnace();
+//                cache = WatcherCache.getInstance();
 //            } catch (IOException e) {
 //                log.error(e.getMessage(), e);
 //            }

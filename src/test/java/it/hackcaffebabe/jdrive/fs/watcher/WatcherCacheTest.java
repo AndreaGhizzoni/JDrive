@@ -115,7 +115,7 @@ public class WatcherCacheTest {
     public WatcherCache getInstance(){
         WatcherCache w = null;
         try{
-            w = WatcherCacheImpl.getInstnace();
+            w = WatcherCacheImpl.getInstance();
         }catch (IOException ignored){}
         return w;
     }

@@ -34,7 +34,7 @@ class WatcherCacheImpl implements WatcherCache{
      * instance
      * @throws IOException if IO with cache fail.
      */
-    public static WatcherCacheImpl getInstnace() throws IOException {
+    public static WatcherCacheImpl getInstance() throws IOException {
         if( instance == null )
             instance = new WatcherCacheImpl();
         return instance;
