@@ -58,6 +58,11 @@ public class WatcherCacheTest {
         Assert.assertEquals("value expected from get() must be: "+newLong,
                 newLong, retriedValue);
 
+        try{
+            w.flush();
+        }catch (IOException ioe){
+            Assert.fail("WatcherCacheImpl throws IOException: "+ioe.getMessage());
+        }
         cleanCacheFile();
     }
 
