@@ -23,14 +23,14 @@ public interface WatcherCache {
      * @return {@link java.lang.Long} the overwritten value, if key was already
      * present, otherwise null.
      */
-    public Long put( Path filePath,  Long lastModify );
+    public Long put( Path filePath,  Long lastModify ) throws IllegalArgumentException;
 
     /**
      * Return the last modify parameter of given {@link java.nio.file.Path}
      * @param filePath {@link java.nio.file.Path}
      * @return {@link java.lang.Long} the last modify value of given path.
      */
-    public Long get( Path filePath );
+    public Long get( Path filePath ) throws IllegalArgumentException;
 
     /**
      * Remove the give file path from cache.
@@ -38,14 +38,14 @@ public interface WatcherCache {
      * @return {@link java.lang.Long} of the removed file path or null if not
      * present.
      */
-    public Long remove( Path filePath );
+    public Long remove( Path filePath ) throws IllegalArgumentException;
     
     /**
      * Check if a {@link java.nio.file.Path} is present or not.
      * @param filePath {@link java.nio.file.Path} to check.
      * @return true if is present, false otherwise.
      */
-    public boolean isWatched( Path filePath );
+    public boolean isWatched( Path filePath ) throws IllegalArgumentException;
 
     /**
      * This method flush the current state of cache into APP_HOME/.jwatch.cache

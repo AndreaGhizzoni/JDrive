@@ -82,26 +82,45 @@ class WatcherCacheImpl implements WatcherCache{
         }
     }
 
+    /* check given path */
+    private void checkPathFile( Path p ) throws IllegalArgumentException{
+        if( p == null )
+            throw new IllegalArgumentException("Given path can not be null.");
+    }
+
+    /* check given last modify */
+    private void checkLastModify( Long l ) throws IllegalArgumentException{
+        if( l == null )
+            throw new IllegalArgumentException("Given last modify can not be null.");
+    }
+
     @Override
     public Set<Path> getCachedPaths(){ return this.cache.keySet(); }
 
     @Override
-    public Long put( Path filePath,  Long lastModify ){
+    public Long put( Path filePath,  Long lastModify ) throws IllegalArgumentException{
+        checkPathFile(filePath);
+        checkLastModify(lastModify);
         log.debug("Try to put: "+filePath+" : "+lastModify);
         return this.cache.put(filePath, lastModify);
     }
 
     @Override
-    public Long get( Path filePath ){ return this.cache.get(filePath); }
+    public Long get( Path filePath ) throws IllegalArgumentException{
+        checkPathFile(filePath);
+        return this.cache.get(filePath);
+    }
 
     @Override
-    public Long remove( Path filePath ){
+    public Long remove( Path filePath ) throws IllegalArgumentException{
+        checkPathFile(filePath);
         log.debug("Try to remove key: "+filePath);
         return this.cache.remove(filePath);
     }
 
     @Override
-    public boolean isWatched( Path filePath ){
+    public boolean isWatched( Path filePath ) throws IllegalArgumentException{
+        checkPathFile(filePath);
         return this.cache.containsKey( filePath );
     }
 
