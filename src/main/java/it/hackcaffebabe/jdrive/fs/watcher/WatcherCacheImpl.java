@@ -92,16 +92,12 @@ class WatcherCacheImpl implements WatcherCache{
     }
 
     @Override
-    public void flush(){
-        try {
-            FileWriter fw = new FileWriter(cacheFile.toFile());
-            fw.append(this.toString());
-            fw.flush();
-            fw.close();
-            log.debug("Cache flushed correctly");
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
+    public void flush() throws IOException{
+        FileWriter fw = new FileWriter(cacheFile.toFile());
+        fw.append(this.toString());
+        fw.flush();
+        fw.close();
+        log.debug("Cache flushed correctly");
     }
 
     @Override

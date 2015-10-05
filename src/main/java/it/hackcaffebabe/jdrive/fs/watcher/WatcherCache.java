@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.fs.watcher;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
 
@@ -41,6 +42,6 @@ public interface WatcherCache {
     /**
      * This method flush the current state of cache into APP_HOME/.jwatch.cache
      */
-    public void flush();
+    public void flush() throws IOException;
 
 }
