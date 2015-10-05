@@ -33,6 +33,14 @@ public interface WatcherCache {
     public Long get( Path filePath );
 
     /**
+     * Remove the give file path from cache.
+     * @param filePath {@link java.nio.file.Path} the file path to remove.
+     * @return {@link java.lang.Long} of the removed file path or null if not
+     * present.
+     */
+    public Long remove( Path filePath );
+    
+    /**
      * Check if a {@link java.nio.file.Path} is present or not.
      * @param filePath {@link java.nio.file.Path} to check.
      * @return true if is present, false otherwise.

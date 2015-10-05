@@ -84,9 +84,7 @@ class WatcherCacheImpl implements WatcherCache{
     }
 
     @Override
-    public Set<Path> getCachedPaths(){
-        return this.cache.keySet();
-    }
+    public Set<Path> getCachedPaths(){ return this.cache.keySet(); }
 
     @Override
     public Long put( Path filePath,  Long lastModify ){
@@ -95,7 +93,13 @@ class WatcherCacheImpl implements WatcherCache{
     }
 
     @Override
-    public Long get( Path filePath ){  return this.cache.get(filePath); }
+    public Long get( Path filePath ){ return this.cache.get(filePath); }
+
+    @Override
+    public Long remove( Path filePath ){
+        log.debug("Try to remove key: "+filePath);
+        return this.cache.remove(filePath);
+    }
 
     @Override
     public boolean isWatched( Path filePath ){
