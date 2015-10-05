@@ -27,6 +27,31 @@ public class WatcherCacheTest {
         Assert.assertTrue("WatcherCacheImpl.getInstance() return something != null",
                 w != null);
 
+        try{
+            w.put(null, 1L);
+            Assert.fail("I can set null path as key");
+        }catch (IllegalArgumentException ignored){}
+
+        try{
+            w.put(Paths.get("/tmp"), null);
+            Assert.fail("I can set null value of key");
+        }catch (IllegalArgumentException ignored){}
+
+        try{
+            w.get(null);
+            Assert.fail("I can pass null as key to retrieve his value");
+        }catch (IllegalArgumentException ignored){}
+
+        try{
+            w.remove(null);
+            Assert.fail("I can pass null as key to remove his value");
+        }catch (IllegalArgumentException ignored){}
+
+        try{
+            w.isWatched(null);
+            Assert.fail("I can pass null as key to check if his value is present");
+        }catch (IllegalArgumentException ignored){}
+
         int savedPaths = w.getCachedPaths().size();
         Assert.assertTrue("Saved Paths must be two", savedPaths == 2);
 
