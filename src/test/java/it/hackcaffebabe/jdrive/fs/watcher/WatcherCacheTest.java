@@ -58,6 +58,11 @@ public class WatcherCacheTest {
         Assert.assertEquals("value expected from get() must be: "+newLong,
                 newLong, retriedValue);
 
+        savedPaths = w.getCachedPaths().size();
+        w.remove(newPath);
+        Assert.assertTrue("Cached Paths size (after removing one) not match.",
+                savedPaths == w.getCachedPaths().size()+1);
+
         try{
             w.flush();
         }catch (IOException ioe){
