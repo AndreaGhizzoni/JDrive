@@ -54,6 +54,9 @@ class WatcherCacheImpl implements WatcherCache{
         log.debug("Try to load cache file.");
         BufferedReader br = new BufferedReader( new FileReader(cacheFile.toFile()) );
 
+        StringBuilder sbKey = new StringBuilder();
+        StringBuilder sbValue = new StringBuilder();
+        char[] chars; int i; char tmp; boolean isKey;
         String line;
         boolean finish = false;
         while( !finish ){
@@ -61,10 +64,11 @@ class WatcherCacheImpl implements WatcherCache{
             if( line == null ) {
                 finish = true;
             }else{
-                StringBuilder sbKey = new StringBuilder();
-                StringBuilder sbValue = new StringBuilder();
-                char[] chars = line.toCharArray();
-                int i = 0; char tmp; boolean isKey = true;
+                sbKey.setLength(0); // clear buffers
+                sbValue.setLength(0);
+                // now check char-by-char the string line
+                chars = line.toCharArray();
+                i = 0; isKey = true;
                 while ( i != chars.length ){
                     tmp = chars[i++];
                     if( tmp != '{' && tmp != '}' && tmp != ',' && tmp != ' '
@@ -77,7 +81,7 @@ class WatcherCacheImpl implements WatcherCache{
                     }
                 }
 
-                if( !sbKey.toString().isEmpty())
+                if( !sbKey.toString().isEmpty() )
                     put(Paths.get(sbKey.toString()), new Long(sbValue.toString()));
             }
         }
@@ -113,18 +117,18 @@ class WatcherCacheImpl implements WatcherCache{
 
     @Override
     public String toString(){
-        StringBuilder b = new StringBuilder();
-        b.append("{").append("\n");
-        String p; String l; int c = 1;
+        StringBuilder sb = new StringBuilder();
+        sb.append("{").append("\n");
+        String k, v; int c = 1;
         for( Map.Entry<Path, Long> e: this.cache.entrySet() ){
-            p = e.getKey().toFile().getAbsoluteFile().toString();
-            l = e.getValue().toString();
-            b.append(" \"").append(p).append("\": \"").append(l).append("\"");
+            k = e.getKey().toFile().getAbsoluteFile().toString();
+            v = e.getValue().toString();
+            sb.append(" \"").append(k).append("\": \"").append(v).append("\"");
             if( c++ != this.cache.size() )
-                b.append(",");
-            b.append("\n");
+                sb.append(",");
+            sb.append("\n");
         }
-        b.append("}");
-        return b.toString();
+        sb.append("}");
+        return sb.toString();
     }
 }
