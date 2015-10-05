@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * Package class to provide IO to cache file.
@@ -52,24 +53,33 @@ class WatcherCacheImpl implements WatcherCache{
     private void loadCache() throws IOException{
         log.debug("Try to load cache file.");
         BufferedReader br = new BufferedReader( new FileReader(cacheFile.toFile()) );
-        StringBuilder b = new StringBuilder();
 
-        boolean finish = false; String line;
+        String line;
+        boolean finish = false;
         while( !finish ){
             line = br.readLine();
-            if( line == null )
+            if( line == null ) {
                 finish = true;
-            else
-                b.append(line);
-        }
+            }else{
+                StringBuilder sbKey = new StringBuilder();
+                StringBuilder sbValue = new StringBuilder();
+                char[] chars = line.toCharArray();
+                int i = 0; char tmp; boolean isKey = true;
+                while ( i != chars.length ){
+                    tmp = chars[i++];
+                    if( tmp != '{' && tmp != '}' && tmp != ',' && tmp != ' '
+                            && tmp != '"' ){
+                        if( tmp == ':' ) isKey = false;
+                        else{
+                            if(isKey) sbKey.append(tmp);
+                            else sbValue.append(tmp);
+                        }
+                    }
+                }
 
-        String json = b.toString();
-        if( !json.isEmpty() ) {
-            Type type = new TypeToken<Map<String, String>>(){}.getType();
-            this.cache = new Gson().fromJson(json, type);
-            log.debug("cache: "+json);
-        }else{
-            log.debug("cache empty.");
+                if( !sbKey.toString().isEmpty())
+                    put(Paths.get(sbKey.toString()), new Long(sbValue.toString()));
+            }
         }
     }
 
@@ -80,6 +90,7 @@ class WatcherCacheImpl implements WatcherCache{
 
     @Override
     public Long put( Path filePath,  Long lastModify ){
+        log.debug("Try to put: "+filePath+" : "+lastModify);
         return this.cache.put(filePath, lastModify);
     }
 
@@ -102,20 +113,18 @@ class WatcherCacheImpl implements WatcherCache{
 
     @Override
     public String toString(){
-        Gson g = new Gson();
-        return g.toJson(this.cache);
-//        StringBuilder b = new StringBuilder();
-//        b.append("{").append("\n");
-//        String p; String l; int c = 1;
-//        for( Map.Entry<Path, Long> e: this.cache.entrySet() ){
-//            p = e.getKey().toFile().getAbsoluteFile().toString();
-//            l = e.getValue().toString();
-//            b.append(" \"").append(p).append("\": \"").append(l).append("\"");
-//            if( c++ != this.cache.size() )
-//                b.append(",");
-//            b.append("\n");
-//        }
-//        b.append("}");
-//        return b.toString();
+        StringBuilder b = new StringBuilder();
+        b.append("{").append("\n");
+        String p; String l; int c = 1;
+        for( Map.Entry<Path, Long> e: this.cache.entrySet() ){
+            p = e.getKey().toFile().getAbsoluteFile().toString();
+            l = e.getValue().toString();
+            b.append(" \"").append(p).append("\": \"").append(l).append("\"");
+            if( c++ != this.cache.size() )
+                b.append(",");
+            b.append("\n");
+        }
+        b.append("}");
+        return b.toString();
     }
 }
