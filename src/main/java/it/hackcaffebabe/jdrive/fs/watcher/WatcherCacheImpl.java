@@ -1,20 +1,16 @@
 package it.hackcaffebabe.jdrive.fs.watcher;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import it.hackcaffebabe.jdrive.cfg.Default;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 /**
  * Package class to provide IO to cache file.
