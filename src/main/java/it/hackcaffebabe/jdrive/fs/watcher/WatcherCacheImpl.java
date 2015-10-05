@@ -50,8 +50,7 @@ class WatcherCacheImpl implements WatcherCache{
         log.debug("Try to load cache file.");
         BufferedReader br = new BufferedReader( new FileReader(cacheFile.toFile()) );
 
-        StringBuilder sbKey = new StringBuilder();
-        StringBuilder sbValue = new StringBuilder();
+        StringBuilder sbKey, sbValue;
         char[] chars; int i; char tmp; boolean isKey;
         String line;
         boolean finish = false;
@@ -60,8 +59,8 @@ class WatcherCacheImpl implements WatcherCache{
             if( line == null ) {
                 finish = true;
             }else{
-                sbKey.setLength(0); // clear buffers
-                sbValue.setLength(0);
+                sbKey = new StringBuilder(); // clean buffers
+                sbValue = new StringBuilder();
                 // now check char-by-char the string line
                 chars = line.toCharArray();
                 i = 0; isKey = true;
