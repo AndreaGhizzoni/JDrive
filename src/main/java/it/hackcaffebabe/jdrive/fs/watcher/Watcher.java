@@ -88,7 +88,7 @@ public final class Watcher implements Runnable
         WatchServiceAdder wsa = new WatchServiceAdder();
         wsa.registerPath(WATCHED_DIR);
         for( Path p : this.cache.getCachedPaths() ){
-            if( Files.isDirectory(p,LinkOption.NOFOLLOW_LINKS) )
+            if( PathsUtil.isDirectory(p) )
                 wsa.registerPath(p);
         }
     }
@@ -177,11 +177,7 @@ public final class Watcher implements Runnable
                     this.dispatchingQueue.put(detObj);
 
                     //handle CREATE event
-                    boolean isDir = Files.isDirectory(
-                        pathFileDetected,
-                        LinkOption.NOFOLLOW_LINKS
-                    );
-                    if( kind.equals(ENTRY_CREATE) && isDir ) {
+                    if( kind.equals(ENTRY_CREATE) && PathsUtil.isDirectory(pathFileDetected)) {
                         registerTree(pathFileDetected);
                     }else if( kind.equals(ENTRY_CREATE) || kind.equals(ENTRY_MODIFY) ) {
                         this.cache.put(

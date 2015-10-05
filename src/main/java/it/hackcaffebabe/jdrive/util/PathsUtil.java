@@ -6,6 +6,7 @@ import it.hackcaffebabe.jdrive.cfg.Keys;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -44,5 +45,14 @@ public class PathsUtil
         // create file ~/.jdrive/.jdrive.conf
         Path p = java.nio.file.Paths.get(Default.APP_CGF_FILE);
         Files.createFile(p);
+    }
+
+    /**
+     * This method checks if given path ends with a directory.
+     * @param p {@link java.nio.file.Path} the path to check.
+     * @return true if ends with a directory, false otherwise.
+     */
+    public static boolean isDirectory( Path p ){
+        return Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS);
     }
 }
