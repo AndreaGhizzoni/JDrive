@@ -1,6 +1,7 @@
 package it.hackcaffebabe.jdrive.fs.watcher;
 
 import it.hackcaffebabe.jdrive.cfg.Default;
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,6 +20,7 @@ public class WatcherCacheTest {
 
     @Test
     public void testWatcherTest(){
+        makeAPPHOME();
         makeCacheFile();
 
         WatcherCache w = getInstance();
@@ -94,6 +96,14 @@ public class WatcherCacheTest {
             Files.delete(Paths.get(Default.WATCHER_CACHE));
         } catch (IOException e) {
             Assert.fail(e.getMessage());
+        }
+    }
+
+    public void makeAPPHOME(){
+        try{
+            PathsUtil.createApplicationHomeDirectory();
+        }catch (IOException ioe){
+            Assert.fail(ioe.getMessage());
         }
     }
 
