@@ -1,13 +1,7 @@
 bin/
 out/
 log/
-build/reports
-build/classes
-build/tmp
-build/dependency-cache
-build/test-results
-build/docs
-build/libs
+build/
 .gradle/
 .gradletasknamecache
 *.swp

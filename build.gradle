@@ -3,7 +3,7 @@ apply plugin: 'application'
 //sourceCompatibility = 1.8
 version = '0.0.1-dev'
 
-//mainClassName = ""
+mainClassName = "it.hackcaffebabe.jdrive.Launcher"
 //applicationDefaultJvmArgs = [""]
 
 repositories {
