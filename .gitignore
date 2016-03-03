@@ -11,4 +11,5 @@ build/docs
 .gradletasknamecache
 *.swp
 JDrive.iml
+**.iml
 .idea/*
