@@ -87,11 +87,11 @@ public class CacheTest {
         Assert.assertTrue("Cached Paths size (after removing one) not match.",
                 savedPaths == cache.getCachedPaths().size()+1);
 
-        try{
-            cache.flush();
-        }catch (IOException ioe){
-            Assert.fail("WatcherCacheImpl throws IOException: "+ioe.getMessage());
-        }
+//        try{
+//            cache.flush();
+//        }catch (IOException ioe){
+//            Assert.fail("WatcherCacheImpl throws IOException: "+ioe.getMessage());
+//        }
         cleanCacheFile();
     }
 

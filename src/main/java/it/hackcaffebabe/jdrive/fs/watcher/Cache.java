@@ -13,6 +13,8 @@ import java.util.Set;
 
 /**
  * Package class to provide IO to cache file.
+ *
+ * TODO remember to re-write test case
  */
 class Cache
 {
