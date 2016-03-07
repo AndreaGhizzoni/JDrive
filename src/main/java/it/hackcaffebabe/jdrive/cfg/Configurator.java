@@ -92,9 +92,7 @@ public final class Configurator
                 put(i.getKey(), i.getValue());
             }
             log.info("Configuration file create and loaded properly.");
-        }catch( FileAlreadyExistsException fae ){
-            log.error(fae.getMessage());
-        }catch( IOException ioe ){
+        } catch( IOException ioe ){
             log.error(ioe.getMessage());
         }
     }
@@ -137,9 +135,7 @@ public final class Configurator
         }
     }
 
-    /*
-     * check if method load() is called.
-     */
+    /* check if method load() is called. */
     private void checkLoaded() throws IllegalStateException{
         if(this.cfgProp == null)
             throw new IllegalStateException("Configuration File not loaded. " +
