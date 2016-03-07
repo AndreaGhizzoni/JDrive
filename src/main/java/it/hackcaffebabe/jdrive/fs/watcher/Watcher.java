@@ -180,7 +180,14 @@ public final class Watcher implements Runnable
                     updateWatcherDataFile();
                 }
 
-                if( !key.reset() )  directories.remove(key);
+                // reset the key. if key is associated to the root of Watcher
+                // send some message and stop this thread.
+                // otherwise, remove only the key associated with path.
+                if( !key.reset() ){
+                    Path removed = directories.remove(key);
+                    if( removed.equals(WATCHED_DIR) )
+                        break; // placeholder to proper closing.
+                }
             }
 
         }catch(InterruptedException inter){
