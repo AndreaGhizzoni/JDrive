@@ -74,6 +74,9 @@ public final class Watcher implements Runnable
         WATCHED_DIR = PathsUtil.createWatchedDirectory();
         log.debug("Watcher base path from Configurator: "+ WATCHED_DIR.toAbsolutePath());
         WATCHED_DATA_FILE = WATCHED_DIR.resolve(WATCHED_DATA_FILE_NAME);
+        if( !WATCHED_DATA_FILE.toFile().exists() ) {
+            WATCHED_DATA_FILE = Files.createFile(WATCHED_DATA_FILE);
+        }
 
         // add here all the file name that watcher must exclude
         this.excludedFile.add(WATCHED_DATA_FILE_NAME);
@@ -90,11 +93,6 @@ public final class Watcher implements Runnable
 
     /* create or update the Watcher data file in working directory. */
     private void updateWatcherDataFile() throws IOException {
-        if( !WATCHED_DATA_FILE.toFile().exists() ) {
-            WATCHED_DATA_FILE = Files.createFile(WATCHED_DATA_FILE);
-            log.info("New watched folder found.");
-        }
-
         BufferedReader in = new BufferedReader(new FileReader(
                 WATCHED_DATA_FILE.toFile()));
         String lineRead = in.readLine();
