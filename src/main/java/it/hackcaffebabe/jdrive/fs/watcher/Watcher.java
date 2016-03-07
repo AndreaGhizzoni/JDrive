@@ -50,7 +50,6 @@ public final class Watcher implements Runnable
     private final HashMap<WatchKey, Path> directories = new HashMap<>();
 
     private LinkedBlockingQueue<DetectedObject> dispatchingQueue;
-//    private WatcherCacheImpl cache;
 
     /**
      * Retrieve the instance of Watcher with the default base path.
@@ -84,41 +83,6 @@ public final class Watcher implements Runnable
     private void registerDirectories(Path start) throws IOException {
         Files.walkFileTree(start, new WatchServiceAdder() );
     }
-
-    /* this method register the watcher from cache paths */
-//    private void restoreWatcherFromCache() throws IOException {
-//        log.debug("Try to restore watcher cache...");
-//        this.cache = WatcherCacheImpl.getInstance();
-//        log.debug("Last root Watched: "+this.cache.getWatcherRoot());
-//
-//         nothing in cache
-//        if(!this.cache.isEmpty()){
-//            log.debug("Cache not empty.");
-//             if cache invalid
-//            if( !this.cache.getWatcherRoot().toFile().getAbsolutePath()
-//                    .equals(WATCHED_DIR.toFile().getAbsolutePath()) ){
-//                 remove all necessary path from cache
-//                 set new WatcherRoot as WATCHED_DIR
-//                 scan fs with registerDirectories() method.
-//                log.debug("=== CACHE INVALID BRANCH DETECTED!");
-//            }else{ // cache valid, restore all from it
-//                log.debug("Cache valid. Restoring.");
-//                 register all other path in cache
-//                for (Path p : this.cache.getCachedPaths()) {
-//                    if (PathsUtil.isDirectory(p)) {
-//                        WatchKey k = p.register(watcher, mod);
-//                        directories.put(k, p);
-//                        log.debug(String.format("Path %s saved by watcher.", p));
-//                    }
-//                }
-//            }
-//        }else{
-//            log.debug("cache empty. Set base: WATCHED_DIR");
-//             set the default watched directory
-//            this.cache.putWatcherRoot(WATCHED_DIR);
-//        }
-//        log.debug("Watcher cache restored.");
-//    }
 
     /* create or update the Watcher data file in working directory. */
     private void updateWatcherDataFile() throws IOException {
@@ -169,8 +133,6 @@ public final class Watcher implements Runnable
             // register the watched directory from Configurator in every case.
             registerDirectories(WATCHED_DIR);
 
-//            restoreWatcherFromCache();
-
             WatchKey key;
             WatchEvent.Kind<?> kind;
             Path pathFileDetected, context;
@@ -213,17 +175,6 @@ public final class Watcher implements Runnable
                         registerDirectories(pathFileDetected);
                     }
 
-                    // manage cache based on event
-//                    if( kind.equals(ENTRY_CREATE) || kind.equals(ENTRY_MODIFY) ) {
-//                        this.cache.put(
-//                            pathFileDetected,
-//                            pathFileDetected.toFile().lastModified()
-//                        );
-//                    }else if( kind.equals(ENTRY_DELETE) ){
-//                        this.cache.remove(pathFileDetected);
-//                    }
-//                    this.cache.flush();
-
                     // update the .jwatch data file
                     updateWatcherDataFile();
                 }
@@ -238,7 +189,6 @@ public final class Watcher implements Runnable
         }finally {
             try {
                 this.watcher.close();
-//                this.cache.flush();
                 log.info("Watch service closed correctly.");
             } catch (IOException e) {
                 log.error(e.getMessage());
@@ -259,12 +209,5 @@ public final class Watcher implements Runnable
             log.debug(String.format("Path %s saved by watcher.", dir));
             return FileVisitResult.CONTINUE;
         }
-
-//        /* register the single path given as argument under the watcher service*/
-//        public void registerPath(Path path) throws IOException {
-//            WatchKey k = path.register(watcher, mod);
-//            directories.put(k, path);
-//            log.debug(String.format("Path %s saved by watcher.", path));
-//        }
     }
 }
