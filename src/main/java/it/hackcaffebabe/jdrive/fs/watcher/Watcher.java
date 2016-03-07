@@ -1,5 +1,7 @@
 package it.hackcaffebabe.jdrive.fs.watcher;
 
+import it.hackcaffebabe.jdrive.cfg.Configurator;
+import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.fs.DetectedObject;
 import it.hackcaffebabe.jdrive.util.DateUtils;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
@@ -68,10 +70,13 @@ public final class Watcher implements Runnable
     /* Constructor method. IOException if newWatchService() fail. */
     private Watcher() throws IOException{
         this.watcher = FileSystems.getDefault().newWatchService();
-        WATCHED_DIR = PathsUtil.createWatchedDirectory();
-        WATCHED_DATA_FILE = WATCHED_DIR.resolve(WATCHED_DATA_FILE_NAME);
-        this.cache = WatcherCacheImpl.getInstance();
         log.info("Watch Service retrieved correctly from FS.");
+
+        WATCHED_DIR = PathsUtil.createWatchedDirectory();
+        log.info("Watch Service attached to "+ WATCHED_DIR.toAbsolutePath());
+        WATCHED_DATA_FILE = WATCHED_DIR.resolve(WATCHED_DATA_FILE_NAME);
+
+        this.cache = WatcherCacheImpl.getInstance();
     }
 
 //==============================================================================
