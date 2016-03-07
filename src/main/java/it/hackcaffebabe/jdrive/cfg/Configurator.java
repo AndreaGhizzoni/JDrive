@@ -52,9 +52,9 @@ public final class Configurator
 //  METHOD
 //==============================================================================
     /**
-     * Load data from configuration file in Paths.APP_CGF_FILE. If this file exists,
-     * the configuration will be loaded from there, otherwise will be create a
-     * new file with the default configuration.
+     * Load data from configuration file in PathsUtil.APP_CGF_FILE. If this file
+     * exists the configuration will be loaded from there, otherwise will be
+     * create a new file with the default configuration.
      * @return true if configuration file will be successfully parsed, otherwise
      * if load() method is called multiple times or loading defaults data rise an
      * exception, will return false.
