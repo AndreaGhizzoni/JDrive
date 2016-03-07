@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -44,10 +45,10 @@ public final class Watcher implements Runnable
     private static Path WATCHED_DATA_FILE;
     private static final String WATCHED_DATA_FILE_NAME = ".jwatch";
 
-
     private static Watcher instance;
     private WatchService watcher;
     private final HashMap<WatchKey, Path> directories = new HashMap<>();
+    private final ArrayList<String> excludedFile = new ArrayList<>();
 
     private LinkedBlockingQueue<DetectedObject> dispatchingQueue;
 
@@ -73,6 +74,9 @@ public final class Watcher implements Runnable
         WATCHED_DIR = PathsUtil.createWatchedDirectory();
         log.debug("Watcher base path from Configurator: "+ WATCHED_DIR.toAbsolutePath());
         WATCHED_DATA_FILE = WATCHED_DIR.resolve(WATCHED_DATA_FILE_NAME);
+
+        // add here all the file name that watcher must exclude
+        this.excludedFile.add(WATCHED_DATA_FILE_NAME);
     }
 
 //==============================================================================
@@ -149,9 +153,8 @@ public final class Watcher implements Runnable
                     context = ((WatchEvent<Path>) watchEvent).context();
                     pathFileDetected = directories.get(key).resolve(context);
 
-                    // if file detected is .jwatch, skip it
-                    if( pathFileDetected.toFile().getName()
-                            .equals(WATCHED_DATA_FILE_NAME) )
+                    // check if is a file to exclude.
+                    if( this.excludedFile.contains(pathFileDetected.toFile().getName()) )
                         continue;
                     //handle OVERFLOW event
                     if( kind.equals(OVERFLOW) )
