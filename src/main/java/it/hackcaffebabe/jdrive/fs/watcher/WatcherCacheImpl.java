@@ -1,12 +1,10 @@
 package it.hackcaffebabe.jdrive.fs.watcher;
 
-import it.hackcaffebabe.jdrive.cfg.Default;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
