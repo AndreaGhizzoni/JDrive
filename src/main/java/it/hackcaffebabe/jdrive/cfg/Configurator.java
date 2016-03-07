@@ -44,7 +44,7 @@ public final class Configurator
     /* Basic constructor */
     private Configurator(){
         //set config file to default
-        this.cfgFile = new File(Default.APP_CGF_FILE);
+        this.cfgFile = new File(PathsUtil.APP_CGF_FILE);
         log.info("Configuration init");
     }
 

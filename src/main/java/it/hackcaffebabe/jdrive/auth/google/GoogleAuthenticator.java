@@ -15,6 +15,7 @@ import com.google.api.client.util.store.MemoryDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import it.hackcaffebabe.jdrive.cfg.Default;
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -116,13 +117,13 @@ public final class GoogleAuthenticator
 
     /* store the user credential */
     private void storeCredential() throws IOException{
-        if(Default.G_TOKEN.exists() && !Default.G_TOKEN.delete())
+        if(PathsUtil.G_TOKEN.exists() && !PathsUtil.G_TOKEN.delete())
             throw new IOException("Error while deleting old authentication token.");
 
         log.debug("Store credential called: try to store...");
         com.fasterxml.jackson.core.JsonGenerator j = new
                 com.fasterxml.jackson.core.JsonFactory().createGenerator(
-                Default.G_TOKEN, JsonEncoding.UTF8 );
+                PathsUtil.G_TOKEN, JsonEncoding.UTF8 );
 
         StoredCredential c = this.store.get(AuthenticationConst.TOKEN_NAME);
         j.writeStartObject();// {
@@ -138,7 +139,7 @@ public final class GoogleAuthenticator
 
     /* load the stored credential */
     private void loadCredential() throws  IOException{
-        if(!Default.G_TOKEN.exists())
+        if(!PathsUtil.G_TOKEN.exists())
             return;
 
         log.info("Credential found: try to load...");
@@ -180,7 +181,7 @@ public final class GoogleAuthenticator
      */
     private void populateStoredCredential( StoredCredential s ) throws IOException {
         com.fasterxml.jackson.core.JsonParser p = new com.fasterxml.jackson
-                .core.JsonFactory().createJsonParser(Default.G_TOKEN);
+                .core.JsonFactory().createJsonParser(PathsUtil.G_TOKEN);
 
         String fieldName;
         while (p.nextToken() != JsonToken.END_OBJECT) {

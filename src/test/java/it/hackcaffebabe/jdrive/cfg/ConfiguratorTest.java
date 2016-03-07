@@ -59,7 +59,7 @@ public class ConfiguratorTest
     // create a method to clean the working directory
     public void cleanWD(){
         try {
-            Files.delete(Paths.get(Default.APP_CGF_FILE));
+            Files.delete(Paths.get(PathsUtil.APP_CGF_FILE));
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }

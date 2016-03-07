@@ -65,8 +65,8 @@ public class GoogleAuthenticatorTest
 
     public void cleanTokenIfPresent(){
         try{
-            if(Default.G_TOKEN.exists())
-                Files.delete(Default.G_TOKEN.toPath());
+            if(PathsUtil.G_TOKEN.exists())
+                Files.delete(PathsUtil.G_TOKEN.toPath());
         }catch (IOException ioe){
             Assert.fail(ioe.getMessage());
         }

@@ -4,6 +4,7 @@ import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Default;
 import it.hackcaffebabe.jdrive.cfg.Keys;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -15,12 +16,27 @@ import java.nio.file.Paths;
  */
 public class PathsUtil
 {
+    // utility paths
+    public static final String USER_HOME = System.getProperty("user.home");
+    public static final String SEP = System.getProperty("file.separator");
+
+    // default application paths
+    /** Path home application folder */
+    public static final String APP_HOME = USER_HOME + SEP + ".jdrive";
+    /** Path to application configuration file */
+    public static final String APP_CGF_FILE = APP_HOME + SEP + "jdrive.conf";
+    /** Path to watcher cache file */
+    public static final String WATCHER_CACHE = APP_HOME + SEP + "jwatch.cache";
+    /** Path to google Token Authentication */
+    public static final File G_TOKEN = new File( APP_HOME + SEP + "t.json" );
+
+
     /**
      * This method check if APP_HOME exists, if not creates it.
      * @throws IOException if make new directory fail.
      */
     public static void createApplicationHomeDirectory() throws IOException{
-        Path p = java.nio.file.Paths.get(Default.APP_HOME);
+        Path p = java.nio.file.Paths.get(APP_HOME);
         Files.createDirectories(p);
     }
 
@@ -43,7 +59,7 @@ public class PathsUtil
      */
     public static void createEmptyConfigurationFile() throws IOException {
         // create file ~/.jdrive/.jdrive.conf
-        Path p = java.nio.file.Paths.get(Default.APP_CGF_FILE);
+        Path p = java.nio.file.Paths.get(APP_CGF_FILE);
         Files.createFile(p);
     }
 

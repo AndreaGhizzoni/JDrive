@@ -1,6 +1,7 @@
 package it.hackcaffebabe.jdrive.fs.watcher;
 
 import it.hackcaffebabe.jdrive.cfg.Default;
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,7 +22,7 @@ class WatcherCacheImpl implements WatcherCache{
     );
 
     private static WatcherCacheImpl instance;
-    private final Path cacheFile = Paths.get(Default.WATCHER_CACHE);
+    private final Path cacheFile = Paths.get(PathsUtil.WATCHER_CACHE);
     private HashMap<Path, Long> cache = new HashMap<>();
 
     /**

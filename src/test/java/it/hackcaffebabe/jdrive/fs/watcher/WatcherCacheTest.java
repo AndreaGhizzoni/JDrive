@@ -117,7 +117,7 @@ public class WatcherCacheTest {
         b.append("}");
 
         try {
-            FileWriter fw = new FileWriter(Paths.get(Default.WATCHER_CACHE).toFile().getAbsolutePath());
+            FileWriter fw = new FileWriter(Paths.get(PathsUtil.WATCHER_CACHE).toFile().getAbsolutePath());
             fw.append(b.toString());
             fw.flush();
             fw.close();
@@ -128,7 +128,7 @@ public class WatcherCacheTest {
 
     public void cleanCacheFile(){
         try {
-            Files.delete(Paths.get(Default.WATCHER_CACHE));
+            Files.delete(Paths.get(PathsUtil.WATCHER_CACHE));
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
