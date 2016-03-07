@@ -14,34 +14,41 @@ import java.util.Set;
 /**
  * Package class to provide IO to cache file.
  */
-class WatcherCacheImpl implements WatcherCache{
+class Cache
+{
     private static final Logger log = LogManager.getLogger(
-        WatcherCacheImpl.class.getSimpleName()
+        Cache.class.getSimpleName()
     );
 
-    private static WatcherCacheImpl instance;
+    private static Cache instance;
     private Path cacheFile;
     private HashMap<Path, Long> cache = new HashMap<>();
 
+    // Path of last root directory used by Watcher
+    private Path lastBasePath;
+
     /**
      * Return the instance of WatcherCache.
-     * @return {@link WatcherCacheImpl } the WatcherCache
+     * @return {@link Cache } the WatcherCache
      * instance
      * @throws IOException if IO with cache fail.
      */
-    public static WatcherCacheImpl getInstance() throws IOException {
+    public static Cache getInstance() throws IOException {
         if( instance == null )
-            instance = new WatcherCacheImpl();
+            instance = new Cache();
         return instance;
     }
 
     /* if cache file doesn't exists, create ones and, in every case load it */
-    private WatcherCacheImpl() throws IOException {
+    private Cache() throws IOException {
         cacheFile = PathsUtil.createWatcherCacheFile();
         log.debug("Cache file created/detected successfully.");
         loadCache();
     }
 
+//==============================================================================
+//  METHODS
+//==============================================================================
     /* read the cache file and load data from it */
     private void loadCache() throws IOException{
         log.debug("Try to load cache file.");
@@ -73,8 +80,14 @@ class WatcherCacheImpl implements WatcherCache{
                     }
                 }
 
-                if( !sbKey.toString().isEmpty() )
-                    put(Paths.get(sbKey.toString()), new Long(sbValue.toString()));
+                String key = sbKey.toString();
+                String value = sbValue.toString();
+                if( !key.isEmpty() ) {
+                    if( key.startsWith("base") )
+                        this.lastBasePath = Paths.get(value);
+                    else
+                        put(Paths.get(key), new Long(value));
+                }
             }
         }
     }
@@ -91,37 +104,29 @@ class WatcherCacheImpl implements WatcherCache{
             throw new IllegalArgumentException("Given last modify can not be null.");
     }
 
-    @Override
-    public Set<Path> getCachedPaths(){ return this.cache.keySet(); }
-
-    @Override
-    public Long put( Path filePath,  Long lastModify ) throws IllegalArgumentException{
-        checkPathFile(filePath);
-        checkLastModify(lastModify);
-        log.debug("Try to put: "+filePath+" : "+lastModify);
-        return this.cache.put(filePath, lastModify);
-    }
-
-    @Override
-    public Long get( Path filePath ) throws IllegalArgumentException{
-        checkPathFile(filePath);
-        return this.cache.get(filePath);
-    }
-
-    @Override
     public Long remove( Path filePath ) throws IllegalArgumentException{
         checkPathFile(filePath);
         log.debug("Try to remove key: "+filePath);
         return this.cache.remove(filePath);
     }
 
-    @Override
     public boolean isWatched( Path filePath ) throws IllegalArgumentException{
         checkPathFile(filePath);
         return this.cache.containsKey( filePath );
     }
 
-    @Override
+    /**
+     * TODO add doc
+     * @return
+     */
+    public boolean isEmpty(){
+        return this.lastBasePath == null && this.cache.isEmpty();
+    }
+
+    /**
+     * TODO add doc
+     * @throws IOException
+     */
     public void flush() throws IOException{
         FileWriter fw = new FileWriter(cacheFile.toFile());
         fw.append(this.toString());
@@ -130,19 +135,81 @@ class WatcherCacheImpl implements WatcherCache{
         log.debug("Cache flushed correctly");
     }
 
+//==============================================================================
+//  SETTER
+//==============================================================================
+    /**
+     * TODO add doc
+     * @param filePath
+     * @param lastModify
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public Long put( Path filePath,  Long lastModify ) throws IllegalArgumentException{
+        checkPathFile(filePath);
+        checkLastModify(lastModify);
+        log.debug("Try to put: "+filePath+" : "+lastModify);
+        return this.cache.put(filePath, lastModify);
+    }
+
+    /**
+     * TODO add doc
+     * @param p
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public Path putWatcherRoot( Path p ) throws IllegalArgumentException{
+        checkPathFile(p);
+        Path previous = this.lastBasePath;
+        this.lastBasePath = p;
+        return previous;
+    }
+
+//==============================================================================
+//  GETTER
+//==============================================================================
+    /**
+     * TODO add doc
+     * @return
+     */
+    public Set<Path> getCachedPaths(){ return this.cache.keySet(); }
+
+    /**
+     * TODO add doc
+     * @return
+     */
+    public Path getWatcherRoot(){ return this.lastBasePath; }
+
+    /**
+     * TODO add doc
+     * @param filePath
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public Long get( Path filePath ) throws IllegalArgumentException{
+        checkPathFile(filePath);
+        return this.cache.get(filePath);
+    }
+
+//==============================================================================
+//  OVERRIDE
+//==============================================================================
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
         sb.append("{").append("\n");
-        String k, v; int c = 1;
+        String k, v; /*int c = 1;*/
         for( Map.Entry<Path, Long> e: this.cache.entrySet() ){
             k = e.getKey().toFile().getAbsoluteFile().toString();
             v = e.getValue().toString();
             sb.append(" \"").append(k).append("\": \"").append(v).append("\"");
-            if( c++ != this.cache.size() )
-                sb.append(",");
+            //if( c++ != this.cache.size() )
+            sb.append(",");
             sb.append("\n");
         }
+        sb.append(" \"").append("base").append("\": \"")
+                .append(this.lastBasePath.toAbsolutePath()).append("\"")
+                .append("\n");
         sb.append("}");
         return sb.toString();
     }
