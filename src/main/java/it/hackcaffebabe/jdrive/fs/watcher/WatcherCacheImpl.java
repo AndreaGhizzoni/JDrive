@@ -22,7 +22,7 @@ class WatcherCacheImpl implements WatcherCache{
     );
 
     private static WatcherCacheImpl instance;
-    private final Path cacheFile = Paths.get(PathsUtil.WATCHER_CACHE);
+    private Path cacheFile;
     private HashMap<Path, Long> cache = new HashMap<>();
 
     /**
@@ -39,10 +39,8 @@ class WatcherCacheImpl implements WatcherCache{
 
     /* if cache file doesn't exists, create ones and, in every case load it */
     private WatcherCacheImpl() throws IOException {
-        if( !cacheFile.toFile().exists() ) {
-            Files.createFile(cacheFile);
-            log.debug("Cache file created successfully.");
-        }
+        cacheFile = PathsUtil.createWatcherCacheFile();
+        log.debug("Cache file created/detected successfully.");
         loadCache();
     }
 

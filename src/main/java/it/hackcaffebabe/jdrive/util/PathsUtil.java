@@ -64,6 +64,19 @@ public class PathsUtil
     }
 
     /**
+     * This method create an empty cache file for WatcherCache class.
+     * @return {@link java.nio.file.Path} of Watcher cache file.
+     * @throws IOException if fail creating the file.
+     */
+    public static Path createWatcherCacheFile() throws IOException {
+        Path cache = Paths.get(WATCHER_CACHE);
+        if( !cache.toFile().exists() ){
+            Files.createFile(cache);
+        }
+        return cache;
+    }
+
+    /**
      * This method checks if given path ends with a directory.
      * @param p {@link java.nio.file.Path} the path to check.
      * @return true if ends with a directory, false otherwise.
