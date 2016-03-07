@@ -1,7 +1,7 @@
 package it.hackcaffebabe.jdrive;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
-import it.hackcaffebabe.jdrive.fs.DetectedObject;
+import it.hackcaffebabe.jdrive.fs.DetectedEvent;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
@@ -34,14 +34,14 @@ public class Launcher {
         // TODO insert here Google Authentication process
 
         try{
-            LinkedBlockingQueue<DetectedObject> lbq = new LinkedBlockingQueue<DetectedObject>();
+            LinkedBlockingQueue<DetectedEvent> lbq = new LinkedBlockingQueue<DetectedEvent>();
             Watcher w = Watcher.getInstance();
             w.setDispatchingQueue(lbq);
 
             Thread watcherThread = new Thread(w);
             watcherThread.start();
 
-            DetectedObject detObj;
+            DetectedEvent detObj;
             while(true){
                 detObj = lbq.take();
                 log.debug(detObj.toString());

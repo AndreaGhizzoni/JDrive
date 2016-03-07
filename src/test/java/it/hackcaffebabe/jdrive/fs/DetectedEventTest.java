@@ -11,13 +11,13 @@ import java.nio.file.WatchEvent;
 import java.util.Date;
 
 /**
- * Test for class {@link it.hackcaffebabe.jdrive.fs.DetectedObject}
+ * Test for class {@link DetectedEvent}
  */
-public class DetectedObjectTest {
+public class DetectedEventTest {
 
     @Test
     public void testDetectedObject(){
-        DetectedObject d = new DetectedObject();
+        DetectedEvent d = new DetectedEvent();
 
         // test watch event kind
         WatchEvent.Kind k;

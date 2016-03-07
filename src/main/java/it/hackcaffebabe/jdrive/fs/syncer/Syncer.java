@@ -2,7 +2,7 @@ package it.hackcaffebabe.jdrive.fs.syncer;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
-import it.hackcaffebabe.jdrive.fs.DetectedObject;
+import it.hackcaffebabe.jdrive.fs.DetectedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,14 +19,14 @@ public final class Syncer {
         Syncer.class.getSimpleName()
     );
 
-    private LinkedBlockingQueue<DetectedObject> dispatchingQueue;
+    private LinkedBlockingQueue<DetectedEvent> dispatchingQueue;
 
     /**
      *
      * @param dispatchingQueue
      * @throws IllegalArgumentException
      */
-    public Syncer( LinkedBlockingQueue<DetectedObject> dispatchingQueue )
+    public Syncer( LinkedBlockingQueue<DetectedEvent> dispatchingQueue )
             throws IllegalArgumentException{
         if( dispatchingQueue == null ){
             IllegalArgumentException up =

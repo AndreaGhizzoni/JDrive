@@ -1,6 +1,6 @@
 package it.hackcaffebabe.jdrive.fs.watcher;
 
-import it.hackcaffebabe.jdrive.fs.DetectedObject;
+import it.hackcaffebabe.jdrive.fs.DetectedEvent;
 import it.hackcaffebabe.jdrive.util.DateUtils;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
@@ -50,7 +50,7 @@ public final class Watcher implements Runnable
     private final HashMap<WatchKey, Path> directories = new HashMap<>();
     private final ArrayList<String> excludedFile = new ArrayList<>();
 
-    private LinkedBlockingQueue<DetectedObject> dispatchingQueue;
+    private LinkedBlockingQueue<DetectedEvent> dispatchingQueue;
 
     /**
      * Retrieve the instance of Watcher with the default base path.
@@ -116,9 +116,9 @@ public final class Watcher implements Runnable
     /**
      * Set the dispatching queue for all the events detected by Watcher.
      * @param dq {@link java.util.concurrent.LinkedBlockingQueue} of
-     * {@link it.hackcaffebabe.jdrive.fs.DetectedObject}
+     * {@link DetectedEvent}
      */
-    public void setDispatchingQueue( LinkedBlockingQueue<DetectedObject> dq ){
+    public void setDispatchingQueue( LinkedBlockingQueue<DetectedEvent> dq ){
         this.dispatchingQueue = dq;
     }
 
@@ -138,7 +138,7 @@ public final class Watcher implements Runnable
             WatchKey key;
             WatchEvent.Kind<?> kind;
             Path pathFileDetected, context;
-            DetectedObject detObj;
+            DetectedEvent detObj;
             while( true ){
                 //retrieve and remove the next watch key
                 key = this.watcher.take();
@@ -165,7 +165,7 @@ public final class Watcher implements Runnable
 
                     //dispatch detected object into queue
                     File f = pathFileDetected.toFile();
-                    detObj = new DetectedObject(
+                    detObj = new DetectedEvent(
                         kind, f.getAbsolutePath(), f.lastModified()
                     );
                     this.dispatchingQueue.put(detObj);

@@ -2,7 +2,7 @@ package it.hackcaffebabe.jdrive.fs.watcher;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
-import it.hackcaffebabe.jdrive.fs.DetectedObject;
+import it.hackcaffebabe.jdrive.fs.DetectedEvent;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,7 +20,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class WatcherTest
 {
-    LinkedBlockingQueue<DetectedObject> lbq = new LinkedBlockingQueue<DetectedObject>();
+    LinkedBlockingQueue<DetectedEvent> lbq = new LinkedBlockingQueue<DetectedEvent>();
 
     @Test
     public void testWatcher(){
@@ -80,7 +80,7 @@ public class WatcherTest
 //  TEST CASE UTIL METHOD
 //==============================================================================
     public void listenFromQueue( List<WatchEvent.Kind<Path>> expected, String msg ){
-        DetectedObject detObj;
+        DetectedEvent detObj;
         while( !lbq.isEmpty() ){
             try {
                 detObj = lbq.take();

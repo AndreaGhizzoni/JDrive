@@ -11,7 +11,7 @@ import java.nio.file.WatchEvent;
 /**
  * Object created by Watcher class when a detect a change of File System.
  */
-public class DetectedObject {
+public class DetectedEvent {
     // -1 not set/error, 0 creation, 1 modify, 2 delete
     private int kindOfEvent = -1;
     private String filePath = null;
@@ -20,7 +20,7 @@ public class DetectedObject {
     /**
      * Create an empty DetectedObject
      */
-    public DetectedObject(){}
+    public DetectedEvent(){}
 
     /**
      * Create a DetectedObject.
@@ -28,7 +28,7 @@ public class DetectedObject {
      * @param filePath {@link java.lang.String} the path of changing object.
      * @param lastModify {@link java.lang.Long} the timestamp of last modify.
      */
-    public DetectedObject(WatchEvent.Kind kind, String filePath, long lastModify) {
+    public DetectedEvent(WatchEvent.Kind kind, String filePath, long lastModify) {
         setKind(kind);
         setDetectedObject(filePath);
         setLastModify(lastModify);
