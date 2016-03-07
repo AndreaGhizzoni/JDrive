@@ -33,11 +33,11 @@ public class PathsUtil
 
     /**
      * This method check if APP_HOME exists, if not creates it.
+     * @return {@link java.nio.file.Path} to home application.
      * @throws IOException if make new directory fail.
      */
-    public static void createApplicationHomeDirectory() throws IOException{
-        Path p = java.nio.file.Paths.get(APP_HOME);
-        Files.createDirectories(p);
+    public static Path createApplicationHomeDirectory() throws IOException{
+        return Files.createDirectories( Paths.get(APP_HOME) );
     }
 
     /**

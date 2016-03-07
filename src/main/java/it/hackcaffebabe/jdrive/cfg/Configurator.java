@@ -29,7 +29,7 @@ public final class Configurator
     );
     private static Configurator instance;
 
-    private File cfgFile;
+    private File cfgFile = new File(PathsUtil.APP_CGF_FILE);
     private PropertiesConfiguration cfgProp;
 
     /**
@@ -43,9 +43,7 @@ public final class Configurator
 
     /* Basic constructor */
     private Configurator(){
-        //set config file to default
-        this.cfgFile = new File(PathsUtil.APP_CGF_FILE);
-        log.info("Configuration init");
+        log.info("Configurator created properly.");
     }
 
 //==============================================================================

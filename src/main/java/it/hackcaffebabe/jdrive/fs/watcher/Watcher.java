@@ -72,7 +72,7 @@ public final class Watcher implements Runnable
         log.info("Watch Service retrieved correctly from FS.");
 
         WATCHED_DIR = PathsUtil.createWatchedDirectory();
-        log.debug("Watcher base path: "+ WATCHED_DIR.toAbsolutePath());
+        log.debug("Watcher base path from Configurator: "+ WATCHED_DIR.toAbsolutePath());
         WATCHED_DATA_FILE = WATCHED_DIR.resolve(WATCHED_DATA_FILE_NAME);
     }
 

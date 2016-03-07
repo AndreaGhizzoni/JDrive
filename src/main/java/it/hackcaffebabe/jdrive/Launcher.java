@@ -20,7 +20,9 @@ public class Launcher {
 
     public static void main( String... args ){
         try{
+            log.info("JDrive Application Starting.");
             PathsUtil.createApplicationHomeDirectory();
+            log.info("JDrive Home directory created/detected in: "+PathsUtil.APP_HOME);
         }catch( IOException ioE ){
             fatal(ioE.getMessage(), ioE);
         }
