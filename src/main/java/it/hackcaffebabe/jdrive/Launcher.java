@@ -1,5 +1,7 @@
 package it.hackcaffebabe.jdrive;
 
+import it.hackcaffebabe.applicationutil.Locker;
+import it.hackcaffebabe.applicationutil.Util;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.DetectedEvent;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
@@ -19,6 +21,12 @@ public class Launcher {
     );
 
     public static void main( String... args ){
+        Locker locker = new Locker("JDriveApplication");
+        if(locker.isAlreadyRunning()){
+            // TODO in the future this will change in something else.
+            fatal("JDrive already running with pid: "+ Util.getProcessID(), null);
+        }
+
         try{
             log.info("JDrive Application Starting.");
             PathsUtil.createApplicationHomeDirectory();
