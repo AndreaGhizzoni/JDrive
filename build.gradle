@@ -10,7 +10,15 @@ repositories {
     mavenCentral()
 }
 
+allprojects {
+    repositories {
+        // this is used to import from gradle github projects
+        maven { url "https://jitpack.io" }
+    }
+}
+
 dependencies {
+    compile 'com.github.AndreaGhizzoni:Application-Util:-SNAPSHOT'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.1'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.1'
     compile group: 'commons-configuration',    name: 'commons-configuration', version: '1.10'
