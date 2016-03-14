@@ -50,6 +50,22 @@ public class DetectedEvent {
     }
 
 //==============================================================================
+//  METHODS
+//==============================================================================
+    /** @return true if this is an error event, false otherwise.
+     *          If returns true check getMessage() for explanation. */
+    public boolean containError(){ return this.kindOfEvent == -1; }
+
+    /** @return true if this event is a Creation Event, false otherwise. */
+    public boolean isEventCreate(){ return this.kindOfEvent == 1; }
+
+    /** @return true if this event is a Modification Event, false otherwise. */
+    public boolean isEventModify(){ return this.kindOfEvent == 2; }
+
+    /** @return true if this event is a Delete Event, false otherwise. */
+    public boolean isEventDelete(){ return this.kindOfEvent == 3; }
+
+//==============================================================================
 //  SETTER
 //==============================================================================
     /* Set the Kind of detection. */
