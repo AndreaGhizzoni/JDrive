@@ -29,6 +29,7 @@ public class Launcher {
 
         try{
             log.info("JDrive Application Starting.");
+            log.debug("pid: "+Util.getProcessID());
             PathsUtil.createApplicationHomeDirectory();
             log.info("JDrive Home directory created/detected in: "+PathsUtil.APP_HOME);
         }catch( IOException ioE ){
