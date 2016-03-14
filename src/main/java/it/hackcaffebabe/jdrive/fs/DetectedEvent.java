@@ -28,6 +28,8 @@ public class DetectedEvent {
 
     /**
      * Create a DetectedEvent by setting all the fields.
+     * If null is passed as WatchEvent.Kind then an error event is created,
+     * Path argument is ignored, and a message needs to be set.
      * @param kind {@link java.nio.file.WatchEvent.Kind} the Kind of event.
      * @param file {@link java.nio.file.Path} the path of changing object.
      * @param message {@link java.lang.String} explanation message of event.
@@ -40,7 +42,9 @@ public class DetectedEvent {
 
     /**
      * Create a DetectedEvent by setting the minimum parameters. The message
-     * argument is auto-generated based on kind and file argument
+     * argument is auto-generated based on kind and file argument.
+     * If you want to create an error event, use the other constructor to
+     * specify the error message (just for clarification).
      * @param kind {@link java.nio.file.WatchEvent.Kind} the Kind of event.
      * @param file {@link java.nio.file.Path} the path of changing object.
      */
@@ -76,7 +80,7 @@ public class DetectedEvent {
     private void setKind( WatchEvent.Kind kind ) {
         if( kind == null ) {
             this.kindOfEvent = -1;
-            this.setMessage("null passed to setKind() method.");
+            this.setMessage("Error event created from wrong constructor. Check java doc.");
         }else if( kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
             this.kindOfEvent = 1;
             this.setMessage("Creation event detected.");
