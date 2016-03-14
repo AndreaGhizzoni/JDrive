@@ -111,6 +111,14 @@ public final class Watcher implements Runnable
         out.close();
     }
 
+    /**
+     * This method close the current Watcher.
+     * @throws IOException if something went wrong with closing procedure.
+     */
+    public void kill() throws IOException {
+        this.watcher.close();
+    }
+
 //==============================================================================
 //  SETTER
 //==============================================================================
@@ -197,8 +205,12 @@ public final class Watcher implements Runnable
 
         }catch(InterruptedException inter){
             log.error(inter.getMessage()+". Exit.");
-        }catch(IOException ioe){
-            log.error("IOException Exit. "+ioe.getMessage());
+        }catch(IOException ioe) {
+            log.error("IOException Exit. " + ioe.getMessage());
+        }catch (ClosedWatchServiceException closedWatcher){
+            // this exception is thrown when the close() method is called when
+            // the a pool() or take() method is waiting  for a key to be queued
+            // DOCS: https://goo.gl/G02AEG
         }finally {
             try {
                 this.watcher.close();
