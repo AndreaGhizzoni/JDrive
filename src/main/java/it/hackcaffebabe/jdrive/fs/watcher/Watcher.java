@@ -12,6 +12,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -48,7 +49,7 @@ public final class Watcher implements Runnable
     private static Watcher instance;
     private WatchService watcher;
     private final HashMap<WatchKey, Path> directories = new HashMap<>();
-    private final ArrayList<String> excludedFile = new ArrayList<>();
+    private final HashSet<String> excludingFils = new HashSet<>();
 
     private LinkedBlockingQueue<DetectedEvent> dispatchingQueue;
 
@@ -79,7 +80,7 @@ public final class Watcher implements Runnable
         }
 
         // add here all the file name that watcher must exclude
-        this.excludedFile.add(WATCHED_DATA_FILE_NAME);
+        this.excludingFils.add(WATCHED_DATA_FILE_NAME);
     }
 
 //==============================================================================
@@ -155,7 +156,7 @@ public final class Watcher implements Runnable
 
 
                     // check if is a file to exclude.
-                    if( this.excludedFile.contains( fileDetected.getName()) )
+                    if( this.excludingFils.contains(fileDetected.getAbsolutePath()) )
                         continue;
                     //handle OVERFLOW event
                     if( kind.equals(OVERFLOW) )
