@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,7 +48,7 @@ public final class Watcher implements Runnable
     private static Watcher instance;
     private WatchService watcher;
     private final HashMap<WatchKey, Path> directories = new HashMap<>();
-    private final HashSet<String> excludingFils = new HashSet<>();
+    private final HashSet<String> excludingFiles = new HashSet<>();
 
     private LinkedBlockingQueue<DetectedEvent> dispatchingQueue;
 
@@ -80,7 +79,7 @@ public final class Watcher implements Runnable
         }
 
         // add here all the file name that watcher must exclude
-        this.excludingFils.add(WATCHED_DATA_FILE_NAME);
+        this.excludingFiles.add(WATCHED_DATA_FILE_NAME);
     }
 
 //==============================================================================
@@ -148,7 +147,6 @@ public final class Watcher implements Runnable
             WatchEvent.Kind<?> kind;
             Path objectDetected, context;
             File fileDetected;
-            DetectedEvent detObj;
             while( true ){
                 //retrieve and remove the next watch key
                 key = this.watcher.take();
@@ -162,21 +160,18 @@ public final class Watcher implements Runnable
                     objectDetected = directories.get(key).resolve(context);
                     fileDetected = objectDetected.toFile();
 
-
-                    // check if is a file to exclude.
-                    if( this.excludingFils.contains(fileDetected.getAbsolutePath()) )
-                        continue;
-                    //handle OVERFLOW event
-                    if( kind.equals(OVERFLOW) )
+                    // check if is a file to exclude or event == OVERFLOW
+                    boolean skipThisDetection =
+                            this.excludingFiles.contains(
+                                    fileDetected.getAbsolutePath()
+                            ) || kind.equals(OVERFLOW);
+                    if( skipThisDetection )
                         continue;
 
                     //dispatch detected object into queue
-                    detObj = new DetectedEvent(
-                            kind,
-                            fileDetected.getAbsolutePath(),
-                            fileDetected.lastModified()
+                    this.dispatchingQueue.put(
+                            new DetectedEvent(kind, objectDetected)
                     );
-                    this.dispatchingQueue.put(detObj);
 
                     // if event is CREATE and is a Directory, attach watcher to it
                     if( kind.equals(ENTRY_CREATE) &&
