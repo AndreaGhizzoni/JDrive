@@ -137,7 +137,8 @@ public final class Watcher implements Runnable
 
             WatchKey key;
             WatchEvent.Kind<?> kind;
-            Path pathFileDetected, context;
+            Path objectDetected, context;
+            File fileDetected;
             DetectedEvent detObj;
             while( true ){
                 //retrieve and remove the next watch key
@@ -147,33 +148,36 @@ public final class Watcher implements Runnable
                 for( WatchEvent<?> watchEvent : key.pollEvents() ) {
                     //get the kind of event (create, modify, delete)
                     kind = watchEvent.kind();
-                    //get the pathFileDetected for the event
+                    //get the objectDetected for the event
                     context = ((WatchEvent<Path>) watchEvent).context();
-                    pathFileDetected = directories.get(key).resolve(context);
+                    objectDetected = directories.get(key).resolve(context);
+                    fileDetected = objectDetected.toFile();
+
 
                     // check if is a file to exclude.
-                    if( this.excludedFile.contains(pathFileDetected.toFile().getName()) )
+                    if( this.excludedFile.contains( fileDetected.getName()) )
                         continue;
                     //handle OVERFLOW event
                     if( kind.equals(OVERFLOW) )
                         continue;
 
                     // ========== DEBUG OPTION!
-                    if( pathFileDetected.toFile().getName().equals("exit") )
+                    if( fileDetected.getName().equals("exit") )
                         throw new InterruptedException("Controlled Exit.");
                     // ========== DEBUG OPTION!
 
                     //dispatch detected object into queue
-                    File f = pathFileDetected.toFile();
                     detObj = new DetectedEvent(
-                        kind, f.getAbsolutePath(), f.lastModified()
+                            kind,
+                            fileDetected.getAbsolutePath(),
+                            fileDetected.lastModified()
                     );
                     this.dispatchingQueue.put(detObj);
 
                     // if event is CREATE and is a Directory, attach watcher to it
                     if( kind.equals(ENTRY_CREATE) &&
-                            PathsUtil.isDirectory(pathFileDetected)) {
-                        registerDirectories(pathFileDetected);
+                            PathsUtil.isDirectory(objectDetected)) {
+                        registerDirectories(objectDetected);
                     }
 
                     // update the .jwatch data file
