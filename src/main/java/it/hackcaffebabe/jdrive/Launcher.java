@@ -24,7 +24,7 @@ public class Launcher {
         Locker locker = new Locker("JDriveApplication");
         if(locker.isAlreadyRunning()){
             // TODO in the future this will change in something else.
-            fatal("JDrive already running with pid: "+ Util.getProcessID(), null);
+            fatal("JDrive already running", null);
         }
 
         try{
