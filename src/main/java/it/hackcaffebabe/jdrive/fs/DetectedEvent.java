@@ -1,10 +1,8 @@
 package it.hackcaffebabe.jdrive.fs;
 
 import it.hackcaffebabe.jdrive.util.DateUtils;
-
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 
@@ -12,86 +10,90 @@ import java.nio.file.WatchEvent;
  * Object created by Watcher class when a detect a change of File System.
  */
 public class DetectedEvent {
-    // -1 not set/error, 0 creation, 1 modify, 2 delete
-    private int kindOfEvent = -1;
+    // -1 : some error, explanation in message
+    //  0 : not set
+    //  1 : CREATE
+    //  2 : MODIFY
+    //  3 : DELETE
+    private int kindOfEvent = 0;
+    // null : not set
     private String filePath = null;
+    // -1 : not set
     private long lastModify = -1L;
+    // null : not set
+    private String message = null;
 
-    /**
-     * Create an empty DetectedObject
-     */
+    /** Create an empty DetectedObject */
     public DetectedEvent(){}
 
     /**
-     * Create a DetectedObject.
+     * Create a DetectedEvent by setting all the fields.
      * @param kind {@link java.nio.file.WatchEvent.Kind} the Kind of event.
-     * @param filePath {@link java.lang.String} the path of changing object.
-     * @param lastModify {@link java.lang.Long} the timestamp of last modify.
+     * @param file {@link java.nio.file.Path} the path of changing object.
+     * @param message {@link java.lang.String} explanation message of event.
      */
-    public DetectedEvent(WatchEvent.Kind kind, String filePath, long lastModify) {
-        setKind(kind);
-        setDetectedObject(filePath);
-        setLastModify(lastModify);
+    public DetectedEvent( WatchEvent.Kind kind, Path file, String message ) {
+        this.setKind(kind);
+        this.setFile(file);
+        this.setMessage(message);
+    }
+
+    /**
+     * Create a DetectedEvent by setting the minimum parameters. The message
+     * argument is auto-generated based on kind and file argument
+     * @param kind {@link java.nio.file.WatchEvent.Kind} the Kind of event.
+     * @param file {@link java.nio.file.Path} the path of changing object.
+     */
+    public DetectedEvent( WatchEvent.Kind kind, Path file ){
+        this.setKind(kind);
+        this.setFile(file);
     }
 
 //==============================================================================
 //  SETTER
 //==============================================================================
-    /**
-     * Set the Kind of detection.
-     * @param kind {@link java.nio.file.WatchEvent.Kind} the kind of detection.
-     */
-    public void setKind( WatchEvent.Kind kind ) {
-        if( kind == null )
+    /* Set the Kind of detection. */
+    private void setKind( WatchEvent.Kind kind ) {
+        if( kind == null ) {
             this.kindOfEvent = -1;
-        else if( kind.equals(StandardWatchEventKinds.OVERFLOW) )
-            this.kindOfEvent = -1;
-        else if( kind.equals(StandardWatchEventKinds.ENTRY_CREATE))
-            this.kindOfEvent = 0;
-        else if( kind.equals(StandardWatchEventKinds.ENTRY_MODIFY))
+            this.setMessage("null passed to setKind() method.");
+        }else if( kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
             this.kindOfEvent = 1;
-        else if( kind.equals(StandardWatchEventKinds.ENTRY_DELETE))
+            this.setMessage("Creation event detected.");
+        }else if( kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
             this.kindOfEvent = 2;
+            this.setMessage("Modification event detected.");
+        }else if( kind.equals(StandardWatchEventKinds.ENTRY_DELETE)) {
+            this.kindOfEvent = 3;
+            this.setMessage("Delete event detected.");
+        }else {
+            this.kindOfEvent = 0; // no set for all the unmatched case
+        }
     }
 
-    /**
-     * Set the Detected Object from Watcher in String format.
-     * If pass null or empty string, noting will set.
-     * @param filePath {@link java.lang.String} in string format.
-     */
-    public void setDetectedObject( String filePath ) {
-        if( filePath != null && !filePath.isEmpty() )
-            this.filePath = filePath;
+    /* Set the Detected Object from Watcher in Path format.
+     * If argument passing is null, nothing will set. */
+    private void setFile(Path path ) {
+        if( path != null ){
+            File tmp = path.toFile();
+            this.filePath = tmp.getAbsolutePath();
+            this.setLastModify(tmp.lastModified());
+        }
     }
 
-    /**
-     * Set the Detected Object from Watcher in File format.
-     * If file passing is null, nothing will set.
-     * @param file {@link java.io.File} in File format.
-     */
-    public void setDetectedObject( File file ){
-        if( file != null )
-            this.filePath = file.getAbsolutePath();
-    }
-
-    /**
-     * Set the Detected Object from Watcher in Path format.
-     * If path passing is null, nothing will set.
-     * @param path {@link java.nio.file.Path} in Path format.
-     */
-    public void setDetectedObject( Path path ){
-        if( path != null )
-            this.filePath = path.toFile().getAbsolutePath();
-    }
-
-    /**
-     * Set the last modify of Detected Object by Watcher.
-     * If lastModify passing is <= 0, nothing will set.
-     * @param lastModify {@link java.lang.Long} in long format.
-     */
-    public void setLastModify(long lastModify) {
+    /* Set the last modify of Detected Event by Watcher.
+     * If argument passing is <= 0, nothing will set. */
+    private void setLastModify( long lastModify ) {
         if( lastModify > 0L )
             this.lastModify = lastModify;
+    }
+
+    /* TODO add comment */
+    private void setMessage( String msg ) {
+        if( msg != null && !msg.isEmpty() ){
+            // TODO maybe escaping "\n" and stuff like that
+            this.message = msg;
+        }
     }
 
 //==============================================================================
@@ -104,59 +106,48 @@ public class DetectedEvent {
      */
     public WatchEvent.Kind getKind() {
         switch (this.kindOfEvent){
-            case -1: return null;
-            case  0: return StandardWatchEventKinds.ENTRY_CREATE;
-            case  1: return StandardWatchEventKinds.ENTRY_MODIFY;
-            case  2: return StandardWatchEventKinds.ENTRY_DELETE;
+            case -1: return null;  // error
+            case  0: return null;  // not set
+            case  1: return StandardWatchEventKinds.ENTRY_CREATE;
+            case  2: return StandardWatchEventKinds.ENTRY_MODIFY;
+            case  3: return StandardWatchEventKinds.ENTRY_DELETE;
             default: return null;
         }
     }
 
     /**
-     * @return {@link java.lang.String} representation of detected object
-     * by watcher.
+     * @return {@link java.lang.String} that represents the absolute path
+     * of detected file event.
      */
-    public String getPathAsString(){ return this.filePath; }
+    public String getFile(){ return this.filePath; }
 
-    /**
-     * @return {@link java.nio.file.Path} representation of detected object by
-     * watcher.
-     */
-    public Path getPath(){
-        String p = this.getPathAsString();
-        if( p == null )
-            return  null;
-        else
-            return Paths.get( p );
-    }
+    /** @return {@link java.lang.Long} the last modify of detected object. */
+    public long getLastModify(){ return this.lastModify; }
 
-    /**
-     * @return {@link java.io.File} representation of detected object by watcher.
-     */
-    public File getFile(){ return this.getPath().toFile(); }
-
-    /**
-     * @return {@link java.lang.Long} the last modify of detected object.
-     */
-    public long getLastModify(){ return lastModify; }
-
-    /**
-     * @return {@link java.lang.String} representation of last modify.
-     */
-    public String getLastModifyAsString(){
-        return DateUtils.fromLongToString( this.getLastModify(), null );
-    }
+    /** @return TODO add doc */
+    public String getMessage(){ return this.message; }
 
 //==============================================================================
 //  OVERRIDE
 //==============================================================================
     @Override
     public String toString(){
+        String k = this.getKind() == null ? "null" : this.getKind().toString();
+        String p = this.getFile() == null ? "null" : this.getFile();
+        String l = this.getLastModify() == 0L ? "0" :
+                DateUtils.fromLongToString(getLastModify(), null);
+        String m = this.getMessage() == null ? "null" : this.getMessage();
+
         StringBuilder b = new StringBuilder();
         b.append("{");
-        b.append(" \"kind\": ").append("\"").append(getKind().toString()).append("\"").append(",");
-        b.append(" \"path\": ").append("\"").append(getPathAsString()).append("\"").append(",");
-        b.append(" \"lastModify\": ").append("\"").append(getLastModify()).append("\"");
+        b.append(" \"kind\": ")
+                .append("\"").append( k ).append("\"").append(",");
+        b.append(" \"path\": ")
+                .append("\"").append( p ).append("\"").append(",");
+        b.append(" \"lastModify\": ")
+                .append("\"").append( l ).append("\"").append(",");
+        b.append(" \"message\": ")
+                .append("\"").append( m ).append("\"");
         b.append(" }");
         return b.toString();
     }
