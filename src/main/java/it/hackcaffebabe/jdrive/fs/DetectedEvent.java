@@ -65,6 +65,10 @@ public class DetectedEvent {
     /** @return true if this event is a Delete Event, false otherwise. */
     public boolean isEventDelete(){ return this.kindOfEvent == 3; }
 
+    /** @return true if this event is empty, meaning that is made by empty
+     *          constructor. */
+    public boolean isEmpty(){ return this.kindOfEvent == 0; }
+
 //==============================================================================
 //  SETTER
 //==============================================================================
