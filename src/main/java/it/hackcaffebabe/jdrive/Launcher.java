@@ -43,12 +43,25 @@ public class Launcher {
         // TODO insert here Google Authentication process
 
         try{
-            LinkedBlockingQueue<DetectedEvent> lbq = new LinkedBlockingQueue<DetectedEvent>();
-            Watcher w = Watcher.getInstance();
-            w.setDispatchingQueue(lbq);
+            // process that will start from main application
+            final Watcher w = Watcher.getInstance();
 
-            Thread watcherThread = new Thread(w);
-            watcherThread.start();
+            // add a shutdown hook to close all the process above properly
+            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    log.debug("JDrive closing procedure...");
+                    try {
+                        w.kill();
+                    } catch (IOException e) {
+                        fatal("Attempting to kill Watcher process.", e);
+                    }
+                }
+            }, "Main-Shutdown-Hook"));
+
+            LinkedBlockingQueue<DetectedEvent> lbq = new LinkedBlockingQueue<>();
+            w.setDispatchingQueue(lbq);
+            new Thread(w, "Watcher").start();
 
             DetectedEvent detObj;
             while(true){
