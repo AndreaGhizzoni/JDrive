@@ -170,11 +170,6 @@ public final class Watcher implements Runnable
                     if( kind.equals(OVERFLOW) )
                         continue;
 
-                    // ========== DEBUG OPTION!
-                    if( fileDetected.getName().equals("exit") )
-                        throw new InterruptedException("Controlled Exit.");
-                    // ========== DEBUG OPTION!
-
                     //dispatch detected object into queue
                     detObj = new DetectedEvent(
                             kind,
