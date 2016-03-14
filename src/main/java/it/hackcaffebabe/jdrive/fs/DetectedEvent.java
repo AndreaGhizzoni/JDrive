@@ -23,7 +23,7 @@ public class DetectedEvent {
     // null : not set
     private String message = null;
 
-    /** Create an empty DetectedObject */
+    /** Create an empty DetectedEvent */
     public DetectedEvent(){}
 
     /**
