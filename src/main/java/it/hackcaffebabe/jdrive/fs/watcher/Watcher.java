@@ -163,7 +163,7 @@ public final class Watcher implements Runnable
                     // check if is a file to exclude or event == OVERFLOW
                     boolean skipThisDetection =
                             this.excludingFiles.contains(
-                                    fileDetected.getAbsolutePath()
+                                    fileDetected.getName()
                             ) || kind.equals(OVERFLOW);
                     if( skipThisDetection )
                         continue;
@@ -178,9 +178,6 @@ public final class Watcher implements Runnable
                             PathsUtil.isDirectory(objectDetected)) {
                         registerDirectories(objectDetected);
                     }
-
-                    // update the .jwatch data file
-                    updateWatcherDataFile();
                 }
 
                 // reset the key. if key is associated to the root of Watcher
@@ -188,9 +185,19 @@ public final class Watcher implements Runnable
                 // otherwise, remove only the key associated with path.
                 if( !key.reset() ){
                     Path removed = directories.remove(key);
-                    if( removed.equals(WATCHED_DIR) )
-                        break; // placeholder to proper closing.
+                    if( removed.equals(WATCHED_DIR) ){
+                        this.dispatchingQueue.put(
+                                new DetectedEvent(null, null,
+                                        "Root directory deleted. Watcher stop." )
+                        );
+                        break;
+                    }
                 }
+
+                // update the .jwatch data file here because in case of removing
+                // root of watcher, this update cause IOException .jwatch not
+                // found
+                updateWatcherDataFile();
             }
 
         }catch(InterruptedException inter){

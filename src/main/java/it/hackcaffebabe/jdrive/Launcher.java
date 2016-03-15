@@ -64,9 +64,14 @@ public class Launcher {
             new Thread(w, "Watcher").start();
 
             DetectedEvent detObj;
-            while(true){
+            boolean keepRunning = true;
+            while(keepRunning){
                 detObj = lbq.take();
                 log.debug(detObj.toString());
+                if( detObj.containError() ){
+                    log.info( detObj.getMessage() );
+                    keepRunning = false;
+                }
             }
         }catch( Exception ex ){
             fatal(ex.getMessage(), ex);
