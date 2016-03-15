@@ -48,7 +48,7 @@ public final class Watcher implements Runnable
     private static Watcher instance;
     private WatchService watcher;
     private final HashMap<WatchKey, Path> directories = new HashMap<>();
-    private final HashSet<String> excludingFiles = new HashSet<>();
+    //private final HashSet<String> excludingFiles = new HashSet<>();
 
     private LinkedBlockingQueue<DetectedEvent> dispatchingQueue;
 
@@ -79,7 +79,7 @@ public final class Watcher implements Runnable
         }
 
         // add here all the file name that watcher must exclude
-        this.excludingFiles.add(WATCHED_DATA_FILE_NAME);
+        //this.excludingFiles.add(WATCHED_DATA_FILE_NAME);
     }
 
 //==============================================================================
@@ -139,14 +139,17 @@ public final class Watcher implements Runnable
             if( this.dispatchingQueue == null )
                 throw new InterruptedException("Dispatch Queue missing.");
 
-            updateWatcherDataFile();
+
+            // turn off this feature by now.
+            // updateWatcherDataFile();
+
             // register the watched directory from Configurator in every case.
             registerDirectories(WATCHED_DIR);
 
             WatchKey key;
             WatchEvent.Kind<?> kind;
             Path objectDetected, context;
-            File fileDetected;
+            //File fileDetected;
             while( true ){
                 //retrieve and remove the next watch key
                 key = this.watcher.take();
@@ -158,15 +161,16 @@ public final class Watcher implements Runnable
                     //get the objectDetected for the event
                     context = ((WatchEvent<Path>) watchEvent).context();
                     objectDetected = directories.get(key).resolve(context);
-                    fileDetected = objectDetected.toFile();
+                    //fileDetected = objectDetected.toFile();
 
                     // check if is a file to exclude or event == OVERFLOW
-                    boolean skipThisDetection =
-                            this.excludingFiles.contains(
-                                    fileDetected.getName()
-                            ) || kind.equals(OVERFLOW);
-                    if( skipThisDetection )
-                        continue;
+//                    boolean skipThisDetection =
+//                            this.excludingFiles.contains(
+//                                    fileDetected.getName()
+//                            ) || kind.equals(OVERFLOW);
+//                    if( skipThisDetection )
+//                        continue;
+                    if( kind.equals(OVERFLOW) ) continue;
 
                     //dispatch detected object into queue
                     this.dispatchingQueue.put(
@@ -174,8 +178,8 @@ public final class Watcher implements Runnable
                     );
 
                     // if event is CREATE and is a Directory, attach watcher to it
-                    if( kind.equals(ENTRY_CREATE) &&
-                            PathsUtil.isDirectory(objectDetected)) {
+                    if( kind.equals(ENTRY_CREATE)
+                            && PathsUtil.isDirectory(objectDetected)) {
                         registerDirectories(objectDetected);
                     }
                 }
@@ -186,8 +190,8 @@ public final class Watcher implements Runnable
                 if( !key.reset() ){
                     Path removed = directories.remove(key);
                     if( removed.equals(WATCHED_DIR) ){
-                        this.dispatchingQueue.put(
-                                new DetectedEvent(null, null,
+                        this.dispatchingQueue
+                                .put( new DetectedEvent( null, null,
                                         "Root directory deleted. Watcher stop." )
                         );
                         break;
@@ -196,8 +200,9 @@ public final class Watcher implements Runnable
 
                 // update the .jwatch data file here because in case of removing
                 // root of watcher, this update cause IOException .jwatch not
-                // found
-                updateWatcherDataFile();
+                // found.
+                // turn off this feature by now.
+                //updateWatcherDataFile();
             }
 
         }catch(InterruptedException inter){
