@@ -69,7 +69,7 @@ public class Launcher {
                 detObj = lbq.take();
                 log.debug(detObj.toString());
                 if( detObj.containError() ){
-                    log.info( detObj.getMessage() );
+                    log.info("Error message from Watcher: "+detObj.getMessage());
                     keepRunning = false;
                 }
             }
