@@ -1,7 +1,6 @@
 package it.hackcaffebabe.jdrive.fs.watcher;
 
 import it.hackcaffebabe.jdrive.fs.DetectedEvent;
-import it.hackcaffebabe.jdrive.util.DateUtils;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,9 +8,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -42,8 +39,8 @@ public final class Watcher implements Runnable
     // watcher base path
     private static Path WATCHED_DIR;
     // watcher data file
-    private static Path WATCHED_DATA_FILE;
-    private static final String WATCHED_DATA_FILE_NAME = ".jwatch";
+//    private static Path WATCHED_DATA_FILE;
+//    private static final String WATCHED_DATA_FILE_NAME = ".jwatch";
 
     private static Watcher instance;
     private WatchService watcher;
@@ -73,10 +70,10 @@ public final class Watcher implements Runnable
 
         WATCHED_DIR = PathsUtil.createWatchedDirectory();
         log.debug("Watcher base path from Configurator: "+ WATCHED_DIR.toAbsolutePath());
-        WATCHED_DATA_FILE = WATCHED_DIR.resolve(WATCHED_DATA_FILE_NAME);
-        if( !WATCHED_DATA_FILE.toFile().exists() ) {
-            WATCHED_DATA_FILE = Files.createFile(WATCHED_DATA_FILE);
-        }
+//        WATCHED_DATA_FILE = WATCHED_DIR.resolve(WATCHED_DATA_FILE_NAME);
+//        if( !WATCHED_DATA_FILE.toFile().exists() ) {
+//            WATCHED_DATA_FILE = Files.createFile(WATCHED_DATA_FILE);
+//        }
 
         // add here all the file name that watcher must exclude
         //this.excludingFiles.add(WATCHED_DATA_FILE_NAME);
@@ -92,23 +89,23 @@ public final class Watcher implements Runnable
     }
 
     /* create or update the Watcher data file in working directory. */
-    private void updateWatcherDataFile() throws IOException {
-        BufferedReader in = new BufferedReader(new FileReader(
-                WATCHED_DATA_FILE.toFile()));
-        String lineRead = in.readLine();
-        in.close();
-        if( lineRead != null ) { // file is not empty
-            String d = DateUtils.fromLongToString( Long.valueOf(lineRead), null);
-            log.info("Last update since " + d);
-        }
-
-        // then write the timestamp
-        BufferedWriter out = new BufferedWriter(new FileWriter(
-                WATCHED_DATA_FILE.toFile()));
-        out.write( String.valueOf( new Date().getTime() ));
-        out.newLine();
-        out.close();
-    }
+//    private void updateWatcherDataFile() throws IOException {
+//        BufferedReader in = new BufferedReader(new FileReader(
+//                WATCHED_DATA_FILE.toFile()));
+//        String lineRead = in.readLine();
+//        in.close();
+//        if( lineRead != null ) { // file is not empty
+//            String d = DateUtils.fromLongToString( Long.valueOf(lineRead), null);
+//            log.info("Last update since " + d);
+//        }
+//
+//         then write the timestamp
+//        BufferedWriter out = new BufferedWriter(new FileWriter(
+//                WATCHED_DATA_FILE.toFile()));
+//        out.write( String.valueOf( new Date().getTime() ));
+//        out.newLine();
+//        out.close();
+//    }
 
     /**
      * This method close the current Watcher.
