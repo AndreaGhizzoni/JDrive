@@ -112,7 +112,8 @@ public class DetectedEvent {
             this.lastModify = lastModify;
     }
 
-    /* TODO add comment */
+    /* Set a human readable message to explain the kind of event that occurs.
+    *  Extremely useful in Error event. */
     private void setMessage( String msg ) {
         if( msg != null && !msg.isEmpty() ){
             // TODO maybe escaping "\n" and stuff like that
