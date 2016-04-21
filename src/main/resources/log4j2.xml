@@ -76,10 +76,6 @@
             <AppenderRef ref="Console"/>
         </Logger>
 
-        <Logger name="GoogleAuthenticatorUI" level="all" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-
         <!-- logger for package it.hackcafffebabe.jdrive.cfg -->
         <Logger name="Configurator" level="all" additivity="false">
             <AppenderRef ref="Console"/>
