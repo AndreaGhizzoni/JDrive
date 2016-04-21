@@ -5,7 +5,7 @@ final class AuthenticationConst
     /** Directory to store user credentials for this application. */
     static final java.io.File DATA_STORE_DIR = new java.io.File(
             System.getProperty("user.home"),
-            ".jdrive/cred.json"
+            ".jdrive/cred"
     );
 
     /** the application name */
