@@ -2,6 +2,7 @@ package it.hackcaffebabe.jdrive;
 
 import it.hackcaffebabe.applicationutil.Locker;
 import it.hackcaffebabe.applicationutil.Util;
+import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.DetectedEvent;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
@@ -40,7 +41,12 @@ public class Launcher {
         if( !cfgOK )
             fatal("Configurator Error. Program Exit.", null);
 
-        // TODO insert here Google Authentication process
+        // integrated with Google authentication
+        try {
+            GoogleAuthenticator.getInstance().UIAuthentication();
+        } catch (IOException | InterruptedException e) {
+            fatal(e.getMessage(), e);
+        }
 
         try{
             // process that will start from main application
