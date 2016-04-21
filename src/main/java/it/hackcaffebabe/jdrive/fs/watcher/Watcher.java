@@ -145,7 +145,7 @@ public final class Watcher implements Runnable
 
             WatchKey key;
             WatchEvent.Kind<?> kind;
-            Path objectDetected, context;
+            Path objectDetected;
             //File fileDetected;
             while( true ){
                 //retrieve and remove the next watch key
@@ -156,8 +156,9 @@ public final class Watcher implements Runnable
                     //get the kind of event (create, modify, delete)
                     kind = watchEvent.kind();
                     //get the objectDetected for the event
-                    context = ((WatchEvent<Path>) watchEvent).context();
-                    objectDetected = directories.get(key).resolve(context);
+                    objectDetected = directories.get(key).resolve(
+                        ((WatchEvent<Path>) watchEvent).context()
+                    );
                     //fileDetected = objectDetected.toFile();
 
                     // check if is a file to exclude or event == OVERFLOW
