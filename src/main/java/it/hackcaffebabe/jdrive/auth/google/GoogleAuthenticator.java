@@ -24,13 +24,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * // Build a new authorized API client service.
- * Drive service = getDriveService();
- *
+ * TODO add doc and example
  */
 public final class GoogleAuthenticator {
 
+    // instance of singleton
     private static GoogleAuthenticator instance;
+    // logger
     private static final Logger log = LogManager.getLogger(
             GoogleAuthenticator.class.getSimpleName()
     );
@@ -46,21 +46,16 @@ public final class GoogleAuthenticator {
         return instance;
     }
 
-    /* Global instance of the {@link FileDataStoreFactory}. */
-    private  FileDataStoreFactory DATA_STORE_FACTORY;
-    /* Global instance of the JSON factory. */
+    // instances needed for Google Authentication process
+    private FileDataStoreFactory DATA_STORE_FACTORY;
     private JsonFactory JSON_FACTORY;
-    /* Global instance of the HTTP transport. */
     private HttpTransport HTTP_TRANSPORT;
-    /* Instance of Code Flow */
     private GoogleAuthorizationCodeFlow CODE_FLAW;
 
-    /* Current connection status */
-//    private GoogleAuthenticatorV2.Status status;
-
+    // Authenticated object
     private Drive service;
 
-    /* Global instance of the scopes */
+    /* instance of the scopes */
     private static final List<String> SCOPES = Arrays.asList(
             DriveScopes.DRIVE,
             DriveScopes.DRIVE_FILE
@@ -69,11 +64,34 @@ public final class GoogleAuthenticator {
     /* constructor */
     private GoogleAuthenticator() throws GeneralSecurityException, IOException {
         log.entry();
-//        setStatus(Status.UNAUTHORIZED);
         this.buildHTTPTransportJsonFactory();
         this.buildDataStore();
         this.buildGoogleAuthCodeFlow();
         log.debug("GoogleAuthenticator created correctly.");
+    }
+
+//==============================================================================
+//  METHOD
+//==============================================================================
+    /**
+     * Build and return an authorized Drive client service.
+     * @return an authorized Drive client service
+     * @throws IOException
+     */
+    public Drive getDriveService() throws IOException {
+        log.info("Try to get Google authentication services...");
+        Credential credential = new AuthorizationCodeInstalledApp(
+                CODE_FLAW,
+                new LocalServerReceiver()
+        ).authorize("user");
+        if( this.service == null ) {
+            this.service = new Drive.Builder(
+                    HTTP_TRANSPORT, JSON_FACTORY, credential)
+                    .setApplicationName(AuthenticationConst.APP_NAME)
+                    .build();
+        }
+        log.info("Google authentication successful.");
+        return this.service;
     }
 
 //==============================================================================
@@ -108,51 +126,6 @@ public final class GoogleAuthenticator {
             .setAccessType("offline")
             .build();
     }
-
-    /**
-     * Build and return an authorized Drive client service.
-     * @return an authorized Drive client service
-     * @throws IOException
-     */
-    public Drive getDriveService() throws IOException {
-        log.info("Try to get Google authentication services...");
-        Credential credential = new AuthorizationCodeInstalledApp(
-                CODE_FLAW,
-                new LocalServerReceiver()
-        ).authorize("user");
-        if( this.service == null ) {
-            this.service = new Drive.Builder(
-                    HTTP_TRANSPORT, JSON_FACTORY, credential)
-                    .setApplicationName(AuthenticationConst.APP_NAME)
-                    .build();
-        }
-        return this.service;
-    }
-
-//==============================================================================
-//  SETTER
-//==============================================================================
-//    /* set the status of authorizations if argument is not null */
-//    private void setStatus(GoogleAuthenticatorV2.Status s){
-//        if(s != null){
-//            this.status = s;
-//        }
-//    }
-
-
-//==============================================================================
-//  INNER CLASS
-//==============================================================================
-//    /** Represents the Authorization status */
-//    private enum Status { AUTHORIZE, UNAUTHORIZED }
-//
-//    /**
-//     * Exception throws when call <code>getService()</code> while your not
-//     * authenticate with the appropriate procedure.
-//     */
-//    public class UnAuthorizeException extends IOException {
-//        public UnAuthorizeException(String m){ super(m); }
-//    }
 }
 
 

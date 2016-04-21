@@ -8,5 +8,6 @@ final class AuthenticationConst
             ".jdrive/cred.json"
     );
 
+    /** the application name */
     static final String APP_NAME = "JDrive";
 }
