@@ -8,3 +8,4 @@ build/
 JDrive.iml
 **.iml
 .idea/*
+credentials.json
