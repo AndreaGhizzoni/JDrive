@@ -80,11 +80,11 @@ public final class GoogleAuthenticator {
      */
     public Drive getDriveService() throws IOException {
         log.info("Try to get Google authentication services...");
-        Credential credential = new AuthorizationCodeInstalledApp(
+        if( this.service == null ) {
+            Credential credential = new AuthorizationCodeInstalledApp(
                 CODE_FLAW,
                 new LocalServerReceiver()
-        ).authorize("user");
-        if( this.service == null ) {
+            ).authorize("user");
             this.service = new Drive.Builder(
                     HTTP_TRANSPORT, JSON_FACTORY, credential)
                     .setApplicationName(AuthenticationConst.APP_NAME)
