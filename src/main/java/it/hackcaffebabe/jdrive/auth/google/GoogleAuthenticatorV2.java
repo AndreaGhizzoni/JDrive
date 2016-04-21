@@ -62,7 +62,8 @@ public final class GoogleAuthenticatorV2 {
 
     /* Global instance of the scopes */
     private static final List<String> SCOPES = Arrays.asList(
-            DriveScopes.DRIVE_METADATA_READONLY
+            DriveScopes.DRIVE,
+            DriveScopes.DRIVE_FILE
     );
 
     /* constructor */
