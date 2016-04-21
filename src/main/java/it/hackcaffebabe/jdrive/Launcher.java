@@ -3,7 +3,6 @@ package it.hackcaffebabe.jdrive;
 import it.hackcaffebabe.applicationutil.Locker;
 import it.hackcaffebabe.applicationutil.Util;
 import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
-import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticatorV2;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.DetectedEvent;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
@@ -45,7 +44,7 @@ public class Launcher {
 
         // integrated with Google authentication
         try {
-            GoogleAuthenticatorV2.getInstance().getDriveService();
+            GoogleAuthenticator.getInstance().getDriveService();
         } catch (IOException | GeneralSecurityException  e) {
             fatal(e.getMessage(), e);
         }

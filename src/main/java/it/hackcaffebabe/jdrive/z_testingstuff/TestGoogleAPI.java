@@ -9,7 +9,6 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
-import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
