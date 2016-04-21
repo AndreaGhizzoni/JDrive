@@ -52,8 +52,13 @@ public final class GoogleAuthenticatorV2 {
     private JsonFactory JSON_FACTORY;
     /* Global instance of the HTTP transport. */
     private HttpTransport HTTP_TRANSPORT;
-
+    /* Instance of Code Flow */
     private GoogleAuthorizationCodeFlow CODE_FLAW;
+
+    /* Current connection status */
+//    private GoogleAuthenticatorV2.Status status;
+
+    private Drive service;
 
     /* Global instance of the scopes */
     private static final List<String> SCOPES = Arrays.asList(
@@ -63,8 +68,10 @@ public final class GoogleAuthenticatorV2 {
     /* constructor */
     private GoogleAuthenticatorV2() throws GeneralSecurityException, IOException {
         log.entry();
+//        setStatus(Status.UNAUTHORIZED);
         this.buildHTTPTransportJsonFactory();
         this.buildDataStore();
+        this.buildGoogleAuthCodeFlow();
         log.debug("GoogleAuthenticator created correctly.");
     }
 
@@ -93,7 +100,6 @@ public final class GoogleAuthenticatorV2 {
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(
                 JSON_FACTORY, new InputStreamReader(in)
         );
-
         // Build flow and trigger user authorization request.
         CODE_FLAW = new GoogleAuthorizationCodeFlow.Builder(
                 HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
@@ -102,30 +108,50 @@ public final class GoogleAuthenticatorV2 {
             .build();
     }
 
-    /*
-     * Creates an authorized Credential object.
-     * @return an authorized Credential object.
-     * @throws IOException
-     */
-    private Credential authorize() throws IOException {
-        return new AuthorizationCodeInstalledApp(
-                CODE_FLAW,
-                new LocalServerReceiver()
-        ).authorize("user");
-    }
-
     /**
      * Build and return an authorized Drive client service.
      * @return an authorized Drive client service
      * @throws IOException
      */
     public Drive getDriveService() throws IOException {
-        Credential credential = authorize();
-        return new Drive.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, credential)
-                .setApplicationName(AuthenticationConst.APP_NAME)
-                .build();
+        log.info("Try to get Google authentication services...");
+        Credential credential = new AuthorizationCodeInstalledApp(
+                CODE_FLAW,
+                new LocalServerReceiver()
+        ).authorize("user");
+        if( this.service == null ) {
+            this.service = new Drive.Builder(
+                    HTTP_TRANSPORT, JSON_FACTORY, credential)
+                    .setApplicationName(AuthenticationConst.APP_NAME)
+                    .build();
+        }
+        return this.service;
     }
+
+//==============================================================================
+//  SETTER
+//==============================================================================
+//    /* set the status of authorizations if argument is not null */
+//    private void setStatus(GoogleAuthenticatorV2.Status s){
+//        if(s != null){
+//            this.status = s;
+//        }
+//    }
+
+
+//==============================================================================
+//  INNER CLASS
+//==============================================================================
+//    /** Represents the Authorization status */
+//    private enum Status { AUTHORIZE, UNAUTHORIZED }
+//
+//    /**
+//     * Exception throws when call <code>getService()</code> while your not
+//     * authenticate with the appropriate procedure.
+//     */
+//    public class UnAuthorizeException extends IOException {
+//        public UnAuthorizeException(String m){ super(m); }
+//    }
 }
 
 

@@ -110,7 +110,7 @@ public final class GoogleAuthenticator
     private void buildGoogleAuthCodeFlow(){
         this.googleAuthCodeFlow = new GoogleAuthorizationCodeFlow.Builder(
                 httpTransport, jsonFactory,
-                AuthenticationConst.CLIENT_ID, AuthenticationConst.CLIENT_SECRET,
+                /*AuthenticationConst.CLIENT_ID, AuthenticationConst.CLIENT_SECRET,*/ "","",
                 Arrays.asList(DriveScopes.DRIVE, DriveScopes.DRIVE_FILE)
         ).setAccessType("offline").setApprovalPrompt("force").build();
     }
@@ -155,9 +155,9 @@ public final class GoogleAuthenticator
         return new GoogleCredential.Builder()
                 .setTransport(this.httpTransport)
                 .setJsonFactory(this.jsonFactory)
-                .setClientSecrets(
-                        AuthenticationConst.CLIENT_ID,
-                        AuthenticationConst.CLIENT_SECRET)
+                .setClientSecrets( "","")
+//                        AuthenticationConst.CLIENT_ID,
+//                        AuthenticationConst.CLIENT_SECRET)
                 .addRefreshListener(new CredentialRefreshListener() {
                     @Override
                     public void onTokenResponse(
@@ -217,7 +217,7 @@ public final class GoogleAuthenticator
 
         if(getStatus().equals(Status.UNAUTHORIZED)) {
             this.tokenResponse = this.googleAuthCodeFlow.newTokenRequest(code)
-                    .setRedirectUri(AuthenticationConst.REDIRECT_URI).execute();
+                    .setRedirectUri(/*AuthenticationConst.REDIRECT_URI*/"").execute();
             this.status = Status.AUTHORIZE;
         }
     }
@@ -248,7 +248,7 @@ public final class GoogleAuthenticator
     public String getAuthURL() {
         if(getStatus().equals(Status.UNAUTHORIZED) ) {
             return this.googleAuthCodeFlow.newAuthorizationUrl().
-                    setRedirectUri(AuthenticationConst.REDIRECT_URI).build();
+                    setRedirectUri(/*AuthenticationConst.REDIRECT_URI*/"").build();
         }else{
             return null;
         }
