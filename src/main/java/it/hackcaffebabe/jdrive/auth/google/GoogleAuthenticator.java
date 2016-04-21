@@ -55,19 +55,13 @@ public final class GoogleAuthenticator {
     // Authenticated object
     private Drive service;
 
-    /* instance of the scopes */
-    private static final List<String> SCOPES = Arrays.asList(
-            DriveScopes.DRIVE,
-            DriveScopes.DRIVE_FILE
-    );
-
     /* constructor */
     private GoogleAuthenticator() throws GeneralSecurityException, IOException {
-        log.entry();
+        log.info("Try to build GoogleAuthenticator...");
         this.buildHTTPTransportJsonFactory();
         this.buildDataStore();
         this.buildGoogleAuthCodeFlow();
-        log.debug("GoogleAuthenticator created correctly.");
+        log.info("GoogleAuthenticator created correctly.");
     }
 
 //==============================================================================
@@ -121,10 +115,13 @@ public final class GoogleAuthenticator {
         );
         // Build flow and trigger user authorization request.
         CODE_FLAW = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-            .setDataStoreFactory(DATA_STORE_FACTORY)
-            .setAccessType("offline")
-            .build();
+                HTTP_TRANSPORT,
+                JSON_FACTORY,
+                clientSecrets,
+                AuthenticationConst.SCOPES
+        ).setDataStoreFactory(DATA_STORE_FACTORY)
+         .setAccessType("offline")
+         .build();
     }
 }
 
