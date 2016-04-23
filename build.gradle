@@ -1,9 +1,10 @@
-apply plugin: 'application'
+//apply plugin: 'application'
+apply plugin: 'java'
 
 //sourceCompatibility = 1.8
 version = '0.0.1-dev'
 
-mainClassName = "it.hackcaffebabe.jdrive.Launcher"
+//mainClassName = "it.hackcaffebabe.jdrive.Launcher"
 //applicationDefaultJvmArgs = [""]
 
 repositories {
@@ -35,11 +36,10 @@ dependencies {
 //create a single Jar with all dependencies
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Implementation-Title': 'Gradle Jar File Example',
-                'Implementation-Version': version,
-                'Main-Class': 'it.hackcaffebabe.jdrive.Launcher'
+        attributes 'Implementation-Version': version,
+                   'Main-Class': 'it.hackcaffebabe.jdrive.Launcher'
     }
-    baseName = project.name + '-all'
+    baseName = project.name
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
