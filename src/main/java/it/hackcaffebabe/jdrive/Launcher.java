@@ -7,6 +7,10 @@ import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.DetectedEvent;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,7 +26,27 @@ public class Launcher {
         Launcher.class.getSimpleName()
     );
 
+    private static CommandLine argParser(String... args) throws ParseException {
+        Options o = new Options();
+        o.addOption("status", false, "check JDrive status");
+        o.addOption("start", false, "start JDrive");
+        o.addOption("stop", false, "stop JDrive");
+        return new DefaultParser().parse(o, args);
+    }
+
     public static void main( String... args ){
+        try{
+            CommandLine cli = argParser(args);
+            if( cli.hasOption("start") )
+                log.debug("start flag detected");
+            else if( cli.hasOption("stop") )
+                log.debug("stop flag detected");
+            else if( cli.hasOption("status") )
+                log.debug("status flag detected");
+        }catch (ParseException pe){
+            fatal(pe.getMessage(), pe);
+        }
+
         Locker locker = new Locker("JDriveApplication");
         if(locker.isAlreadyRunning()){
             // TODO in the future this will change in something else.
