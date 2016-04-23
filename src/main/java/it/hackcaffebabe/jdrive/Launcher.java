@@ -26,6 +26,7 @@ public class Launcher {
         Launcher.class.getSimpleName()
     );
 
+    /* parsing argument from CLI: using -X where X is the argument */
     private static CommandLine argParser(String... args) throws ParseException {
         Options o = new Options();
         o.addOption("status", false, "check JDrive status");
@@ -43,6 +44,8 @@ public class Launcher {
                 log.debug("stop flag detected");
             else if( cli.hasOption("status") )
                 log.debug("status flag detected");
+            else
+                log.debug("no flag detected");
         }catch (ParseException pe){
             fatal(pe.getMessage(), pe);
         }
