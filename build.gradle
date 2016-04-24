@@ -2,7 +2,7 @@
 apply plugin: 'java'
 
 //sourceCompatibility = 1.8
-version = '0.0.1-dev'
+version = '0.0.5-dev'
 
 //mainClassName = "it.hackcaffebabe.jdrive.Launcher"
 //applicationDefaultJvmArgs = [""]
