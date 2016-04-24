@@ -7,10 +7,7 @@ import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.DetectedEvent;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,36 +23,61 @@ public class Launcher {
         Launcher.class.getSimpleName()
     );
 
-    /* parsing argument from CLI: using -X where X is the argument */
-    private static CommandLine argParser(String... args) throws ParseException {
-        Options o = new Options();
-        o.addOption("status", false, "check JDrive status");
-        o.addOption("start", false, "start JDrive");
-        o.addOption("stop", false, "stop JDrive");
-        return new DefaultParser().parse(o, args);
-    }
+    private static CommandLine ARGS_CLI;
+    private static Options ARGS_OPTIONS = new Options();
 
     public static void main( String... args ){
-        try{
-            CommandLine cli = argParser(args);
-            if( cli.hasOption("start") )
-                log.debug("start flag detected");
-            else if( cli.hasOption("stop") )
-                log.debug("stop flag detected");
-            else if( cli.hasOption("status") )
-                log.debug("status flag detected");
-            else
-                log.debug("no flag detected");
-        }catch (ParseException pe){
-            fatal(pe.getMessage(), pe);
+        checkCLIArgs(args);
+
+        boolean startFlag = ARGS_CLI.hasOption("start");
+        boolean stopFlag = ARGS_CLI.hasOption("stop");
+        boolean statusFlag = ARGS_CLI.hasOption("status");
+        boolean helpFlag = ARGS_CLI.hasOption("help");
+        boolean noFlag = startFlag || stopFlag || statusFlag || helpFlag;
+
+        if( helpFlag || !noFlag ) {
+            HelpFormatter h = new HelpFormatter();
+            h.printHelp("JDrive usage: JDrive -start|-stop|-status|-help",
+                    ARGS_OPTIONS);
+            System.exit(0);
         }
 
-        Locker locker = new Locker("JDriveApplication");
-        if(locker.isAlreadyRunning()){
-            // TODO in the future this will change in something else.
-            fatal("JDrive already running", null);
+        if( new Locker("JDriveApplication").isAlreadyRunning() ){
+            if( statusFlag ){
+                System.out.println("TODO: checking JDrive status..");
+            }else if( stopFlag ){
+                System.out.println("TODO: stopping jDrive..");
+            }else if( startFlag ){
+                System.out.println("JDrive already running. Use -status");
+            }
+        }else{
+            if( statusFlag || stopFlag ){
+                System.out.println("JDrive not running. Use -start");
+            }else if( startFlag ){
+                startJDrive();
+            }
         }
+    }
 
+//==============================================================================
+//  UTILITY METHODS
+//==============================================================================
+    // more options @ https://goo.gl/4zOb8V
+    private static void checkCLIArgs(String...args){
+         try{
+             ARGS_OPTIONS.addOption("status", false, "check JDrive status");
+             ARGS_OPTIONS.addOption("start", false, "start JDrive");
+             ARGS_OPTIONS.addOption("stop", false, "stop JDrive");
+             ARGS_OPTIONS.addOption("help", false, "print argument usage");
+             ARGS_CLI = new DefaultParser().parse(ARGS_OPTIONS, args);
+         }catch (ParseException pe){
+             System.out.println(pe.getMessage());
+             System.exit(1);
+         }
+    }
+
+    /* start application main flow */
+    private static void startJDrive(){
         try{
             log.info("JDrive Application Starting.");
             log.debug("pid: "+Util.getProcessID());
@@ -66,8 +88,9 @@ public class Launcher {
         }
 
         boolean cfgOK = Configurator.getInstance().load();
-        if( !cfgOK )
+        if( !cfgOK ) {
             fatal("Configurator Error. Program Exit.", null);
+        }
 
         // integrated with Google authentication
         try {
@@ -112,9 +135,6 @@ public class Launcher {
         }
     }
 
-//==============================================================================
-//  UTILITY METHODS
-//==============================================================================
     // this method write a fatal message into log file and kill the program
     private static void fatal(String msg, Throwable t){
         log.fatal(msg, t);
