@@ -37,9 +37,8 @@ public class Launcher {
 
         if( helpFlag || !noFlag ) {
             HelpFormatter h = new HelpFormatter();
-            h.printHelp("JDrive usage: JDrive -start|-stop|-status|-help",
-                    ARGS_OPTIONS);
-            System.exit(0);
+            h.printHelp("<jar> [OPTIONS]\n" +
+                        "Where OPTIONS are listed below:", ARGS_OPTIONS);
         }
 
         if( new Locker("JDriveApplication").isAlreadyRunning() ){
