@@ -53,7 +53,8 @@ public class Launcher {
             if( statusFlag ){
                 System.out.println("TODO: checking JDrive status..");
             }else if( stopFlag ){
-                System.out.println("TODO: stopping jDrive..");
+//                System.out.println("TODO: stopping jDrive..");
+                stopJDrive(pid);
             }else if( startFlag ){
                 System.out.println("JDrive already running. Use -status");
             }
@@ -114,7 +115,7 @@ public class Launcher {
             Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    log.debug("JDrive closing procedure...");
+                    log.info("JDrive closing procedure...");
                     try {
                         w.kill();
                     } catch (IOException e) {
@@ -139,6 +140,15 @@ public class Launcher {
             }
         }catch( Exception ex ){
             fatal(ex.getMessage(), ex);
+        }
+    }
+
+    private static void stopJDrive( long pid ){
+        try {
+            log.info("Stopping JDrive from command line detected.");
+            Runtime.getRuntime().exec("kill -15 "+pid);
+        } catch (IOException e) {
+            fatal(e.getMessage(), e);
         }
     }
 
