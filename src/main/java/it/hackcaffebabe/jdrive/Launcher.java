@@ -41,7 +41,15 @@ public class Launcher {
                         "Where OPTIONS are listed below:", ARGS_OPTIONS);
         }
 
-        if( new Locker("JDriveApplication").isAlreadyRunning() ){
+        long pid = -1;
+        try{
+            pid = new Locker("JDriveApplication").checkLock();
+        }catch (IOException ioe){
+            fatal(ioe.getMessage(), ioe);
+        }
+
+        boolean isAlreadyRunning = pid != Util.getProcessID();
+        if( isAlreadyRunning ){
             if( statusFlag ){
                 System.out.println("TODO: checking JDrive status..");
             }else if( stopFlag ){
