@@ -2,6 +2,7 @@ package it.hackcaffebabe.jdrive.auth.google;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
+import com.google.api.client.extensions.java6.auth.oauth2.VerificationCodeReceiver;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
@@ -11,7 +12,6 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 
-import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.Drive;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,9 +19,8 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * TODO add doc and example
@@ -72,7 +71,14 @@ public final class GoogleAuthenticator {
      * @return an authorized Drive client service
      * @throws IOException
      */
-    public Drive getDriveService() throws IOException {
+    public Drive getDriveService() throws IOException, InterruptedException {
+        log.info("Checking internet connection...");
+        if( !GoogleAuthenticator.isInternetConnectionAvailable() ){
+            throw new IOException("Internet Connection not present or timeout "+
+            "exceeded.");
+        }
+        log.info("Internet connection ok.");
+
         log.info("Try to get Google authentication services...");
         if( this.service == null ) {
             Credential credential = new AuthorizationCodeInstalledApp(
@@ -122,6 +128,18 @@ public final class GoogleAuthenticator {
         ).setDataStoreFactory(DATA_STORE_FACTORY)
          .setAccessType("offline")
          .build();
+    }
+
+    /**
+     * check internet connection by sending ICMP Echo Request to 8.8.8.8.
+     * @return true if destination 8.8.8.8 is reachable, false otherwise
+     * @throws IOException if destination is not reachable or request is timed
+     * out
+     */
+    public static boolean isInternetConnectionAvailable()
+            throws InterruptedException, IOException{
+        Process p1 = java.lang.Runtime.getRuntime().exec("ping -c 1 8.8.8.8");
+        return p1.waitFor()==0;
     }
 }
 
