@@ -10,9 +10,7 @@ import java.util.concurrent.BlockingQueue;
  * Simple thread class to study how wait() and notifyAll() methods works
  */
 public class DownloadManager extends Thread {
-    private static final Logger log = LogManager.getLogger(
-            DownloadManager.class.getSimpleName()
-    );
+    private static final Logger log = LogManager.getLogger();
 
     private boolean running;
     private final BlockingQueue<String> queue;

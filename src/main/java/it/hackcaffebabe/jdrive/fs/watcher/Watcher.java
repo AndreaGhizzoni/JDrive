@@ -29,9 +29,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
  */
 public final class Watcher implements Runnable
 {
-    private static final Logger log = LogManager.getLogger(
-        Watcher.class.getSimpleName()
-    );
+    private static final Logger log = LogManager.getLogger();
     private static final WatchEvent.Kind[] mod = {
         ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
     };

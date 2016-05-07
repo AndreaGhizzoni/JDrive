@@ -24,7 +24,7 @@ public class Test {
     }
 
     static class Producer extends Thread {
-        private static final Logger log = LogManager.getLogger("MyTest");
+        private static final Logger log = LogManager.getLogger();
         private final Random rand = new Random();
 
         private boolean running;

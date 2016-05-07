@@ -19,9 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * JDrive Application Launcher
  */
 public class Launcher {
-    private static Logger log = LogManager.getLogger(
-        Launcher.class.getSimpleName()
-    );
+    private static Logger log = LogManager.getLogger();
 
     private static CommandLine ARGS_CLI;
     private static Options ARGS_OPTIONS = new Options();

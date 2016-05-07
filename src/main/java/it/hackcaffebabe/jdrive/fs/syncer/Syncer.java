@@ -15,9 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  *
  */
 public final class Syncer {
-    private static final Logger log = LogManager.getLogger(
-        Syncer.class.getSimpleName()
-    );
+    private static final Logger log = LogManager.getLogger();
 
     private LinkedBlockingQueue<DetectedEvent> dispatchingQueue;
 

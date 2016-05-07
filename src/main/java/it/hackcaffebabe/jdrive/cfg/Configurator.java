@@ -24,9 +24,7 @@ import java.util.Map;
  */
 public final class Configurator
 {
-    private static Logger log = LogManager.getLogger(
-        Configurator.class.getSimpleName()
-    );
+    private static Logger log = LogManager.getLogger();
     private static Configurator instance;
 
     private File cfgFile = new File(PathsUtil.APP_CGF_FILE);

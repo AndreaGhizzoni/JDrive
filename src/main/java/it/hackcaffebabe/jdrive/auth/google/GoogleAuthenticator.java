@@ -30,9 +30,7 @@ public final class GoogleAuthenticator {
     // instance of singleton
     private static GoogleAuthenticator instance;
     // logger
-    private static final Logger log = LogManager.getLogger(
-            GoogleAuthenticator.class.getSimpleName()
-    );
+    private static final Logger log = LogManager.getLogger();
 
     /**
      * TODO add doc

@@ -18,9 +18,7 @@ import java.util.Set;
  */
 class Cache
 {
-    private static final Logger log = LogManager.getLogger(
-        Cache.class.getSimpleName()
-    );
+    private static final Logger log = LogManager.getLogger();
 
     private static Cache instance;
     private Path cacheFile;
