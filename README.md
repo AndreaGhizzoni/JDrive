@@ -1,11 +1,24 @@
-# Google Drive desktop integration in Java.
+# Google Drive file sync in Java.
 
 ## Conceptual Idea
-JDrive is proposing as a linux client sync for your Google Drive 
-documents (like Dropbox).
+JDrive is proposing as a linux synchronization tool for your Google 
+Drive documents (like Dropbox).
 JDrive only needs to have access to your Google Drive, via standard 
-Google OAuth2 authentication process, in order to keep sync your file.
-   
+Google OAuth2 authentication process, in order to keep your file sync.
+
+## Dependencies
+- Java 1.7
+- Gradle 2.12
+
+## Building from this repo
+After correctly installed all the dependencies, run:
+```bash
+git clone git@github.com:AndreaGhizzoni/JDrive.git JDrive
+cd JDrive
+gradle build
+```
+The last command produce a runnable jar into `build/libs`.
+
 ## Usage
 To start JDrive follow the instruction below:
 ```bash
