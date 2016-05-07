@@ -1,11 +1,8 @@
 //apply plugin: 'application'
 apply plugin: 'java'
 
-//sourceCompatibility = 1.8
 version = '0.0.5-dev'
-
-//mainClassName = "it.hackcaffebabe.jdrive.Launcher"
-//applicationDefaultJvmArgs = [""]
+def author = 'Andrea Ghizzoni'
 
 repositories {
     mavenCentral()
@@ -33,13 +30,13 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
 
-//create a single Jar with all dependencies
-task fatJar(type: Jar) {
+//overriding default jar task to create a fat jar with dependencies
+jar {
     manifest {
         attributes 'Implementation-Version': version,
+                   'Created-By': author,
                    'Main-Class': 'it.hackcaffebabe.jdrive.Launcher'
     }
     baseName = project.name
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
 }
