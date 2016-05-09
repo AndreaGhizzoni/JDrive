@@ -31,12 +31,19 @@ public class Launcher {
         boolean stopFlag = ARGS_CLI.hasOption("stop");
         boolean statusFlag = ARGS_CLI.hasOption("status");
         boolean helpFlag = ARGS_CLI.hasOption("help");
-        boolean noFlag = startFlag || stopFlag || statusFlag || helpFlag;
+        boolean versionFlag = ARGS_CLI.hasOption("version");
+        boolean noFlag = startFlag || stopFlag || statusFlag || helpFlag ||
+                         versionFlag;
 
         if( helpFlag || !noFlag ) {
             HelpFormatter h = new HelpFormatter();
             h.printHelp("<jar> [OPTIONS]\n" +
                         "Where OPTIONS are listed below:", ARGS_OPTIONS);
+        }
+
+        if( versionFlag ){
+            System.out.println(System.getProperty("application.version"));
+            System.exit(0);
         }
 
         long pid = -1;
@@ -51,7 +58,6 @@ public class Launcher {
             if( statusFlag ){
                 System.out.println("TODO: checking JDrive status..");
             }else if( stopFlag ){
-//                System.out.println("TODO: stopping jDrive..");
                 stopJDrive(pid);
             }else if( startFlag ){
                 System.out.println("JDrive already running. Use -status");
@@ -75,6 +81,7 @@ public class Launcher {
              ARGS_OPTIONS.addOption("start", false, "start JDrive");
              ARGS_OPTIONS.addOption("stop", false, "stop JDrive");
              ARGS_OPTIONS.addOption("help", false, "print argument usage");
+             ARGS_OPTIONS.addOption("version", false, "print current version");
              ARGS_CLI = new DefaultParser().parse(ARGS_OPTIONS, args);
          }catch (ParseException pe){
              System.out.println(pe.getMessage());
