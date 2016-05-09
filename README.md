@@ -15,7 +15,7 @@ After correctly installed all the dependencies, run:
 ```bash
 git clone git@github.com:AndreaGhizzoni/JDrive.git JDrive
 cd JDrive
-gradle
+gradle build
 ```
 The last command produce a runnable jar into `build/libs`.
 
