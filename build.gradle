@@ -1,8 +1,10 @@
-//apply plugin: 'application'
+apply plugin: 'application'
 apply plugin: 'java'
 
+mainClassName = "it.hackcaffebabe.jdrive.Launcher"
 version = '0.0.5-dev'
-def author = 'Andrea Ghizzoni'
+
+defaultTasks 'clean', 'build', 'startScripts', 'installDist'
 
 repositories {
     mavenCentral()
@@ -28,15 +30,4 @@ dependencies {
     compile 'com.google.apis:google-api-services-drive:v2-rev170-1.20.0'
 
     testCompile group: 'junit', name: 'junit', version: '4.11'
-}
-
-//overriding default jar task to create a fat jar with dependencies
-jar {
-    manifest {
-        attributes 'Implementation-Version': version,
-                   'Created-By': author,
-                   'Main-Class': 'it.hackcaffebabe.jdrive.Launcher'
-    }
-    baseName = project.name
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
