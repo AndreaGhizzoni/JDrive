@@ -28,8 +28,9 @@ with the following content:
 - bin: witch contains the script to launch JDrive, depending to your OS
 
 ## Usage
-The following instructions assumes that your under unix-like OS and you
-have build it from this repo.
+The following instructions assumes that your under unix-like OS, you
+have build it from this repo and your are in the root folder of the 
+repo.
 
 To start JDrive follow the instruction below:
 ```bash
