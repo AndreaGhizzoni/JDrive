@@ -2,7 +2,7 @@ apply plugin: 'application'
 apply plugin: 'java'
 
 mainClassName = "it.hackcaffebabe.jdrive.Launcher"
-version = System.properties['application.version']
+version = '0.0.5-dev'
 defaultTasks 'clean', 'build', 'startScripts', 'installDist'
 
 repositories {
