@@ -26,7 +26,7 @@
         </Console>
 
         <!-- Log appenders. ImmediateFlush="false" for better SSD lifetime -->
-        <File name="File" fileName="${logFilePath}" immediateFlush="false" append="false">
+        <File name="File" fileName="${logFilePath}" immediateFlush="false" append="true">
             <PatternLayout pattern="${pattern}"/>
         </File>
     </Appenders>
