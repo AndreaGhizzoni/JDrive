@@ -26,7 +26,9 @@ import java.security.GeneralSecurityException;
  * Simple class to get an authenticate object from Google and using Drive API
  * How to use:<pre>{@code
  * try{
- *      GoogleAuthenticator.getInstance().authenticate();
+ *     GoogleAuthenticator g = GoogleAuthenticator.getInstance();
+ *     g.authenticate();
+ *     Drive d = g.getDriveService();
  * } catch (IOException | GeneralSecurityException e) {
  *      e.printStackTrace();
  * }
