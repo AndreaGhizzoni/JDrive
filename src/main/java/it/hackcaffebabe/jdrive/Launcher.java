@@ -89,8 +89,7 @@ public class Launcher {
              ARGS_OPTIONS.addOption("version", false, "print current version");
              ARGS_CLI = new DefaultParser().parse(ARGS_OPTIONS, args);
          }catch (ParseException pe){
-             System.out.println(pe.getMessage());
-             System.exit(1);
+             fatal(pe.getMessage(), pe);
          }
     }
 
@@ -165,6 +164,6 @@ public class Launcher {
     // this method write a fatal message into log file and kill the program
     private static void fatal(String msg, Throwable t){
         log.fatal(msg, t);
-        System.exit(-1);
+        System.exit(1);
     }
 }
