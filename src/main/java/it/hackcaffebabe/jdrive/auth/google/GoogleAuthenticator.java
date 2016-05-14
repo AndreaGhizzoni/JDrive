@@ -23,7 +23,14 @@ import java.net.InetAddress;
 import java.security.GeneralSecurityException;
 
 /**
- * TODO add doc and example
+ * Simple class to get an authenticate object from Google and using Drive API
+ * How to use:<pre>{@code
+ * try{
+ *      GoogleAuthenticator.getInstance().getDriveService();
+ * } catch (IOException | GeneralSecurityException e) {
+ *      e.printStackTrace();
+ * }
+ * }</pre>
  */
 public final class GoogleAuthenticator {
 
@@ -33,8 +40,8 @@ public final class GoogleAuthenticator {
     private static final Logger log = LogManager.getLogger();
 
     /**
-     * TODO add doc
-     * @return
+     * Instances a new Google Authenticator object.
+     * @return {@link GoogleAuthenticator} the object to provide the authentication
      */
     public static GoogleAuthenticator getInstance() throws GeneralSecurityException,
             IOException {
@@ -65,11 +72,11 @@ public final class GoogleAuthenticator {
 //  METHOD
 //==============================================================================
     /**
-     * Build and return an authorized Drive client service.
-     * @return an authorized Drive client service
-     * @throws IOException
+     * Build and return an authorized Drive object for Google service.
+     * @return {@link Drive} the authorized client service
+     * @throws IOException if something went wrong during the process
      */
-    public Drive getDriveService() throws IOException, InterruptedException {
+    public Drive getDriveService() throws IOException {
         log.info("Checking internet connection...");
         if( !GoogleAuthenticator.isInternetConnectionAvailable() ){
             throw new IOException("Internet Connection not present or timeout "+
@@ -134,10 +141,13 @@ public final class GoogleAuthenticator {
      * @throws IOException if destination is not reachable or request is timed
      * out
      */
-    public static boolean isInternetConnectionAvailable()
-            throws InterruptedException, IOException{
+    public static boolean isInternetConnectionAvailable() throws IOException{
         Process p1 = java.lang.Runtime.getRuntime().exec("ping -c 1 8.8.8.8");
-        return p1.waitFor()==0;
+        try {
+            return p1.waitFor()==0;
+        } catch (InterruptedException e) {
+            throw new IOException("Error while checking internet connection.");
+        }
     }
 }
 

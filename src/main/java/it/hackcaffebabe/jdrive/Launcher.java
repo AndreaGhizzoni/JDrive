@@ -112,7 +112,7 @@ public class Launcher {
         // integrated with Google authentication
         try {
             GoogleAuthenticator.getInstance().getDriveService();
-        } catch (IOException | GeneralSecurityException | InterruptedException e) {
+        } catch (IOException | GeneralSecurityException e) {
             fatal(e.getMessage(), e);
         }
 
