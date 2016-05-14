@@ -26,7 +26,7 @@ import java.security.GeneralSecurityException;
  * Simple class to get an authenticate object from Google and using Drive API
  * How to use:<pre>{@code
  * try{
- *      GoogleAuthenticator.getInstance().getDriveService();
+ *      GoogleAuthenticator.getInstance().authenticate();
  * } catch (IOException | GeneralSecurityException e) {
  *      e.printStackTrace();
  * }
@@ -55,6 +55,7 @@ public final class GoogleAuthenticator {
     private JsonFactory JSON_FACTORY;
     private HttpTransport HTTP_TRANSPORT;
     private GoogleAuthorizationCodeFlow CODE_FLAW;
+    private Credential credential;
 
     // Authenticated object
     private Drive service;
@@ -69,33 +70,49 @@ public final class GoogleAuthenticator {
     }
 
 //==============================================================================
-//  METHOD
+//  GETTER
 //==============================================================================
     /**
-     * Build and return an authorized Drive object for Google service.
-     * @return {@link Drive} the authorized client service
-     * @throws IOException if something went wrong during the process
+     * This method try to authenticate with Google using Google Authentication
+     * process.
+     * @throws IOException if something went wrong during the process or
+     * there is no internet connection.
      */
-    public Drive getDriveService() throws IOException {
-        log.info("Checking internet connection...");
-        if( !GoogleAuthenticator.isInternetConnectionAvailable() ){
-            throw new IOException("Internet Connection not present or timeout "+
-            "exceeded.");
-        }
-        log.info("Internet connection ok.");
+    public void authenticate() throws IOException {
+        this.checkInternetConnection();
 
-        log.info("Try to get Google authentication services...");
-        if( this.service == null ) {
-            Credential credential = new AuthorizationCodeInstalledApp(
+        log.info("Try to authenticate with Google...");
+        if( this.credential == null ) {
+            this.credential = new AuthorizationCodeInstalledApp(
                 CODE_FLAW,
                 new LocalServerReceiver()
             ).authorize("user");
-            this.service = new Drive.Builder(
-                    HTTP_TRANSPORT, JSON_FACTORY, credential)
-                    .setApplicationName(AuthenticationConst.APP_NAME)
-                    .build();
         }
         log.info("Google authentication successful.");
+    }
+
+    /**
+     * This method return the Drive authenticate object.
+     * @return {@link Drive} the Google authenticate object
+     * @throws IOException if something went wrong during the process or
+     * there is no internet connection.
+     */
+    public Drive getDriveService() throws IOException {
+        if( this.credential == null ) {
+            this.authenticate();
+        }else {
+            this.checkInternetConnection();
+        }
+
+        log.info("Try to get Google Drive services...");
+        if( this.service == null ) {
+            this.service = new Drive.Builder(
+                HTTP_TRANSPORT,
+                JSON_FACTORY,
+                credential
+            ).setApplicationName(AuthenticationConst.APP_NAME).build();
+        }
+        log.info("Google Drive service get.");
         return this.service;
     }
 
@@ -133,6 +150,17 @@ public final class GoogleAuthenticator {
         ).setDataStoreFactory(DATA_STORE_FACTORY)
          .setAccessType("offline")
          .build();
+    }
+
+    /* this method checks if an internet connection is available, if not
+    * throws an IOException */
+    private void checkInternetConnection() throws IOException {
+        log.info("Checking internet connection...");
+        if( !GoogleAuthenticator.isInternetConnectionAvailable() ){
+            throw new IOException("Internet Connection not present or timeout "+
+            "exceeded.");
+        }
+        log.info("Internet connection ok.");
     }
 
     /**

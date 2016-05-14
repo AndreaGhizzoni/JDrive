@@ -11,11 +11,8 @@ import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Properties;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -111,7 +108,7 @@ public class Launcher {
 
         // integrated with Google authentication
         try {
-            GoogleAuthenticator.getInstance().getDriveService();
+            GoogleAuthenticator.getInstance().authenticate();
         } catch (IOException | GeneralSecurityException e) {
             fatal(e.getMessage(), e);
         }
