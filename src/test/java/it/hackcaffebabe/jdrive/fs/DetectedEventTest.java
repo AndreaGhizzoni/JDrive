@@ -10,38 +10,74 @@ import static java.nio.file.StandardWatchEventKinds.*;
  * Test for class {@link DetectedEvent}
  */
 public class DetectedEventTest {
-    public final Path testPath = Paths.get(System.getProperty("java.io.tmpdir"));
+    private final Path testPath = Paths.get(
+            System.getProperty("java.io.tmpdir")
+    );
 
     @Test
-    public void testPassingWrongArguments(){
-        // test getKind()
-        DetectedEvent d = new DetectedEvent( null, testPath, "some msg" );
-        Assert.assertNull("Expected null from passing null as kind", d.getKind());
+    public void testPassingNullAsKind(){
+        String someMsg = "some msg";
+        DetectedEvent d = new DetectedEvent( null, testPath, someMsg );
+        Assert.assertNull(
+                "Expected null from passing null as kind",
+                d.getKind()
+        );
         Assert.assertTrue(
-                "", d.containError());
+                "Expected return the same file path as set",
+                d.getFile().equals(testPath.toFile().getAbsolutePath())
+        );
+        Assert.assertTrue(
+                "Expected d.containError() returns true",
+                d.containError()
+        );
+        Assert.assertTrue(
+                "Expected return the same message as set",
+                d.getMessage().equals(someMsg)
+        );
+    }
 
-        // test getFile() & getLastModify()
-        d = new DetectedEvent( ENTRY_CREATE, null, "some msg" );
+    @Test
+    public void testPassingNullAsFile(){
+        String someMsg = "some msg";
+        DetectedEvent d = new DetectedEvent( ENTRY_CREATE, null, someMsg );
+        Assert.assertTrue(
+                "Expect return the same kind as set",
+                d.getKind() == ENTRY_CREATE
+        );
         Assert.assertNull(
                 "Expected null from passing null as file path",
                 d.getFile()
         );
         Assert.assertTrue(
                 "Expected negative number as last modify from null file path",
-                d.getLastModify() < 0L
-        );
+                d.getLastModify() < 0L);
+        Assert.assertTrue("Expected return the same message as set",
+                d.getMessage().equals(someMsg));
+    }
 
-        // test getMessage()
-        d = new DetectedEvent( ENTRY_CREATE, testPath, null );
+    @Test
+    public void testPassingNullAsMessage(){
+        DetectedEvent d = new DetectedEvent( ENTRY_CREATE, testPath, null );
+        Assert.assertTrue(
+                "Expect return the same kind as set",
+                d.getKind() == ENTRY_CREATE
+        );
+        Assert.assertTrue(
+                "Expected return the same file path as set",
+                d.getFile().equals(testPath.toFile().getAbsolutePath())
+        );
         Assert.assertNotNull(
-                "Expected not null string from given null message",
+                "Expected default message from given null message",
                 d.getMessage()
         );
+    }
 
-        // test wrong constructor for errors
+    @Test
+    public void testMessageUsingWrongConstructor(){
         DetectedEvent e5 = new DetectedEvent( null, null );
         Assert.assertNotNull(
-                "Expected default error message from using wrong constructor for errors",
+                "Expected default error message from using wrong constructor " +
+                        "for errors",
                 e5.getMessage()
         );
     }
