@@ -2,13 +2,14 @@ package it.hackcaffebabe.jdrive.auth.google;
 
 import com.google.api.services.drive.DriveScopes;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 final class AuthenticationConst
 {
     /** Directory to store user credentials for this application. */
-    static final java.io.File DATA_STORE_DIR = new java.io.File(
+    static final File DATA_STORE_DIR = new File(
             System.getProperty("user.home"),
             ".jdrive/cred"
     );
