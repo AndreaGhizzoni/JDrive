@@ -7,7 +7,7 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 
 /**
- * Object created by Watcher class when a detect a change of File System.
+ * Object created by Watcher class when it detect a change of File System.
  */
 public class DetectedEvent {
     // -1 : some error, explanation in message
