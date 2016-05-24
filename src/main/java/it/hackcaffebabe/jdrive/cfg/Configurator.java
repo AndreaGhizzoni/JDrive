@@ -16,7 +16,7 @@ import java.util.Map;
  *
  * How to use:
  * <pre>{@code
- * Paths.createApplicationHomeDirectory(); // this class needs a folder (user home)/.jdrive
+ * Paths.createApplicationHomeDirectory();
  * Configuration c = Configuration.getInstance();
  * c.load();
  * String s = c.get("key");
@@ -101,7 +101,8 @@ public final class Configurator
         log.info("User configuration Found. Try to load...");
         for(Map.Entry<String, Object> i : Default.cfg.entrySet()){
             if(get(i.getKey()) == null) { //miss minimum value
-                log.error("Value for \""+i.getKey()+"\" is missing: restoring default.");
+                log.error("Value for \""+i.getKey()+"\" is missing: restoring "+
+                        "default.");
                 put(i.getKey(), i.getValue());
             }
         }
@@ -168,7 +169,8 @@ public final class Configurator
      * @param key {@link java.lang.String} the key.
      * @return {@link java.lang.Object} the object of specific key or null if
      *                                  the key is null or not found.
-     * @throws java.lang.IllegalStateException if load method is not called fist.
+     * @throws java.lang.IllegalStateException if load method is not called
+     *         fist.
      */
     public Object get(String key) throws IllegalStateException{
         checkLoaded();

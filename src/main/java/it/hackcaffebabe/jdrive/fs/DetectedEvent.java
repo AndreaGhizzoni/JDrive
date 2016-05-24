@@ -80,7 +80,8 @@ public class DetectedEvent {
     private void setKind( WatchEvent.Kind kind ) {
         if( kind == null ) {
             this.kindOfEvent = -1;
-            this.setMessage("Error event created from wrong constructor. Check java doc.");
+            this.setMessage("Error event created from wrong constructor. " +
+                    "Check java doc.");
         }else if( kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
             this.kindOfEvent = 1;
             this.setMessage("Creation event detected.");

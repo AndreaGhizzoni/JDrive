@@ -102,13 +102,13 @@ public class DetectedEventTest {
         boolean isCreationFirst = creationFirst.isEventCreate();
         boolean isCreationSecond = creationSecond.isEventCreate();
         Assert.assertTrue(
-                "Expecting true from isEventCreate() from a Creation event with" +
-                        "full parameters constructor.",
+                "Expecting true from isEventCreate() from a Creation event " +
+                        "with full parameters constructor.",
                 isCreationFirst
         );
         Assert.assertTrue(
-                "Expecting true from isEventCreate() from a Creation event with" +
-                        "less parameters constructor.",
+                "Expecting true from isEventCreate() from a Creation event" +
+                        " with less parameters constructor.",
                 isCreationSecond
         );
     }
@@ -127,13 +127,13 @@ public class DetectedEventTest {
         boolean isModificationFirst = modificationFirst.isEventModify();
         boolean isModificationSecond = modificationSecond.isEventModify();
         Assert.assertTrue(
-                "Expecting true from isEventModify() from a Modification event with" +
-                        "full parameters constructor.",
+                "Expecting true from isEventModify() from a Modification " +
+                        "event with full parameters constructor.",
                 isModificationFirst
         );
         Assert.assertTrue(
-                "Expecting true from isEventModify() from a Modification event with" +
-                        "less parameters constructor.",
+                "Expecting true from isEventModify() from a Modification " +
+                        "event with less parameters constructor.",
                 isModificationSecond
         );
     }
