@@ -27,6 +27,8 @@ public class PathsUtil
     public static final String APP_CGF_FILE = APP_HOME + SEP + "jdrive.conf";
     /** Path to watcher cache file */
     public static final String WATCHER_CACHE = APP_HOME + SEP + "jwatch.cache";
+
+    // TODO remove this: useless now
     /** Path to google Token Authentication */
     public static final File G_TOKEN = new File( APP_HOME + SEP + "t.json" );
 
@@ -54,6 +56,7 @@ public class PathsUtil
     }
 
     /**
+     * TODO remove this method: has been used only by Configurator.loadDefault()
      * This method create an empty configuration file in Paths.APP_CGF_FILE.
      * @throws IOException if make new directory fail.
      */
