@@ -1,9 +1,11 @@
 package it.hackcaffebabe.jdrive.cfg;
 
 import it.hackcaffebabe.jdrive.util.PathsUtil;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,33 +24,92 @@ public class ConfiguratorTest
 
     /* TODO remember to modify buildWD() and cleanWD() method to create and
             delete cfg  */
-
-
     @Test
     public void testSetupViaFile(){
-
-    }
-
-    @Test
-    public void testSetupViaConfigurationProperties(){
-
+        try{
+            Configurator.setup(cfg.toFile());
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
+        }
+        cleanWD();
     }
 
     @Test
     public void testSetupViaNullFile(){
-
+        try{
+            File f = null;
+            Configurator.setup(f);
+            Assert.fail("Expected to throw an exception if null File is passed"+
+                    " to setup() method");
+        }catch (Exception ignored){}
+        cleanWD();
     }
 
     @Test
     public void testSetupViaWrongFile(){
-
+        try{
+            File dir = Paths.get(System.getProperty("java.io.tmpdir")).toFile();
+            Configurator.setup(dir);
+            Assert.fail("Expected to throw an exception if directory is passed"+
+                    " as argument to setup() method");
+        }catch (Exception ignored){}
+        cleanWD();
     }
 
     @Test
-    public void testSetupViaNullConfigurationProperties(){
-
+    public void testSetupViaPropertiesConfiguration(){
+        try {
+            PropertiesConfiguration p = new PropertiesConfiguration(
+                    cfg.toFile()
+            );
+            Configurator.setup(p);
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
+        }
+        cleanWD();
     }
 
+    @Test
+    public void testSetupViaNullPropertiesConfiguration(){
+        try {
+            PropertiesConfiguration p = null;
+            Configurator.setup(p);
+            Assert.fail("Expected to throw an exception if null " +
+                    "PropertiesConfiguration is passed as argument to setup()");
+        }catch (Exception ignored){}
+        cleanWD();
+    }
+
+    @Test
+    public void testInstanceViaFile(){
+        try{
+            Configurator c = Configurator.setup(cfg.toFile());
+            Assert.assertTrue(
+                    "Expected that setup() method returns a not null instance "+
+                            "of Configurator from file setup",
+                    c != null
+            );
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testInstanceViaPropertiesConfiguration(){
+        try{
+            PropertiesConfiguration p = new PropertiesConfiguration(
+                    cfg.toFile()
+            );
+            Configurator c = Configurator.setup(p);
+            Assert.assertTrue(
+                    "Expected that setup() method returns a not null instance "+
+                            "of Configurator from file setup",
+                    c != null
+            );
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
+        }
+    }
 
     @Test
     public void testConfigurator(){
@@ -85,18 +146,18 @@ public class ConfiguratorTest
 //  TEST CASE UTIL METHOD
 //==============================================================================
     // create a method to build working directory
-    public void buildWD(){
+    private void buildWD(){
         try {
-            PathsUtil.createApplicationHomeDirectory();
+            Files.createFile(cfg);
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
     }
 
     // create a method to clean the working directory
-    public void cleanWD(){
+    private void cleanWD(){
         try {
-            Files.delete(Paths.get(PathsUtil.APP_CGF_FILE));
+            Files.delete(cfg);
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
