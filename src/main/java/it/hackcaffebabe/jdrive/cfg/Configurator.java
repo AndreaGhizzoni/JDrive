@@ -12,8 +12,32 @@ import java.nio.file.Files;
 import java.util.Map;
 
 /**
- * TODO add doc and example
+ * Configurator class manage Properties file for your application.
+ * Simple usage:
  * <pre>{@code
+ * File p = new File("cfg.prop");
+ * try{
+ *     Configurator c = Configurator.setup(p);
+ * }catch( ConfigurationException e ){
+ *     e.printStackTrace();
+ * }
+ * c.put("key", "value")
+ * System.out.println(c.get("key"));
+ * }</pre>
+ *
+ * Or something more complex:
+ * <pre>{@code
+ * File p = new File("cfg.prop");
+ * try{
+ *     PropertiesConfiguration pc = new PropertiesConfiguration(p);
+ * }catch(ConfigurationException e){
+ *     e.printStackTrace();
+ * }
+ * pc.setAutoSave(true);
+ * Configurator c = Configurator.setup(pc);
+ * // or other options
+ * c.put("key", "value")
+ * System.out.println(c.get("key"));
  * }</pre>
  */
 public final class Configurator
@@ -23,11 +47,14 @@ public final class Configurator
     private static PropertiesConfiguration CFG;
 
     /**
-     * TODO add doc
-     * @param cfgFilePath
-     * @return
-     * @throws IllegalArgumentException
-     * @throws ConfigurationException
+     * This method create a completely functional Configurator object just
+     * giving the properties file path as argument.
+     * Multiple called of this method will reset the previous one.
+     * @param cfgFilePath {@link java.io.File} the configuration file path.
+     * @return {@link it.hackcaffebabe.jdrive.cfg.Configurator} the instance of
+     *         Configurator.
+     * @throws IllegalArgumentException if argument is null or a directory
+     * @throws ConfigurationException if something else went wrong
      */
     public static Configurator setup( File cfgFilePath ) throws
             IllegalArgumentException, ConfigurationException {
@@ -44,10 +71,15 @@ public final class Configurator
     }
 
     /**
-     * TODO add doc
+     * This method create a completely functional Configurator object just
+     * giving the PropertiesConfiguration object as argument.
+     * Multiple called of this method will reset the previous one.
      * @param propCfg
-     * @return
-     * @throws IllegalArgumentException
+     *          {@link org.apache.commons.configuration.PropertiesConfiguration}
+     *          the configuration object.
+     * @return {@link it.hackcaffebabe.jdrive.cfg.Configurator} the instance of
+     *         Configurator.
+     * @throws IllegalArgumentException if argument is null
      */
     public static Configurator setup(PropertiesConfiguration propCfg)
             throws IllegalArgumentException{
@@ -73,6 +105,7 @@ public final class Configurator
 
     /**
      * Returns the instance of Configurator.
+     * @throws IllegalStateException if setup() method is not called first.
      */
     public static Configurator getInstance() throws IllegalStateException{
         log.info("Configurator instance requested.");
