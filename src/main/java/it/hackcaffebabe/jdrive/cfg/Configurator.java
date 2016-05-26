@@ -8,81 +8,96 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
 import java.util.Map;
 
 /**
- * NB: this class needs his own basic folder in (user home)/.jdrive
- *
- * How to use:
+ * TODO add doc and example
  * <pre>{@code
- * Paths.createApplicationHomeDirectory();
- * Configuration c = Configuration.getInstance();
- * c.load();
- * String s = c.get("key");
  * }</pre>
  */
 public final class Configurator
 {
     private static Logger log = LogManager.getLogger();
     private static Configurator instance;
+    private static PropertiesConfiguration CFG;
 
-    private File cfgFile = new File(PathsUtil.APP_CGF_FILE);
-    private PropertiesConfiguration cfgProp;
+    /**
+     * TODO add doc
+     * @param cfgFilePath
+     * @return
+     * @throws IllegalArgumentException
+     * @throws ConfigurationException
+     */
+    public static Configurator setup( File cfgFilePath ) throws
+            IllegalArgumentException, ConfigurationException {
+        if( cfgFilePath == null )
+            throw new IllegalArgumentException("Properties file passed as " +
+                    "argument can not be null");
+
+        if( PathsUtil.isDirectory(cfgFilePath) )
+            throw new IllegalArgumentException("Properties file passed as " +
+                    "argument is a directory.");
+
+        PropertiesConfiguration p = new PropertiesConfiguration(cfgFilePath);
+        return Configurator.setup(p);
+    }
+
+    /**
+     * TODO add doc
+     * @param propCfg
+     * @return
+     * @throws IllegalArgumentException
+     */
+    public static Configurator setup(PropertiesConfiguration propCfg)
+            throws IllegalArgumentException{
+        log.info("Configurator setup called on regular file...");
+
+        if( propCfg == null )
+            throw new IllegalArgumentException("Properties configuration "+
+                    "passed as argument can not be null");
+
+        CFG = propCfg;
+        log.info("Configurator properties set.");
+        Configurator c = Configurator.getInstance();
+
+        // if file already exists, there are properties into configuration file.
+        // otherwise load default properties
+        if( !propCfg.getFile().exists() ){
+            c.loadDefault();
+        }else{
+            c.loadConfigurationFromFile();
+        }
+        return c;
+    }
 
     /**
      * Returns the instance of Configurator.
      */
-    public static Configurator getInstance(){
+    public static Configurator getInstance() throws IllegalStateException{
+        log.info("Configurator instance requested.");
         if(instance==null)
             instance = new Configurator();
         return instance;
     }
 
     /* Basic constructor */
-    private Configurator(){
-        log.info("Configurator created properly.");
+    private Configurator() throws IllegalStateException{
+        if( CFG == null )
+            throw new IllegalStateException("Configurator need to be set first"+
+                    " via: Configurator.setup() method.");
+        log.info("Configurator instance created.");
     }
 
 //==============================================================================
 //  METHOD
 //==============================================================================
-    /**
-     * Load data from configuration file in PathsUtil.APP_CGF_FILE. If this file
-     * exists the configuration will be loaded from there, otherwise will be
-     * create a new file with the default configuration.
-     * @return true if configuration file will be successfully parsed, otherwise
-     * if load() method is called multiple times or loading defaults data rise an
-     * exception, will return false.
-     */
-    public boolean load(){
-        if(this.cfgProp != null )
-            return false; // safe condition: avoid multiple calls of load()
-
-        try{
-            this.cfgProp = new PropertiesConfiguration(cfgFile);
-            this.cfgProp.setAutoSave(true);
-        }catch (ConfigurationException e) {
-            log.error(e.getMessage());
-            return false;
-        }
-
-        // if file exists the cfgProp already holds the cfg of values
-        if(!cfgFile.exists()){
-            loadDefault();
-        }else{
-            loadConfigurationFromFile();
-        }
-
-        return true;
-    }
-
     /* this method is used to create a new configuration file if NOT EXISTS
      * whit default configuration*/
     private void loadDefault(){
         log.info("User configuration not Found. Try to load default...");
         try{
-            PathsUtil.createEmptyConfigurationFile();
+            Files.createFile(CFG.getFile().toPath());
             // load default settings from Default class
             for(Map.Entry<String, Object> i : Default.cfg.entrySet() ){
                 put(i.getKey(), i.getValue());
@@ -113,30 +128,19 @@ public final class Configurator
      * Check if given key is associated with existing value in the cfg.
      * @param key {@link java.lang.String} the key as string.
      * @return true if exists, otherwise false.
-     * @throws java.lang.IllegalStateException if load method is not called fist.
      */
-    public boolean exists(String key) throws IllegalStateException{
-        checkLoaded();
+    public boolean exists(String key) {
         return get(key)!= null;
     }
 
     /**
      * Remove the value from key given.
      * @param key {@link java.lang.String} the key  of properties
-     * @throws java.lang.IllegalStateException if load method is not called fist.
      */
-    public void remove(String key) throws  IllegalStateException{
-        checkLoaded();
+    public void remove(String key) {
         if(key != null && !key.isEmpty()) {
-            this.cfgProp.clearProperty(key);
+            CFG.clearProperty(key);
         }
-    }
-
-    /* check if method load() is called. */
-    private void checkLoaded() throws IllegalStateException{
-        if(this.cfgProp == null)
-            throw new IllegalStateException("Configuration File not loaded. " +
-                    "Call Configuration.getInstance().load() first.");
     }
 
 //==============================================================================
@@ -148,15 +152,13 @@ public final class Configurator
      * @param key {@link java.lang.String} the key string
      * @param obj {@link java.lang.Object} to put
      * @return true if there wasn't that object with that key, false otherwise
-     * @throws java.lang.IllegalStateException if load method is not called fist.
      */
-    public boolean put(String key, Object obj) throws IllegalStateException {
-        checkLoaded();
+    public boolean put(String key, Object obj) {
         if(key == null || key.isEmpty())
             return false;
 
         boolean hasOverride = exists(key);
-        this.cfgProp.setProperty(key, obj);
+        CFG.setProperty(key, obj);
         log.debug("Loaded > Key: " + key + " : \"" + obj.toString() + "\"");
         return hasOverride;
     }
@@ -169,11 +171,8 @@ public final class Configurator
      * @param key {@link java.lang.String} the key.
      * @return {@link java.lang.Object} the object of specific key or null if
      *                                  the key is null or not found.
-     * @throws java.lang.IllegalStateException if load method is not called
-     *         fist.
      */
-    public Object get(String key) throws IllegalStateException{
-        checkLoaded();
-        return this.cfgProp.getProperty(key);
+    public Object get(String key){
+        return CFG.getProperty(key);
     }
 }
