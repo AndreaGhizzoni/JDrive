@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
@@ -13,6 +14,42 @@ import java.nio.file.Paths;
  */
 public class ConfiguratorTest
 {
+    private static final Path cfg = Paths.get(
+            System.getProperty("java.io.tmpdir")+
+            System.getProperty("file.separator")+
+            "testCFG.conf"
+    );
+
+    /* TODO remember to modify buildWD() and cleanWD() method to create and
+            delete cfg  */
+
+
+    @Test
+    public void testSetupViaFile(){
+
+    }
+
+    @Test
+    public void testSetupViaConfigurationProperties(){
+
+    }
+
+    @Test
+    public void testSetupViaNullFile(){
+
+    }
+
+    @Test
+    public void testSetupViaWrongFile(){
+
+    }
+
+    @Test
+    public void testSetupViaNullConfigurationProperties(){
+
+    }
+
+
     @Test
     public void testConfigurator(){
         buildWD();
