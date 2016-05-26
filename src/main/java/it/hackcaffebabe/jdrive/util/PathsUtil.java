@@ -77,11 +77,21 @@ public class PathsUtil
     }
 
     /**
-     * This method checks if given path ends with a directory.
+     * This method checks if given path leads to a directory or not.
      * @param p {@link java.nio.file.Path} the path to check.
-     * @return true if ends with a directory, false otherwise.
+     * @return true if leads to a directory, false otherwise.
      */
     public static boolean isDirectory( Path p ){
         return Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS);
+    }
+
+    /**
+     * This method checks if given path leads to a directory or not.
+     * @param f {@link java.io.File} the file object to check.
+     * @return true if leads to a directory, false otherwise.
+     */
+    public static boolean isDirectory( File f ){
+        Path p = Paths.get(f.getAbsolutePath());
+        return PathsUtil.isDirectory(p);
     }
 }
