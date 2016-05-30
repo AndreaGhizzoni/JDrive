@@ -1,15 +1,17 @@
 package it.hackcaffebabe.jdrive.cfg;
 
-import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 /**
  * Unit test for {@link it.hackcaffebabe.jdrive.cfg.Configurator}
@@ -19,45 +21,54 @@ public class ConfiguratorTest
     private static final Path cfg = Paths.get(
             System.getProperty("java.io.tmpdir")+
             System.getProperty("file.separator")+
-            "testCFG.conf"
+            "defCFG.conf"
     );
 
-    /* TODO remember to modify buildWD() and cleanWD() method to create and
-            delete cfg  */
     @Test
     public void testSetupViaFile(){
+        // testing if cfg does not exists
         try{
             Configurator.setup(cfg.toFile());
         }catch (Exception e){
             Assert.fail(e.getMessage());
         }
-        cleanWD();
+        deleteDefaultCFG();
+
+        // testing if cfg exists
+        createDefaultCFG();
+        try{
+            Configurator.setup(cfg.toFile());
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
+        }
+        deleteDefaultCFG();
     }
 
     @Test
     public void testSetupViaNullFile(){
+        // in this test is not important that cfg file exists or not.
         try{
             File f = null;
             Configurator.setup(f);
             Assert.fail("Expected to throw an exception if null File is passed"+
                     " to setup() method");
         }catch (Exception ignored){}
-        cleanWD();
     }
 
     @Test
     public void testSetupViaWrongFile(){
+        // in this test is not important that cfg file exists or not.
         try{
             File dir = Paths.get(System.getProperty("java.io.tmpdir")).toFile();
             Configurator.setup(dir);
             Assert.fail("Expected to throw an exception if directory is passed"+
                     " as argument to setup() method");
         }catch (Exception ignored){}
-        cleanWD();
     }
 
     @Test
     public void testSetupViaPropertiesConfiguration(){
+        // testing if cfg does not exists
         try {
             PropertiesConfiguration p = new PropertiesConfiguration(
                     cfg.toFile()
@@ -66,7 +77,19 @@ public class ConfiguratorTest
         }catch (Exception e){
             Assert.fail(e.getMessage());
         }
-        cleanWD();
+        deleteDefaultCFG();
+
+        // testing if cfg exists
+        createDefaultCFG();
+        try {
+            PropertiesConfiguration p = new PropertiesConfiguration(
+                    cfg.toFile()
+            );
+            Configurator.setup(p);
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
+        }
+        deleteDefaultCFG();
     }
 
     @Test
@@ -77,11 +100,11 @@ public class ConfiguratorTest
             Assert.fail("Expected to throw an exception if null " +
                     "PropertiesConfiguration is passed as argument to setup()");
         }catch (Exception ignored){}
-        cleanWD();
     }
 
     @Test
     public void testInstanceViaFile(){
+        // testing if cfg does not exists
         try{
             Configurator c = Configurator.setup(cfg.toFile());
             Assert.assertTrue(
@@ -92,10 +115,26 @@ public class ConfiguratorTest
         }catch (Exception e){
             Assert.fail(e.getMessage());
         }
+        deleteDefaultCFG();
+
+        // testing if cfg exists
+        createDefaultCFG();
+        try{
+            Configurator c = Configurator.setup(cfg.toFile());
+            Assert.assertTrue(
+                    "Expected that setup() method returns a not null instance "+
+                            "of Configurator from file setup",
+                    c != null
+            );
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
+        }
+        deleteDefaultCFG();
     }
 
     @Test
     public void testInstanceViaPropertiesConfiguration(){
+        // testing if cfg does not exists
         try{
             PropertiesConfiguration p = new PropertiesConfiguration(
                     cfg.toFile()
@@ -109,44 +148,174 @@ public class ConfiguratorTest
         }catch (Exception e){
             Assert.fail(e.getMessage());
         }
+        deleteDefaultCFG();
+
+        // testing if cfg exists
+        createDefaultCFG();
+        try{
+            PropertiesConfiguration p = new PropertiesConfiguration(
+                    cfg.toFile()
+            );
+            Configurator c = Configurator.setup(p);
+            Assert.assertTrue(
+                    "Expected that setup() method returns a not null instance "+
+                            "of Configurator from file setup",
+                    c != null
+            );
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
+        }
+        deleteDefaultCFG();
     }
 
     @Test
-    public void testConfigurator(){
-        buildWD();
-        Configurator c = Configurator.getInstance();
-        c.load();
-        c.load(); // testing multiple calling
+    public void testIOFromDefaultProperties(){
+        Configurator c = null;
+        try{
+            c = Configurator.setup(cfg.toFile());
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
+        }
 
-        Object n = c.get(null);
-        Assert.assertNull("Expecting to retrieve null object from null key.", n);
-        Object e = c.get("");
-        Assert.assertNull("Expecting to retrieve null object from empty key.", e);
+        for(Map.Entry<String, Object> t : Default.cfg.entrySet() ){
+            Assert.assertTrue(
+                    "Expected that default key exists into Configurator when " +
+                            "loads defaults cfg",
+                    c.exists(t.getKey())
+            );
 
-        String b = (String)c.get(Keys.WATCHED_DIR);
-        Assert.assertEquals("Expecting the same base path.", Default.cfg.get(Keys.WATCHED_DIR), b);
+            Object valueFromDefault = t.getValue();
+            Object valueFromConfigutator = c.get(t.getKey());
+            boolean mustBeTrue = valueFromConfigutator.toString().equals(
+                    valueFromDefault.toString()
+            );
+            Assert.assertTrue(
+                    "Expected that loading default cfg file returns the " +
+                            "default value",
+                    mustBeTrue
+            );
+        }
 
-        boolean pNK = c.put(null,1);
-        boolean pEK = c.put("",1);
-        boolean ok = c.put("testing", 42);
+        testGetAndPutValue(c);
+        testGetAndPutWrongValue(c);
+    }
 
-        Assert.assertFalse("Expecting false from put() with null key.", pNK);
-        Assert.assertFalse("Expecting false from put() with empty key.", pEK);
-        Assert.assertFalse("Expecting false from put() with valid key " +
-                "because does not exists before.", ok);
+    @Test
+    public void testIOFromCustomPropertiesFile(){
+        Path customPropFile = createTestPropertiesFile();
+        Configurator c = null;
+        try{
+            c = Configurator.setup(customPropFile.toFile());
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
+        }
 
-        Integer i = (Integer)c.get("testing");
-        Assert.assertEquals("Expecting to retrieve the latest properties",
-                new Integer(42), i);
+        boolean existsKey1 = c.exists("Key1");
+        Assert.assertTrue(
+                "Expect that the first key of custom properties file actual " +
+                        "exists into file.",
+                existsKey1
+        );
 
-        cleanWD();
+        Object valueKey1 = c.get("Key1");
+        Assert.assertTrue(
+                "Expect to retrive custom value from custom properties file",
+                valueKey1.toString().equals("Value1")
+        );
+
+        testGetAndPutValue(c);
+        testGetAndPutWrongValue(c);
+        deleteTestPropertiesFile(customPropFile);
+    }
+
+    // method that test put() and get() method when Configurator loads default
+    // properties or custom properties.
+    public void testGetAndPutValue(Configurator c){
+        String newKey = "MyNewKey";
+        String newValueForNewKey = "My fantastic value";
+        boolean expectTrue = c.put(newKey, newValueForNewKey);
+        Assert.assertTrue(
+                "Expect that there isn't other keys equal to: "+newKey,
+                expectTrue
+        );
+
+        boolean newKeyExists = c.exists(newKey);
+        Assert.assertTrue(
+                "Expect that new key actual exists in default properties file",
+                newKeyExists
+        );
+
+        String newValueFromConfigurator = c.get(newKey).toString();
+        Assert.assertTrue(
+                "Expect that set new custom value returns the same value from "+
+                        "default configurator",
+                newValueForNewKey.equals(newValueFromConfigurator)
+        );
+
+        c.remove(newKey);
+        boolean expectFalse = c.exists(newKey);
+        Assert.assertFalse(
+                "Expect that after delete a key, there isn't in the default " +
+                        "properties file anymore",
+                expectFalse
+        );
+
+        Object mustBeNull = c.get(newKey);
+        Assert.assertNull(
+                "Expect null object from a deleted key",
+                mustBeNull
+        );
+    }
+
+    // method that test put() and get() method with wrong values when
+    // Configurator loads custom properties or custom properties.
+    public void testGetAndPutWrongValue(Configurator c){
+        boolean falseOnPutNull = c.put(null, "whatever");
+        boolean falseOnPutEmptyString = c.put("", "whatever");
+        Assert.assertFalse(
+                "Expect false when putting null key into Configurator",
+                falseOnPutNull
+        );
+        Assert.assertFalse(
+                "Expect false when putting empty string as key into " +
+                        "Configurator",
+                falseOnPutEmptyString
+        );
+
+        // TODO | to test remove(null) and remove("") -> do a method
+        // TODO | c.getEntrySet() that returns all the (key, value) in the
+        // TODO | properties file. In this way I can put new (key, value),
+        // TODO | call remove(null) and remove("") and see that the entry set is
+        // TODO | not changed.
+
+        boolean falseOnExsistsNull = c.exists(null);
+        Assert.assertFalse(
+                "Expect that doesn't exists any key as null",
+                falseOnExsistsNull
+        );
+        boolean falseOnExistsEmptyString = c.exists("");
+        Assert.assertFalse(
+                "Expect that doesn't exists any key as empty string",
+                falseOnExistsEmptyString
+        );
+
+        Object nullObjectOnGetNull = c.get(null);
+        Assert.assertNull(
+                "Expect null object from getting null key",
+                nullObjectOnGetNull
+        );
+        Object nullObjectOnGetEmptyString = c.get("");
+        Assert.assertNull(
+                "Expect null object from getting empty key",
+                nullObjectOnGetEmptyString
+        );
     }
 
 //==============================================================================
 //  TEST CASE UTIL METHOD
 //==============================================================================
     // create a method to build working directory
-    private void buildWD(){
+    private void createDefaultCFG(){
         try {
             Files.createFile(cfg);
         } catch (IOException e) {
@@ -155,9 +324,43 @@ public class ConfiguratorTest
     }
 
     // create a method to clean the working directory
-    private void cleanWD(){
+    private void deleteDefaultCFG(){
         try {
             Files.delete(cfg);
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    // method to create example of properties file
+    private Path createTestPropertiesFile(){
+        Path p = Paths.get(
+                System.getProperty("java.io.tmpdir")+
+                System.getProperty("file.separator")+
+                "customFG.conf"
+        );
+
+        try {
+            Files.createFile(p);
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(p.toFile()));
+            bw.append("Key1:Value1");
+            bw.flush();
+            bw.close();
+        } catch (IOException e) {
+            Assert.fail(e.getMessage());
+        }
+
+        return p;
+    }
+
+    private void deleteTestPropertiesFile(Path p){
+        try {
+            Files.delete(p);
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
