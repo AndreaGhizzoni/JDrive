@@ -24,6 +24,12 @@ public class ConfiguratorTest
             "defCFG.conf"
     );
 
+    private static final Path custom = Paths.get(
+            System.getProperty("java.io.tmpdir")+
+            System.getProperty("file.separator")+
+            "customFG.conf"
+    );
+
     @Test
     public void testSetupViaFile(){
         // testing if cfg does not exists
@@ -198,14 +204,16 @@ public class ConfiguratorTest
 
         testGetAndPutValue(c);
         testGetAndPutWrongValue(c);
+        deleteDefaultCFG();
     }
 
     @Test
     public void testIOFromCustomPropertiesFile(){
-        Path customPropFile = createTestPropertiesFile();
+        createTestPropertiesFile();
+
         Configurator c = null;
         try{
-            c = Configurator.setup(customPropFile.toFile());
+            c = Configurator.setup(custom.toFile());
         }catch (Exception e){
             Assert.fail(e.getMessage());
         }
@@ -225,18 +233,18 @@ public class ConfiguratorTest
 
         testGetAndPutValue(c);
         testGetAndPutWrongValue(c);
-        deleteTestPropertiesFile(customPropFile);
+        deleteTestPropertiesFile();
     }
 
     // method that test put() and get() method when Configurator loads default
     // properties or custom properties.
     public void testGetAndPutValue(Configurator c){
-        String newKey = "MyNewKey";
+        String newKey = new Long(System.nanoTime()).toString();
         String newValueForNewKey = "My fantastic value";
-        boolean expectTrue = c.put(newKey, newValueForNewKey);
-        Assert.assertTrue(
+        boolean expectFalse = c.put(newKey, newValueForNewKey);
+        Assert.assertFalse(
                 "Expect that there isn't other keys equal to: "+newKey,
-                expectTrue
+                expectFalse
         );
 
         boolean newKeyExists = c.exists(newKey);
@@ -253,11 +261,11 @@ public class ConfiguratorTest
         );
 
         c.remove(newKey);
-        boolean expectFalse = c.exists(newKey);
+        boolean expectFalseAfterRemove = c.exists(newKey);
         Assert.assertFalse(
                 "Expect that after delete a key, there isn't in the default " +
                         "properties file anymore",
-                expectFalse
+                expectFalseAfterRemove
         );
 
         Object mustBeNull = c.get(newKey);
@@ -333,34 +341,29 @@ public class ConfiguratorTest
     }
 
     // method to create example of properties file
-    private Path createTestPropertiesFile(){
-        Path p = Paths.get(
-                System.getProperty("java.io.tmpdir")+
-                System.getProperty("file.separator")+
-                "customFG.conf"
-        );
-
+    private void createTestPropertiesFile(){
         try {
-            Files.createFile(p);
+            Files.createFile(custom);
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
 
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(p.toFile()));
+            BufferedWriter bw = new BufferedWriter(
+                    new FileWriter(custom.toFile())
+            );
             bw.append("Key1:Value1");
             bw.flush();
             bw.close();
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
-
-        return p;
     }
 
-    private void deleteTestPropertiesFile(Path p){
+    // method to delete custom test properties file
+    private void deleteTestPropertiesFile(){
         try {
-            Files.delete(p);
+            Files.delete(custom);
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         }
