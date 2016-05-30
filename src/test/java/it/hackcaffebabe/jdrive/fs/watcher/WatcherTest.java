@@ -101,7 +101,8 @@ public class WatcherTest
 
     public void buildConfigurator(){
        try{
-           Configurator.getInstance().load();
+//           Configurator.getInstance().load();
+           Configurator.setup(new File(PathsUtil.APP_CGF_FILE));
        } catch (Exception e) {
            Assert.fail(e.getMessage());
        }

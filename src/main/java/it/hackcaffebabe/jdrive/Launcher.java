@@ -11,6 +11,7 @@ import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -101,9 +102,14 @@ public class Launcher {
             fatal(ioE.getMessage(), ioE);
         }
 
-        boolean cfgOK = Configurator.getInstance().load();
-        if( !cfgOK ) {
-            fatal("Configurator Error. Program Exit.", null);
+//        boolean cfgOK = Configurator.getInstance().load();
+//        if( !cfgOK ) {
+//            fatal("Configurator Error. Program Exit.", null);
+//        }
+        try{
+            Configurator.setup(new File(PathsUtil.APP_CGF_FILE));
+        }catch (Exception e){
+            fatal("Configurator Error. Program Exit.", e);
         }
 
         // integrated with Google authentication
