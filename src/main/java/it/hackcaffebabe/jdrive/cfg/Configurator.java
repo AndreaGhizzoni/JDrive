@@ -184,7 +184,7 @@ public final class Configurator
      * the value associated with will be replaced with the newest one.
      * @param key {@link java.lang.String} the key string
      * @param obj {@link java.lang.Object} to put
-     * @return true if there wasn't that object with that key, false otherwise
+     * @return true if there was a object with that key, false otherwise
      */
     public boolean put(String key, Object obj) {
         if(key == null || key.isEmpty())
