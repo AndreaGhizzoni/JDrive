@@ -95,7 +95,7 @@ public final class Configurator
 
         // if file already exists, there are properties into configuration file.
         // otherwise load default properties
-        if( !propCfg.getFile().exists() ){
+        if( !CFG.getFile().exists() ){
             c.loadDefault();
         }else{
             c.loadConfigurationFromFile();
