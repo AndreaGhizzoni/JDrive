@@ -28,11 +28,6 @@ public class PathsUtil
     /** Path to watcher cache file */
     public static final String WATCHER_CACHE = APP_HOME + SEP + "jwatch.cache";
 
-    // TODO remove this: useless now
-    /** Path to google Token Authentication */
-    public static final File G_TOKEN = new File( APP_HOME + SEP + "t.json" );
-
-
     /**
      * This method check if APP_HOME exists, if not creates it.
      * @return {@link java.nio.file.Path} to home application.
@@ -53,17 +48,6 @@ public class PathsUtil
         if( !wd.toFile().exists() )
             Files.createDirectories(wd);
         return wd;
-    }
-
-    /**
-     * TODO remove this method: has been used only by Configurator.loadDefault()
-     * This method create an empty configuration file in Paths.APP_CGF_FILE.
-     * @throws IOException if make new directory fail.
-     */
-    public static void createEmptyConfigurationFile() throws IOException {
-        // create file ~/.jdrive/.jdrive.conf
-        Path p = java.nio.file.Paths.get(APP_CGF_FILE);
-        Files.createFile(p);
     }
 
     /**
