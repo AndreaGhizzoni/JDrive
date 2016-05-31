@@ -13,9 +13,11 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 
 import com.google.api.services.drive.Drive;
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,8 +36,8 @@ import java.security.GeneralSecurityException;
  * }
  * }</pre>
  */
-public final class GoogleAuthenticator {
-
+public final class GoogleAuthenticator
+{
     // instance of singleton
     private static GoogleAuthenticator instance;
     // logger
@@ -131,7 +133,7 @@ public final class GoogleAuthenticator {
     /* build up the data store and load stored credential if the are any */
     private void buildDataStore() throws IOException{
         DATA_STORE_FACTORY = new FileDataStoreFactory(
-                AuthenticationConst.DATA_STORE_DIR
+                new File( PathsUtil.DATA_STORE_JSON )
         );
     }
 
@@ -139,7 +141,8 @@ public final class GoogleAuthenticator {
     private void buildGoogleAuthCodeFlow() throws IOException {
         // Load client secrets.
         InputStream in = GoogleAuthenticator.class.getResourceAsStream(
-                "/credentials.json");
+                PathsUtil.LOCAL_CRED
+        );
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(
                 JSON_FACTORY, new InputStreamReader(in)
         );
@@ -160,7 +163,7 @@ public final class GoogleAuthenticator {
         log.info("Checking internet connection...");
         if( !GoogleAuthenticator.isInternetConnectionAvailable() ){
             throw new IOException("Internet Connection not present or timeout "+
-            "exceeded.");
+                "exceeded.");
         }
         log.info("Internet connection ok.");
     }
