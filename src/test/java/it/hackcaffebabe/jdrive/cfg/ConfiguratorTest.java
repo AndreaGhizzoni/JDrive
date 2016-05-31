@@ -290,12 +290,6 @@ public class ConfiguratorTest
                 falseOnPutEmptyString
         );
 
-        // TODO | to test remove(null) and remove("") -> do a method
-        // TODO | c.getEntrySet() that returns all the (key, value) in the
-        // TODO | properties file. In this way I can put new (key, value),
-        // TODO | call remove(null) and remove("") and see that the entry set is
-        // TODO | not changed.
-
         boolean falseOnExsistsNull = c.exists(null);
         Assert.assertFalse(
                 "Expect that doesn't exists any key as null",
