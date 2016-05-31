@@ -38,21 +38,10 @@ import java.security.GeneralSecurityException;
  */
 public final class GoogleAuthenticator
 {
-    // instance of singleton
-    private static GoogleAuthenticator instance;
     // logger
     private static final Logger log = LogManager.getLogger();
-
-    /**
-     * Instances a new Google Authenticator object.
-     * @return {@link GoogleAuthenticator} the object to provide the authentication
-     */
-    public static GoogleAuthenticator getInstance() throws GeneralSecurityException,
-            IOException {
-        if( instance == null )
-            instance = new GoogleAuthenticator();
-        return instance;
-    }
+    // instance of singleton
+    private static GoogleAuthenticator instance;
 
     // instances needed for Google Authentication process
     private FileDataStoreFactory DATA_STORE_FACTORY;
@@ -63,6 +52,18 @@ public final class GoogleAuthenticator
 
     // Authenticated object
     private Drive service;
+
+    /**
+     * Instances a new Google Authenticator object.
+     * @return {@link GoogleAuthenticator} the object to provide the
+     *         authentication
+     */
+    public static GoogleAuthenticator getInstance() throws
+            GeneralSecurityException, IOException {
+        if( instance == null )
+            instance = new GoogleAuthenticator();
+        return instance;
+    }
 
     /* constructor */
     private GoogleAuthenticator() throws GeneralSecurityException, IOException {
@@ -99,7 +100,7 @@ public final class GoogleAuthenticator
      * This method return the Drive authenticate object.
      * @return {@link Drive} the Google authenticate object
      * @throws IOException if something went wrong during the process or
-     * there is no internet connection.
+     *         there is no internet connection.
      */
     public Drive getDriveService() throws IOException {
         if( this.credential == null ) {
@@ -124,8 +125,8 @@ public final class GoogleAuthenticator
 //  METHOD
 //==============================================================================
     /* build up the HTTPTransport and JsonFactory */
-    private void buildHTTPTransportJsonFactory() throws GeneralSecurityException,
-            IOException {
+    private void buildHTTPTransportJsonFactory() throws
+            GeneralSecurityException, IOException {
         this.HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         this.JSON_FACTORY = JacksonFactory.getDefaultInstance();
     }
@@ -158,7 +159,7 @@ public final class GoogleAuthenticator
     }
 
     /* this method checks if an internet connection is available, if not
-    * throws an IOException */
+     * throws an IOException */
     private void checkInternetConnection() throws IOException {
         log.info("Checking internet connection...");
         if( !GoogleAuthenticator.isInternetConnectionAvailable() ){
