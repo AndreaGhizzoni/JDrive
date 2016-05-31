@@ -2,7 +2,6 @@ package it.hackcaffebabe.jdrive.util;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -45,13 +44,15 @@ public class PathsUtil
     }
 
     /**
-     * This method get the value associated with Keys.WATCHED_DIR from Configuration
-     * class and create it if not exists.
+     * This method get the value associated with Keys.WATCHED_DIR from
+     * Configuration class and create it if not exists.
      * @return {@link java.nio.file.Path} scanned by Watcher class.
      * @throws IOException if make new directory fail.
      */
     public static Path createWatchedDirectory() throws IOException{
-        Path wd = Paths.get( (String) Configurator.getInstance().get(Keys.WATCHED_DIR) );
+        Path wd = Paths.get(
+                (String) Configurator.getInstance().get(Keys.WATCHED_DIR)
+        );
         if( !wd.toFile().exists() )
             Files.createDirectories(wd);
         return wd;
