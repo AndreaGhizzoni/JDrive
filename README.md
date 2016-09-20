@@ -7,8 +7,8 @@ JDrive only needs to have access to your Google Drive, via standard
 Google OAuth2 authentication process, in order to keep your file sync.
 
 ## Dependencies
-- Java 1.7
-- Gradle 2.12
+- Java 1.8
+- Gradle 3.0
 
 ## Code
 All the project is written using the latest version of IntelliJ as
