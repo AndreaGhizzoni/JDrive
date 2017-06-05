@@ -1,6 +1,8 @@
 package it.hackcaffebabe.jdrive.cfg;
 
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -76,10 +78,15 @@ public class ConfiguratorTest
     public void testSetupViaPropertiesConfiguration(){
         // testing if cfg does not exists
         try {
-            PropertiesConfiguration p = new PropertiesConfiguration(
-                    cfg.toFile()
-            );
-            Configurator.setup(p);
+            FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
+                new FileBasedConfigurationBuilder<>(
+                    PropertiesConfiguration.class
+                ).configure(
+                    new Parameters().properties().setFileName(
+                        cfg.toString()
+                    )
+                );
+            Configurator.setup(builder.getConfiguration());
         }catch (Exception e){
             Assert.fail(e.getMessage());
         }
@@ -88,10 +95,15 @@ public class ConfiguratorTest
         // testing if cfg exists
         createDefaultCFG();
         try {
-            PropertiesConfiguration p = new PropertiesConfiguration(
-                    cfg.toFile()
-            );
-            Configurator.setup(p);
+            FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
+                new FileBasedConfigurationBuilder<>(
+                    PropertiesConfiguration.class
+                ).configure(
+                    new Parameters().properties().setFileName(
+                        cfg.toString()
+                    )
+                );
+            Configurator.setup(builder.getConfiguration());
         }catch (Exception e){
             Assert.fail(e.getMessage());
         }
@@ -142,10 +154,16 @@ public class ConfiguratorTest
     public void testInstanceViaPropertiesConfiguration(){
         // testing if cfg does not exists
         try{
-            PropertiesConfiguration p = new PropertiesConfiguration(
-                    cfg.toFile()
-            );
-            Configurator c = Configurator.setup(p);
+            FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
+                new FileBasedConfigurationBuilder<>(
+                    PropertiesConfiguration.class
+                ).configure(
+                    new Parameters().properties().setFileName(
+                        cfg.toString()
+                    )
+                );
+            Configurator c = Configurator.setup(builder.getConfiguration());
+
             Assert.assertTrue(
                     "Expected that setup() method returns a not null instance "+
                             "of Configurator from file setup",
@@ -159,10 +177,16 @@ public class ConfiguratorTest
         // testing if cfg exists
         createDefaultCFG();
         try{
-            PropertiesConfiguration p = new PropertiesConfiguration(
-                    cfg.toFile()
-            );
-            Configurator c = Configurator.setup(p);
+            FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
+                new FileBasedConfigurationBuilder<>(
+                    PropertiesConfiguration.class
+                ).configure(
+                    new Parameters().properties().setFileName(
+                        cfg.toString()
+                    )
+                );
+            Configurator c = Configurator.setup(builder.getConfiguration());
+
             Assert.assertTrue(
                     "Expected that setup() method returns a not null instance "+
                             "of Configurator from file setup",

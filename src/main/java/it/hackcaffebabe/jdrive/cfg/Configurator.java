@@ -1,14 +1,17 @@
 package it.hackcaffebabe.jdrive.cfg;
 
 import it.hackcaffebabe.jdrive.util.PathsUtil;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 /**
@@ -45,6 +48,7 @@ public final class Configurator
     private static Logger log = LogManager.getLogger();
     private static Configurator instance;
     private static PropertiesConfiguration CFG;
+    private static Path pathPropertiesFile;
 
     /**
      * This method create a completely functional Configurator object just
@@ -66,8 +70,17 @@ public final class Configurator
             throw new IllegalArgumentException("Properties file passed as " +
                     "argument is a directory.");
 
-        PropertiesConfiguration p = new PropertiesConfiguration(cfgFilePath);
-        return Configurator.setup(p);
+        pathPropertiesFile = cfgFilePath.toPath();
+        FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
+            new FileBasedConfigurationBuilder<PropertiesConfiguration>(
+                PropertiesConfiguration.class
+            ).configure(
+                new Parameters().properties().setFileName(
+                    pathPropertiesFile.toFile().getAbsolutePath()
+                )
+            );
+
+        return Configurator.setup( builder.getConfiguration() );
     }
 
     /**
@@ -75,7 +88,7 @@ public final class Configurator
      * giving the PropertiesConfiguration object as argument.
      * Multiple called of this method will reset the previous one.
      * @param propCfg
-     *          {@link org.apache.commons.configuration.PropertiesConfiguration}
+     *          {@link org.apache.commons.configuration2.PropertiesConfiguration}
      *          the configuration object.
      * @return {@link it.hackcaffebabe.jdrive.cfg.Configurator} the instance of
      *         Configurator.
@@ -95,7 +108,7 @@ public final class Configurator
 
         // if file already exists, there are properties into configuration file.
         // otherwise load default properties
-        if( !CFG.getFile().exists() ){
+        if( !pathPropertiesFile.toFile().exists() ){
             c.loadDefault();
         }else{
             c.loadConfigurationFromFile();
@@ -130,7 +143,7 @@ public final class Configurator
     private void loadDefault(){
         log.info("User configuration not Found. Try to load default...");
         try{
-            Files.createFile(CFG.getFile().toPath());
+            Files.createFile(pathPropertiesFile);
             // load default settings from Default class
             for(Map.Entry<String, Object> i : Default.cfg.entrySet() ){
                 put(i.getKey(), i.getValue());
