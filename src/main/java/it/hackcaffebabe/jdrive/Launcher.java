@@ -13,6 +13,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -107,7 +109,8 @@ public class Launcher {
 //            fatal("Configurator Error. Program Exit.", null);
 //        }
         try{
-            Configurator.setup(new File(PathsUtil.APP_CGF_FILE));
+            Path cfgPath = Paths.get(PathsUtil.APP_CGF_FILE);
+            Configurator.setup(cfgPath);
         }catch (Exception e){
             fatal("Configurator Error. Program Exit.", e);
         }
