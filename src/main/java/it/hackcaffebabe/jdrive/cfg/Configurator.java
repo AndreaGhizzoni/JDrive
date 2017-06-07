@@ -1,14 +1,12 @@
 package it.hackcaffebabe.jdrive.cfg;
 
 import it.hackcaffebabe.jdrive.util.PathsUtil;
-import org.apache.commons.configuration2.PropertiesConfiguration;
-import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
-import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,8 +30,8 @@ public final class Configurator
 {
     private static Logger log = LogManager.getLogger();
     private static Configurator instance;
-    private static PropertiesConfiguration propConfiguration;
-    private static Path pathConfigurationFile;
+    private static Configuration configuration;
+    private static Path pathPropertiesFile;
 
     /**
      * Returns the instance of Configurator.
@@ -41,7 +39,7 @@ public final class Configurator
      */
     public static Configurator getInstance() throws IllegalStateException{
         log.info("Configurator instance requested.");
-        if( propConfiguration == null )
+        if( configuration == null )
             throw new IllegalStateException("Configurator need to be set up "+
                     "via Configurator.setup() method first.");
         if( instance == null )
@@ -61,7 +59,7 @@ public final class Configurator
      * @throws ConfigurationException if something else went wrong
      */
     public static Configurator setup( Path configurationFilePath )
-            throws IllegalArgumentException, ConfigurationException {
+            throws IllegalArgumentException, ConfigurationException, IOException{
 
         if( configurationFilePath == null )
             throw new IllegalArgumentException("Configuration file passed as " +
@@ -71,28 +69,25 @@ public final class Configurator
             throw new IllegalArgumentException("Configuration file passed as " +
                     "argument is a directory.");
 
-        pathConfigurationFile = configurationFilePath.toAbsolutePath();
+        pathPropertiesFile = configurationFilePath.toAbsolutePath();
         log.info("Configurator setup called with file: "
-                +pathConfigurationFile.toString());
+                + pathPropertiesFile.toString() );
 
-        FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
-            new FileBasedConfigurationBuilder<>(
-                    PropertiesConfiguration.class
-            ).configure(
-                new Parameters().properties().setFileName(
-                    pathConfigurationFile.toString()
-                )
-            );
-        propConfiguration = builder.getConfiguration();
+        if( !pathPropertiesFile.toFile().exists() ){
+            Files.createFile( pathPropertiesFile );
+        }
+
+        configuration = new Configurations()
+                .properties( pathPropertiesFile.toFile() );
         log.info("Configurator get from builder.");
 
-        Configurator c = Configurator.getInstance();
-        if( pathConfigurationFile.toFile().exists() ){
-            c.checkDefault();
+        instance = new Configurator();
+        if( pathPropertiesFile.toFile().exists() ){
+            instance.checkDefault();
         }else{
-            c.createNewAndLoadDefault();
+            instance.createNewAndLoadDefault();
         }
-        return c;
+        return instance;
     }
 
     private Configurator() {}
@@ -105,7 +100,7 @@ public final class Configurator
     private void createNewAndLoadDefault(){
         log.info("User configuration not found. Try to load default...");
         try{
-            Files.createFile(pathConfigurationFile);
+            Files.createFile(pathPropertiesFile);
             for( Map.Entry<String, Object> i : Default.cfg.entrySet() ){
                 put( i.getKey(), i.getValue() );
             }
@@ -144,7 +139,7 @@ public final class Configurator
      */
     public void remove( String key ) {
         if( key != null && !key.isEmpty() ) {
-            propConfiguration.clearProperty( key );
+            configuration.clearProperty( key );
         }
     }
 
@@ -163,7 +158,7 @@ public final class Configurator
             return false;
 
         boolean hasOverride = exists( key );
-        propConfiguration.setProperty( key, obj );
+        configuration.setProperty( key, obj );
         log.debug("Loaded > Key: "+ key +" : \""+ obj.toString() +"\"");
         return hasOverride;
     }
@@ -178,6 +173,6 @@ public final class Configurator
      *                                  the key is null or not found.
      */
     public Object get( String key ){
-        return propConfiguration.getProperty( key );
+        return configuration.getProperty( key );
     }
 }
