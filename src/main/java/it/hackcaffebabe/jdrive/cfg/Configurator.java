@@ -2,7 +2,11 @@ package it.hackcaffebabe.jdrive.cfg;
 
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.FileBasedConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -69,24 +73,32 @@ public final class Configurator
             throw new IllegalArgumentException("Configuration file passed as " +
                     "argument is a directory.");
 
-        pathPropertiesFile = configurationFilePath.toAbsolutePath();
+        pathPropertiesFile = configurationFilePath.normalize().toAbsolutePath();
         log.info("Configurator setup called with file: "
-                + pathPropertiesFile.toString() );
+                + pathPropertiesFile.toString());
 
         if( !pathPropertiesFile.toFile().exists() ){
+            log.info("Properties file doesn't exists, try to create one.");
             Files.createFile( pathPropertiesFile );
+            log.info("Empty properties file created.");
         }
 
-        configuration = new Configurations()
-                .properties( pathPropertiesFile.toFile() );
+        Parameters params = new Parameters();
+        FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
+                new FileBasedConfigurationBuilder<FileBasedConfiguration>
+                (PropertiesConfiguration.class).configure(
+                    params.properties().setFile(pathPropertiesFile.toFile())
+                );
+        builder.setAutoSave(true);
+        configuration = builder.getConfiguration();
         log.info("Configurator get from builder.");
 
         instance = new Configurator();
-        if( pathPropertiesFile.toFile().exists() ){
+//        if( pathPropertiesFile.toFile().exists() ){
             instance.checkDefault();
-        }else{
-            instance.createNewAndLoadDefault();
-        }
+//        }else{
+//            instance.createNewAndLoadDefault();
+//        }
         return instance;
     }
 
@@ -97,23 +109,23 @@ public final class Configurator
 //==============================================================================
     /* this method is used to create a new configuration file if NOT EXISTS
      * whit default configuration */
-    private void createNewAndLoadDefault(){
-        log.info("User configuration not found. Try to load default...");
-        try{
-            Files.createFile(pathPropertiesFile);
-            for( Map.Entry<String, Object> i : Default.cfg.entrySet() ){
-                put( i.getKey(), i.getValue() );
-            }
-            log.info("Configuration file create and loaded properly.");
-        } catch( IOException ioe ){
-            log.error( ioe.getMessage() );
-        }
-    }
+//    private void createNewAndLoadDefault(){
+//        log.info("User configuration not found. Try to load default...");
+//        try{
+//            Files.createFile(pathPropertiesFile);
+//            for( Map.Entry<String, Object> i : Default.cfg.entrySet() ){
+//                put( i.getKey(), i.getValue() );
+//            }
+//            log.info("Configuration file create and loaded properly.");
+//        } catch( IOException ioe ){
+//            log.error( ioe.getMessage() );
+//        }
+//    }
 
     /* this method check if the required value are set in the configuration file.
      * If not, restores the defaults. */
-    private void checkDefault(){
-        log.info("User configuration found. Try to load...");
+    private void checkDefault() {
+        log.info("Checking if there are default properties in the file...");
         for( Map.Entry<String, Object> i : Default.cfg.entrySet() ){
             if( !exists(i.getKey()) ) {
                 log.info("Value for \""+i.getKey()+"\" is missing: restoring "+
