@@ -30,9 +30,9 @@ public class ConfiguratorTest2 {
     @Test
     public void setupWithPopulatedPropertiesFile(){
         ArrayList<Path> pathsToTest = new ArrayList<>();
-        pathsToTest.add( Paths.get("configuration.cfg") );
-        pathsToTest.add( Paths.get("folder/configuration.cfg") );
-        pathsToTest.add( Paths.get("../folder/configuration.cfg") );
+        pathsToTest.add( Paths.get("configuration.properties") );
+        pathsToTest.add( Paths.get("../configuration.properties") );
+        pathsToTest.add( Paths.get("../../configuration.properties") );
 
         for( Path pathToTest : pathsToTest ){
             createFile(pathToTest);
@@ -53,9 +53,9 @@ public class ConfiguratorTest2 {
     @Test
     public void setupWithEmptyPropertiesFile(){
         ArrayList<Path> pathsToTest = new ArrayList<>();
-        pathsToTest.add( Paths.get("configuration.cfg") );
-        pathsToTest.add( Paths.get("folder/configuration.cfg") );
-        pathsToTest.add( Paths.get("../folder/configuration.cfg") );
+        pathsToTest.add( Paths.get("configuration.properties") );
+        pathsToTest.add( Paths.get("../configuration.properties") );
+        pathsToTest.add( Paths.get("../../configuration.properties") );
 
         for( Path pathToTest : pathsToTest ){
             try{
@@ -95,8 +95,8 @@ public class ConfiguratorTest2 {
             }
         };
 
+        Path propertiesFile = Paths.get("prop.properties");
         try{
-            Path propertiesFile = Paths.get("prop.cfg");
             Configurator configurator = Configurator.setup(propertiesFile);
 
             for( Map.Entry<String,Object> prop : properties.entrySet() ){
@@ -113,6 +113,8 @@ public class ConfiguratorTest2 {
             }
         }catch (Exception e){
             Assert.fail( e.getMessage() );
+        }finally {
+            deleteFile( propertiesFile );
         }
     }
 
@@ -179,7 +181,7 @@ public class ConfiguratorTest2 {
             ));
 
             int NUMBER_OF_PAIR = 10;
-            String format = "Key%d = Value%d\n";
+            String format = "key%d = Value%d\n";
             for( int i=0; i<NUMBER_OF_PAIR; i++ ){
                 bw.append( String.format(format, i, i) );
             }
