@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * Unit test for {@link it.hackcaffebabe.jdrive.cfg.Configurator}
  */
-public class ConfiguratorTest2 {
+public class ConfiguratorTest {
     @Test
     public void getInstance(){
         try{
