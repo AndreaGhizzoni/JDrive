@@ -13,6 +13,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 
 import com.google.api.services.drive.Drive;
+import it.hackcaffebabe.jdrive.util.NetworkUtil;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -162,26 +163,8 @@ public final class GoogleAuthenticator
      * throws an IOException */
     private void checkInternetConnection() throws IOException {
         log.info("Checking internet connection...");
-        if( !GoogleAuthenticator.isInternetConnectionAvailable() ){
-            throw new IOException("Internet Connection not present or timeout "+
-                "exceeded.");
-        }
+        NetworkUtil.isInternetAvailableOrThrow();
         log.info("Internet connection ok.");
-    }
-
-    /**
-     * check internet connection by sending ICMP Echo Request to 8.8.8.8.
-     * @return true if destination 8.8.8.8 is reachable, false otherwise
-     * @throws IOException if destination is not reachable or request is timed
-     * out
-     */
-    public static boolean isInternetConnectionAvailable() throws IOException{
-        Process p1 = java.lang.Runtime.getRuntime().exec("ping -c 1 8.8.8.8");
-        try {
-            return p1.waitFor()==0;
-        } catch (InterruptedException e) {
-            throw new IOException("Error while checking internet connection.");
-        }
     }
 }
 
