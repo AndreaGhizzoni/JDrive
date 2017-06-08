@@ -16,15 +16,6 @@ import java.util.*;
  */
 public class ConfiguratorTest {
     @Test
-    public void getInstance(){
-        try{
-            Configurator.getInstance();
-            Assert.fail("Configurator.getInstance() must fail without calling " +
-                    "Configurator.setup() first.");
-        }catch (IllegalStateException ignored){}
-    }
-
-    @Test
     public void setupWithPopulatedPropertiesFile(){
         ArrayList<Path> pathsToTest = new ArrayList<>();
         pathsToTest.add( Paths.get("configuration.properties") );
