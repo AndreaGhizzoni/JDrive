@@ -1,6 +1,5 @@
 package it.hackcaffebabe.jdrive.cfg;
 
-import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -38,7 +37,7 @@ public class ConfiguratorTest2 {
 
             try{
                 Configurator c = Configurator.setup(pathToTest);
-                checkDefaultValues(c);
+                checkRequiredProperties(c);
 
                 readPropertiesFromFileAndCheck( pathToTest, c );
             }catch (IllegalArgumentException | IOException e){
@@ -59,7 +58,7 @@ public class ConfiguratorTest2 {
         for( Path pathToTest : pathsToTest ){
             try{
                 Configurator c = Configurator.setup(pathToTest);
-                checkDefaultValues(c);
+                checkRequiredProperties(c);
 
                 readPropertiesFromFileAndCheck( pathToTest, c );
             }catch (IllegalArgumentException | IOException e){
@@ -173,8 +172,8 @@ public class ConfiguratorTest2 {
         );
     }
 
-    private void checkDefaultValues( Configurator c ){
-        for( Map.Entry<String, Object> def : Default.cfg.entrySet() ){
+    private void checkRequiredProperties(Configurator c ){
+        for( Map.Entry<String, Object> def : Default.PROPERTIES.entrySet() ){
             Assert.assertTrue(
                 "Expected that default key exists into Configurator",
                 c.exists( def.getKey() )
@@ -183,7 +182,7 @@ public class ConfiguratorTest2 {
             Object defaultValue = def.getValue();
             Object configuratorValue = c.get( def.getKey() );
             Assert.assertEquals(
-                "Expected that loading default cfg file returns the default value",
+                "Expected that loading default PROPERTIES file returns the default value",
                 defaultValue, configuratorValue
             );
         }

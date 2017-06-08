@@ -21,7 +21,7 @@ import java.util.Map;
  * Configurator class manage Properties file for your application.
  * Simple usage:
  * <pre>{@code
- * Path path = Paths.get( "cfg.prop" );
+ * Path path = Paths.get( "pro.properties" );
  * try{
  *     Configurator c = Configurator.setup( path );
  * }catch( IllegalArgumentException | IOException e ){
@@ -99,7 +99,7 @@ public final class Configurator
         log.info("Configurator get from builder.");
 
         instance = new Configurator();
-        instance.checkDefault();
+        instance.checkRequiredProperties();
         return instance;
     }
 
@@ -169,9 +169,9 @@ public final class Configurator
     public Integer size(){ return configuration.size(); }
 
     /* check if default and required properties are set in the properties file*/
-    private void checkDefault() {
+    private void checkRequiredProperties() {
         log.info("Checking if there are default properties in the file...");
-        for( Map.Entry<String, Object> i : Default.cfg.entrySet() ){
+        for( Map.Entry<String, Object> i : Default.PROPERTIES.entrySet() ){
             if( !exists(i.getKey()) ) {
                 log.info("Value for \""+i.getKey()+"\" is missing: restoring "+
                         "default.");

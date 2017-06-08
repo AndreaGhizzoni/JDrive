@@ -11,13 +11,12 @@ import java.util.Map;
 public class Default
 {
     // map of default configuration
-    public static final Map<String, Object> cfg = new HashMap<String, Object>();
-    static{
-        cfg.put(
+    public static final Map<String, Object> PROPERTIES = new HashMap<String, Object>(){
+        {
+            put(
                 Keys.WATCHED_DIR,
-                PathsUtil.USER_HOME+PathsUtil.SEP+"Google Drive"
-        );
-
-        // add default settings here
-    }
+                PathsUtil.USER_HOME + PathsUtil.SEP + "Google Drive"
+            );
+        }
+    };
 }
