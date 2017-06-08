@@ -10,9 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Unit test for {@link it.hackcaffebabe.jdrive.cfg.Configurator}
@@ -35,14 +33,15 @@ public class ConfiguratorTest2 {
         pathsToTest.add( Paths.get("../../configuration.properties") );
 
         for( Path pathToTest : pathsToTest ){
-            createFile(pathToTest);
-            populateWithRandomProperties(pathToTest);
+            createFile( pathToTest );
+            populateWithRandomProperties( pathToTest );
 
             try{
                 Configurator c = Configurator.setup(pathToTest);
                 checkDefaultValues(c);
-            }catch (IllegalArgumentException | ConfigurationException |
-                    IOException e){
+
+                readPropertiesFromFileAndCheck( pathToTest, c );
+            }catch (IllegalArgumentException | IOException e){
                 Assert.fail( e.getMessage() );
             }finally {
                 deleteFile(pathToTest);
@@ -61,8 +60,9 @@ public class ConfiguratorTest2 {
             try{
                 Configurator c = Configurator.setup(pathToTest);
                 checkDefaultValues(c);
-            }catch (IllegalArgumentException | ConfigurationException |
-                    IOException e){
+
+                readPropertiesFromFileAndCheck( pathToTest, c );
+            }catch (IllegalArgumentException | IOException e){
                 Assert.fail( e.getMessage() );
             }finally {
                 deleteFile(pathToTest);
@@ -106,10 +106,7 @@ public class ConfiguratorTest2 {
                 checkValueFromKey( configurator, prop.getKey(), prop.getValue() );
 
                 configurator.remove( prop.getKey() );
-                if( configurator.exists(prop.getKey()) ){
-                    Assert.fail("Property with key="+prop.getKey()+
-                            " was removed but method exists() return true.");
-                }
+                notExistKeyInConfigurator( configurator, prop.getKey() );
             }
         }catch (Exception e){
             Assert.fail( e.getMessage() );
@@ -121,6 +118,34 @@ public class ConfiguratorTest2 {
 //==============================================================================
 //  TEST CASE UTIL METHOD
 //==============================================================================
+    private void readPropertiesFromFileAndCheck(Path file,
+                                                Configurator configurator ){
+        try{
+            List<String> lines = Files.readAllLines( file );
+
+            Assert.assertTrue(
+                "List of properties read from file mismatch from actual " +
+                    "property keys stored in configurator: "+
+                    lines.size()+" != "+configurator.size(),
+                lines.size() == configurator.size()
+            );
+
+            StringTokenizer tokenizer;
+            String keyFromFile, valueFromFile;
+            for( String line : lines ){
+                tokenizer = new StringTokenizer(line, "=");
+                keyFromFile = tokenizer.nextToken().trim();
+                valueFromFile = tokenizer.nextToken().trim();
+
+                existKeyInConfigurator( configurator, keyFromFile );
+
+                checkValueFromKey( configurator, keyFromFile, valueFromFile );
+            }
+        } catch (IOException e) {
+            Assert.fail( e.getMessage() );
+        }
+    }
+
     private void checkValueFromKey( Configurator c, String actualKey,
                                     Object expectedValue ){
         Object actualValueFromConfigurator = c.get( actualKey );
@@ -134,15 +159,22 @@ public class ConfiguratorTest2 {
         );
     }
 
-    private void existKeyInConfigurator(Configurator c, String key ){
+    private void existKeyInConfigurator( Configurator c, String key ){
         Assert.assertTrue(
-            "Property with key="+key+" already put must exists in configurator.",
+            "Property with key="+key+" must exists in configurator.",
+            c.exists( key )
+        );
+    }
+
+    private void notExistKeyInConfigurator( Configurator c, String key ){
+        Assert.assertFalse(
+            "Property with key="+key+" must not exists in configurator.",
             c.exists( key )
         );
     }
 
     private void checkDefaultValues( Configurator c ){
-        for(Map.Entry<String, Object> def : Default.cfg.entrySet() ){
+        for( Map.Entry<String, Object> def : Default.cfg.entrySet() ){
             Assert.assertTrue(
                 "Expected that default key exists into Configurator",
                 c.exists( def.getKey() )
@@ -151,9 +183,8 @@ public class ConfiguratorTest2 {
             Object defaultValue = def.getValue();
             Object configuratorValue = c.get( def.getKey() );
             Assert.assertEquals(
-                    "Expected that loading default cfg file returns the " +
-                            "default value",
-                    defaultValue, configuratorValue
+                "Expected that loading default cfg file returns the default value",
+                defaultValue, configuratorValue
             );
         }
     }
@@ -174,7 +205,7 @@ public class ConfiguratorTest2 {
         }
     }
 
-    private void populateWithRandomProperties(Path thisPath ){
+    private void populateWithRandomProperties( Path thisPath ){
         try {
             BufferedWriter bw = new BufferedWriter( new FileWriter(
                     thisPath.toFile()

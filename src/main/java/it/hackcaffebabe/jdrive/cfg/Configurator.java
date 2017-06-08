@@ -5,7 +5,6 @@ import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.FileBasedConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.logging.log4j.LogManager;
@@ -14,20 +13,22 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
  * Configurator class manage Properties file for your application.
  * Simple usage:
  * <pre>{@code
- * File p = new File("cfg.prop");
+ * Path path = Paths.get( "cfg.prop" );
  * try{
- *     Configurator c = Configurator.setup(p);
- * }catch( ConfigurationException e ){
+ *     Configurator c = Configurator.setup( path );
+ * }catch( IllegalArgumentException | IOException e ){
  *     e.printStackTrace();
  * }
- * c.put("key", "value")
- * System.out.println(c.get("key"));
+ * c.put( "key", "value" )
+ * System.out.println( c.get("key") );
  * }</pre>
  */
 public final class Configurator
@@ -35,10 +36,9 @@ public final class Configurator
     private static Logger log = LogManager.getLogger();
     private static Configurator instance;
     private static Configuration configuration;
-    private static Path pathPropertiesFile;
 
     /**
-     * Returns the instance of Configurator.
+     * Returns the current instance of Configurator.
      * @throws IllegalStateException if setup() method is not called first.
      */
     public static Configurator getInstance() throws IllegalStateException{
@@ -60,10 +60,10 @@ public final class Configurator
      * @return {@link it.hackcaffebabe.jdrive.cfg.Configurator} the instance of
      *         Configurator.
      * @throws IllegalArgumentException if argument is null or a directory
-     * @throws ConfigurationException if something else went wrong
+     * @throws IOException if something went wrong with parsing properties file
      */
     public static Configurator setup( Path configurationFilePath )
-            throws IllegalArgumentException, ConfigurationException, IOException{
+            throws IllegalArgumentException, IOException{
 
         if( configurationFilePath == null )
             throw new IllegalArgumentException("Configuration file passed as " +
@@ -73,97 +73,45 @@ public final class Configurator
             throw new IllegalArgumentException("Configuration file passed as " +
                     "argument is a directory.");
 
-        pathPropertiesFile = configurationFilePath.normalize().toAbsolutePath();
+        Path pathPropertiesFile = configurationFilePath
+                .normalize().toAbsolutePath();
         log.info("Configurator setup called with file: "
                 + pathPropertiesFile.toString());
 
         if( !pathPropertiesFile.toFile().exists() ){
             log.info("Properties file doesn't exists, try to create one.");
-            Files.createFile( pathPropertiesFile );
+            Files.createFile(pathPropertiesFile);
             log.info("Empty properties file created.");
         }
 
         Parameters params = new Parameters();
         FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
-                new FileBasedConfigurationBuilder<FileBasedConfiguration>
-                (PropertiesConfiguration.class).configure(
-                    params.properties().setFile(pathPropertiesFile.toFile())
-                );
+            new FileBasedConfigurationBuilder<FileBasedConfiguration>
+                    (PropertiesConfiguration.class).configure(
+                params.properties().setFile(pathPropertiesFile.toFile())
+            );
         builder.setAutoSave(true);
-        configuration = builder.getConfiguration();
+        try {
+            configuration = builder.getConfiguration();
+        }catch (ConfigurationException cause){
+            throw new IOException( cause );
+        }
         log.info("Configurator get from builder.");
 
         instance = new Configurator();
-//        if( pathPropertiesFile.toFile().exists() ){
-            instance.checkDefault();
-//        }else{
-//            instance.createNewAndLoadDefault();
-//        }
+        instance.checkDefault();
         return instance;
     }
 
     private Configurator() {}
 
-//==============================================================================
-//  METHOD
-//==============================================================================
-    /* this method is used to create a new configuration file if NOT EXISTS
-     * whit default configuration */
-//    private void createNewAndLoadDefault(){
-//        log.info("User configuration not found. Try to load default...");
-//        try{
-//            Files.createFile(pathPropertiesFile);
-//            for( Map.Entry<String, Object> i : Default.cfg.entrySet() ){
-//                put( i.getKey(), i.getValue() );
-//            }
-//            log.info("Configuration file create and loaded properly.");
-//        } catch( IOException ioe ){
-//            log.error( ioe.getMessage() );
-//        }
-//    }
-
-    /* this method check if the required value are set in the configuration file.
-     * If not, restores the defaults. */
-    private void checkDefault() {
-        log.info("Checking if there are default properties in the file...");
-        for( Map.Entry<String, Object> i : Default.cfg.entrySet() ){
-            if( !exists(i.getKey()) ) {
-                log.info("Value for \""+i.getKey()+"\" is missing: restoring "+
-                        "default.");
-                put( i.getKey(), i.getValue() );
-            }
-        }
-        log.info("Configuration file create and loaded properly.");
-    }
-
     /**
-     * Check if given key is associated with existing value in the cfg.
-     * @param key {@link java.lang.String} the key as string.
-     * @return true if exists, otherwise false.
-     */
-    public boolean exists( String key ) {
-        return get( key )!= null;
-    }
-
-    /**
-     * Remove the value from key given.
-     * @param key {@link java.lang.String} the key  of properties
-     */
-    public void remove( String key ) {
-        if( key != null && !key.isEmpty() ) {
-            configuration.clearProperty( key );
-        }
-    }
-
-//==============================================================================
-//  SETTER
-//==============================================================================
-    /**
-     * Put a new value into the configuration file. If this key already exists,
+     * Put a new value into the properties file. If this key already exists,
      * the value associated with will be replaced with the newest one.
      * @param key {@link java.lang.String} the key string
-     * @param obj {@link java.lang.Object} to put
-     * @return true if there was a object with that key, false otherwise
+     * @param obj {@link java.lang.Object} to object to put
+     * @return true if there was a object with that key, false otherwise or key
+     *         is null or empty string.
      */
     public boolean put( String key, Object obj ) {
         if( key == null || key.isEmpty() )
@@ -175,16 +123,61 @@ public final class Configurator
         return hasOverride;
     }
 
-//==============================================================================
-//  GETTER
-//==============================================================================
     /**
      * Returns the value of the specific key given.
      * @param key {@link java.lang.String} the key.
      * @return {@link java.lang.Object} the object of specific key or null if
      *                                  the key is null or not found.
      */
-    public Object get( String key ){
-        return configuration.getProperty( key );
+    public Object get( String key ){ return configuration.getProperty( key ); }
+
+    /**
+     * Remove the value from key given if is not null and not empty string.
+     * @param key {@link java.lang.String} the key of properties
+     */
+    public void remove( String key ) {
+        if( key != null && !key.isEmpty() ) {
+            configuration.clearProperty( key );
+        }
+    }
+
+    /**
+     * Check if given key is associated with some value in the properties file.
+     * @param key {@link java.lang.String} the key to check
+     * @return true if exists, false otherwise
+     */
+    public boolean exists( String key ) { return get( key )!= null; }
+
+    /**
+     * Returns the map representation of actual properties stored.
+     * @return {@link java.util.Map} the map of key-value properties.
+     */
+    public Map<String, Object> entrySet(){
+        Iterator<String> keys = configuration.getKeys();
+        Map<String, Object> maps = new HashMap<>();
+        while( keys.hasNext() ){
+            String key = keys.next();
+            maps.put( key, get(key) );
+        }
+        return maps;
+    }
+
+    /**
+     * Return the number of keys stored in the properties file.
+     * @return {@link java.lang.Integer} the number of keys in properties file.
+     */
+    public Integer size(){ return configuration.size(); }
+
+    /* check if default and required properties are set in the properties file*/
+    private void checkDefault() {
+        log.info("Checking if there are default properties in the file...");
+        for( Map.Entry<String, Object> i : Default.cfg.entrySet() ){
+            if( !exists(i.getKey()) ) {
+                log.info("Value for \""+i.getKey()+"\" is missing: restoring "+
+                        "default.");
+                put( i.getKey(), i.getValue() );
+            }
+        }
+        log.info("Properties file create and loaded properly.");
     }
 }
