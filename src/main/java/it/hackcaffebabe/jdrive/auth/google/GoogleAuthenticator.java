@@ -2,7 +2,6 @@ package it.hackcaffebabe.jdrive.auth.google;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.java6.auth.oauth2.VerificationCodeReceiver;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
@@ -22,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.security.GeneralSecurityException;
 
 /**
@@ -39,9 +37,8 @@ import java.security.GeneralSecurityException;
  */
 public final class GoogleAuthenticator
 {
-    // logger
     private static final Logger log = LogManager.getLogger();
-    // instance of singleton
+
     private static GoogleAuthenticator instance;
 
     // instances needed for Google Authentication process
@@ -56,17 +53,18 @@ public final class GoogleAuthenticator
 
     /**
      * Instances a new Google Authenticator object.
-     * @return {@link GoogleAuthenticator} the object to provide the
-     *         authentication
+     * @return {@link it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator}
+     *         the object to provide the authentication.
+     * @throws GeneralSecurityException
+     * @throws IOException
      */
-    public static GoogleAuthenticator getInstance() throws
-            GeneralSecurityException, IOException {
+    public static GoogleAuthenticator getInstance()
+            throws GeneralSecurityException, IOException {
         if( instance == null )
             instance = new GoogleAuthenticator();
         return instance;
     }
 
-    /* constructor */
     private GoogleAuthenticator() throws GeneralSecurityException, IOException {
         log.info("Try to build GoogleAuthenticator...");
         this.buildHTTPTransportJsonFactory();
@@ -75,9 +73,6 @@ public final class GoogleAuthenticator
         log.info("GoogleAuthenticator created correctly.");
     }
 
-//==============================================================================
-//  GETTER
-//==============================================================================
     /**
      * This method try to authenticate with Google using Google Authentication
      * process.
@@ -125,22 +120,24 @@ public final class GoogleAuthenticator
 //==============================================================================
 //  METHOD
 //==============================================================================
-    /* build up the HTTPTransport and JsonFactory */
-    private void buildHTTPTransportJsonFactory() throws
-            GeneralSecurityException, IOException {
+    private void buildHTTPTransportJsonFactory()
+            throws GeneralSecurityException, IOException {
+        log.debug("build HTTP Transport JSON Factory...");
         this.HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         this.JSON_FACTORY = JacksonFactory.getDefaultInstance();
+        log.debug("build HTTP Transport JSON Factory...ok");
     }
 
-    /* build up the data store and load stored credential if the are any */
     private void buildDataStore() throws IOException{
+        log.debug("build Data Store...");
         DATA_STORE_FACTORY = new FileDataStoreFactory(
                 new File( PathsUtil.DATA_STORE_JSON )
         );
+        log.debug("build Data Store...ok");
     }
 
-    /* build up the Google Authentication Flow */
     private void buildGoogleAuthCodeFlow() throws IOException {
+        log.debug("build GoogleAuthCodeFlow...");
         // Load client secrets.
         InputStream in = GoogleAuthenticator.class.getResourceAsStream(
                 PathsUtil.LOCAL_CRED
@@ -157,10 +154,10 @@ public final class GoogleAuthenticator
         ).setDataStoreFactory(DATA_STORE_FACTORY)
          .setAccessType("offline")
          .build();
+        log.debug("build GoogleAuthCodeFlow...ok");
     }
 
-    /* this method checks if an internet connection is available, if not
-     * throws an IOException */
+    /* if there isn't internet connection available throw an Exception */
     private void checkInternetConnection() throws IOException {
         log.info("Checking internet connection...");
         NetworkUtil.isInternetAvailableOrThrow();
