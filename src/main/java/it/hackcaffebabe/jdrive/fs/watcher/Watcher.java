@@ -25,7 +25,6 @@ import static java.nio.file.StandardWatchEventKinds.*;
  * Thread t = new Thread(Watcher.getInstance());
  * t.start();
  * }</pre>
- *
  */
 public final class Watcher implements Runnable
 {
@@ -36,14 +35,10 @@ public final class Watcher implements Runnable
 
     // watcher base path
     private static Path WATCHED_DIR;
-    // watcher data file
-//    private static Path WATCHED_DATA_FILE;
-//    private static final String WATCHED_DATA_FILE_NAME = ".jwatch";
 
     private static Watcher instance;
     private WatchService watcher;
     private final HashMap<WatchKey, Path> directories = new HashMap<>();
-    //private final HashSet<String> excludingFiles = new HashSet<>();
 
     private LinkedBlockingQueue<DetectedEvent> dispatchingQueue;
 
@@ -68,13 +63,6 @@ public final class Watcher implements Runnable
 
         WATCHED_DIR = PathsUtil.createWatchedDirectory();
         log.debug("Watcher base path from Configurator: "+ WATCHED_DIR.toAbsolutePath());
-//        WATCHED_DATA_FILE = WATCHED_DIR.resolve(WATCHED_DATA_FILE_NAME);
-//        if( !WATCHED_DATA_FILE.toFile().exists() ) {
-//            WATCHED_DATA_FILE = Files.createFile(WATCHED_DATA_FILE);
-//        }
-
-        // add here all the file name that watcher must exclude
-        //this.excludingFiles.add(WATCHED_DATA_FILE_NAME);
     }
 
 //==============================================================================
@@ -85,25 +73,6 @@ public final class Watcher implements Runnable
     private void registerDirectories(Path start) throws IOException {
         Files.walkFileTree(start, new WatchServiceAdder() );
     }
-
-    /* create or update the Watcher data file in working directory. */
-//    private void updateWatcherDataFile() throws IOException {
-//        BufferedReader in = new BufferedReader(new FileReader(
-//                WATCHED_DATA_FILE.toFile()));
-//        String lineRead = in.readLine();
-//        in.close();
-//        if( lineRead != null ) { // file is not empty
-//            String d = DateUtils.formatTimestamp( Long.valueOf(lineRead), null);
-//            log.info("Last update since " + d);
-//        }
-//
-//         then write the timestamp
-//        BufferedWriter out = new BufferedWriter(new FileWriter(
-//                WATCHED_DATA_FILE.toFile()));
-//        out.write( String.valueOf( new Date().getTime() ));
-//        out.newLine();
-//        out.close();
-//    }
 
     /**
      * This method close the current Watcher.
@@ -134,17 +103,12 @@ public final class Watcher implements Runnable
             if( this.dispatchingQueue == null )
                 throw new InterruptedException("Dispatch Queue missing.");
 
-
-            // turn off this feature by now.
-            // updateWatcherDataFile();
-
             // register the watched directory from Configurator in every case.
             registerDirectories(WATCHED_DIR);
 
             WatchKey key;
             WatchEvent.Kind<?> kind;
             Path objectDetected;
-            //File fileDetected;
             while( true ){
                 //retrieve and remove the next watch key
                 key = this.watcher.take();
@@ -157,15 +121,6 @@ public final class Watcher implements Runnable
                     objectDetected = directories.get(key).resolve(
                         ((WatchEvent<Path>) watchEvent).context()
                     );
-                    //fileDetected = objectDetected.toFile();
-
-                    // check if is a file to exclude or event == OVERFLOW
-//                    boolean skipThisDetection =
-//                            this.excludingFiles.contains(
-//                                    fileDetected.getName()
-//                            ) || kind.equals(OVERFLOW);
-//                    if( skipThisDetection )
-//                        continue;
                     if( kind.equals(OVERFLOW) ) continue;
 
                     //dispatch detected object into queue
@@ -193,12 +148,6 @@ public final class Watcher implements Runnable
                         break;
                     }
                 }
-
-                // update the .jwatch data file here because in case of removing
-                // root of watcher, this update cause IOException .jwatch not
-                // found.
-                // turn off this feature by now.
-                //updateWatcherDataFile();
             }
 
         }catch(InterruptedException inter){
