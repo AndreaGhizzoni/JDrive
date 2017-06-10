@@ -7,38 +7,23 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 
 /**
- * Object created by Watcher class when it detect a change of File System.
+ * Class that contains information about events detected from File System by
+ * Watcher.
  */
-public class DetectedEvent {
+public class DetectedEvent
+{
     // -1 : some error, explanation in message
     //  0 : not set
     //  1 : CREATE
     //  2 : MODIFY
     //  3 : DELETE
     private int kindOfEvent = 0;
-    // null : not set
+
     private String filePath = null;
-    // -1 : not set
     private long lastModify = -1L;
-    // null : not set
     private String message = null;
 
-    /** Create an empty DetectedEvent */
     public DetectedEvent(){}
-
-    /**
-     * Create a DetectedEvent by setting all the fields.
-     * If null is passed as WatchEvent.Kind then an error event is created,
-     * Path argument is ignored, and a message needs to be set.
-     * @param kind {@link java.nio.file.WatchEvent.Kind} the Kind of event.
-     * @param file {@link java.nio.file.Path} the path of changing object.
-     * @param message {@link java.lang.String} explanation message of event.
-     */
-    public DetectedEvent( WatchEvent.Kind kind, Path file, String message ) {
-        this.setKind(kind);
-        this.setFile(file);
-        this.setMessage(message);
-    }
 
     /**
      * Create a DetectedEvent by setting the minimum parameters. The message
@@ -49,8 +34,21 @@ public class DetectedEvent {
      * @param file {@link java.nio.file.Path} the path of changing object.
      */
     public DetectedEvent( WatchEvent.Kind kind, Path file ){
+        this( kind, file, "" );
+    }
+
+    /**
+     * Create a DetectedEvent by setting all the fields.
+     * If null is passed as WatchEvent.Kind then an error event is created,
+     * Path argument is ignored and a message needs to be set.
+     * @param kind {@link java.nio.file.WatchEvent.Kind} the Kind of event.
+     * @param file {@link java.nio.file.Path} the path of changing object.
+     * @param message {@link java.lang.String} explanation message of event.
+     */
+    public DetectedEvent( WatchEvent.Kind kind, Path file, String message ) {
         this.setKind(kind);
         this.setFile(file);
+        this.setMessage(message);
     }
 
 //==============================================================================
@@ -160,8 +158,8 @@ public class DetectedEvent {
     public String toString(){
         String k = this.getKind() == null ? "null" : this.getKind().toString();
         String p = this.getFile() == null ? "null" : this.getFile();
-        String l = this.getLastModify() == 0L ? "0" :
-                DateUtils.formatTimestamp(getLastModify());
+        String l = this.getLastModify() == 0L ?
+                "0" : DateUtils.formatTimestamp(getLastModify());
         String m = this.getMessage() == null ? "null" : this.getMessage();
 
         StringBuilder b = new StringBuilder();
