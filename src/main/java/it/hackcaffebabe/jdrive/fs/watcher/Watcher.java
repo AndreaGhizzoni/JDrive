@@ -93,7 +93,7 @@ public final class Watcher implements Runnable
 //        String lineRead = in.readLine();
 //        in.close();
 //        if( lineRead != null ) { // file is not empty
-//            String d = DateUtils.fromLongToString( Long.valueOf(lineRead), null);
+//            String d = DateUtils.formatTimestamp( Long.valueOf(lineRead), null);
 //            log.info("Last update since " + d);
 //        }
 //
