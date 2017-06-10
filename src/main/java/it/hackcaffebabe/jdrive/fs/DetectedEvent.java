@@ -161,7 +161,7 @@ public class DetectedEvent {
         String k = this.getKind() == null ? "null" : this.getKind().toString();
         String p = this.getFile() == null ? "null" : this.getFile();
         String l = this.getLastModify() == 0L ? "0" :
-                DateUtils.formatTimestamp(getLastModify(), null);
+                DateUtils.formatTimestamp(getLastModify());
         String m = this.getMessage() == null ? "null" : this.getMessage();
 
         StringBuilder b = new StringBuilder();
