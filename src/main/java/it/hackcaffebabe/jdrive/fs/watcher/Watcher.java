@@ -1,5 +1,7 @@
 package it.hackcaffebabe.jdrive.fs.watcher;
 
+import it.hackcaffebabe.jdrive.cfg.Configurator;
+import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.fs.DetectedEvent;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
@@ -9,6 +11,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -21,72 +24,73 @@ import static java.nio.file.StandardWatchEventKinds.*;
  * How to use:
  * <pre>{@code
  * Paths.createApplicationHomeDirectory();
- * Configurator.getInstance().load();
- * Thread t = new Thread(Watcher.getInstance());
+ * Configurator.setup( cfgPath )
+ * Thread t = new Thread( Watcher.getInstance() );
  * t.start();
  * }</pre>
  */
 public final class Watcher implements Runnable
 {
     private static final Logger log = LogManager.getLogger();
-    private static final WatchEvent.Kind[] mod = {
-        ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
-    };
-
-    // watcher base path
-    private static Path WATCHED_DIR;
-
     private static Watcher instance;
+
+    private Path watcherBasePath;
+
     private WatchService watcher;
-    private final HashMap<WatchKey, Path> directories = new HashMap<>();
+    private Map<WatchKey, Path> directories = new HashMap<>();
 
     private LinkedBlockingQueue<DetectedEvent> dispatchingQueue;
 
     /**
      * Retrieve the instance of Watcher with the default base path.
-     * NB: Be sure that Configurator.getInstance().load() is called before to get
-     * this instance.
      * @return {@link Watcher} instance.
      * @throws IOException if creation of watcher fail.
      */
     public static Watcher getInstance() throws IOException {
-        if(instance == null) {
+        log.info("Try to get a Watcher instance...");
+        if( instance == null ) {
             instance = new Watcher();
         }
         return instance;
     }
 
-    /* Constructor method. IOException if newWatchService() fail. */
     private Watcher() throws IOException{
+        log.info("Try to get WatchService from FileSystem...");
         this.watcher = FileSystems.getDefault().newWatchService();
-        log.info("Watch Service retrieved correctly from FS.");
+        log.info("Watch Service retrieved correctly from FileSystem.");
 
-        WATCHED_DIR = PathsUtil.createWatchedDirectory();
-        log.debug("Watcher base path from Configurator: "+ WATCHED_DIR.toAbsolutePath());
+        createBasePathIfNotExists();
     }
 
-//==============================================================================
-//  METHOD
-//==============================================================================
-    /* method to walk down a path given recursively and meanwhile register all
-    * the directory */
-    private void registerDirectories(Path start) throws IOException {
-        Files.walkFileTree(start, new WatchServiceAdder() );
+    private void createBasePathIfNotExists() throws IOException {
+        log.debug("Try to retrieve watcher base path from configurator...");
+        Configurator configurator = Configurator.getInstance();
+        String watcherBasePathAsString = (String)configurator.get(
+                Keys.WATCHED_DIR
+        );
+
+        this.watcherBasePath = Paths.get( watcherBasePathAsString )
+                .toAbsolutePath();
+        if( !this.watcherBasePath.toFile().exists() ){
+            Files.createDirectories( this.watcherBasePath );
+        }
+        log.debug("Watcher base path set: "+ this.watcherBasePath);
+    }
+
+    /** This method close the current Watcher. */
+    public void kill() {
+        // TODO rename this method to close() ?
+        log.info("Try to kill Watch service...");
+        try {
+            this.watcher.close();
+            log.info("Watch service closed correctly.");
+        } catch (IOException e) {
+            log.error( e.getMessage() );
+        }
     }
 
     /**
-     * This method close the current Watcher.
-     * @throws IOException if something went wrong with closing procedure.
-     */
-    public void kill() throws IOException {
-        this.watcher.close();
-    }
-
-//==============================================================================
-//  SETTER
-//==============================================================================
-    /**
-     * Set the dispatching queue for all the events detected by Watcher.
+     * Set the dispatching queue for all the kindEvents detected by Watcher.
      * @param dq {@link java.util.concurrent.LinkedBlockingQueue} of
      * {@link DetectedEvent}
      */
@@ -103,46 +107,23 @@ public final class Watcher implements Runnable
             if( this.dispatchingQueue == null )
                 throw new InterruptedException("Dispatch Queue missing.");
 
-            // register the watched directory from Configurator in every case.
-            registerDirectories(WATCHED_DIR);
+            registerDirectories( this.watcherBasePath );
 
-            WatchKey key;
-            WatchEvent.Kind<?> kind;
-            Path objectDetected;
+            WatchKey detectedWatchKey;
             while( true ){
-                //retrieve and remove the next watch key
-                key = this.watcher.take();
+                // get the next event rise by File System as WatchKey
+                detectedWatchKey = this.watcher.take();
 
-                //get list of events for the watch key
-                for( WatchEvent<?> watchEvent : key.pollEvents() ) {
-                    //get the kind of event (create, modify, delete)
-                    kind = watchEvent.kind();
-                    //get the objectDetected for the event
-                    objectDetected = directories.get(key).resolve(
-                        ((WatchEvent<Path>) watchEvent).context()
-                    );
-                    if( kind.equals(OVERFLOW) ) continue;
+                dispatchPollEventsFrom( detectedWatchKey );
 
-                    //dispatch detected object into queue
-                    this.dispatchingQueue.put(
-                            new DetectedEvent(kind, objectDetected)
-                    );
-
-                    // if event is CREATE and is a Directory, attach watcher to it
-                    if( kind.equals(ENTRY_CREATE)
-                            && PathsUtil.isDirectory(objectDetected)) {
-                        registerDirectories(objectDetected);
-                    }
-                }
-
-                // reset the key. if key is associated to the root of Watcher
-                // send some message and stop this thread.
-                // otherwise, remove only the key associated with path.
-                if( !key.reset() ){
-                    Path removed = directories.remove(key);
-                    if( removed.equals(WATCHED_DIR) ){
-                        this.dispatchingQueue
-                                .put( new DetectedEvent( null, null,
+                // reset the key. if key is associated to the root of Watcher,
+                // send some message and stop this thread;  otherwise, remove
+                // only the key associated with path.
+                if( !detectedWatchKey.reset() ){
+                    Path removed = directories.remove( detectedWatchKey );
+                    if( removed.equals( this.watcherBasePath) ){
+                        this.dispatchingQueue.put(
+                                new DetectedEvent( null, null,
                                         "Root directory deleted. Watcher stop." )
                         );
                         break;
@@ -159,11 +140,40 @@ public final class Watcher implements Runnable
             // the a pool() or take() method is waiting  for a key to be queued
             // DOCS: https://goo.gl/G02AEG
         }finally {
-            try {
-                this.watcher.close();
-                log.info("Watch service closed correctly.");
-            } catch (IOException e) {
-                log.error(e.getMessage());
+            this.kill();
+        }
+    }
+
+    /* method to walk down a path given recursively and meanwhile watcher
+     * register all the visitedPathsByWatcher. */
+    private void registerDirectories( Path start ) throws IOException {
+        WatchServiceAdder watchServiceAdder = new WatchServiceAdder();
+        Files.walkFileTree( start, watchServiceAdder );
+        this.directories.putAll( watchServiceAdder.visitedPathsByWatcher );
+    }
+
+    private void dispatchPollEventsFrom(WatchKey eventWatchKey )
+            throws InterruptedException, IOException {
+
+        WatchEvent.Kind<?> eventKind;
+        Path eventPath;
+        for( WatchEvent<?> watchEvent : eventWatchKey.pollEvents() ){
+            eventKind = watchEvent.kind();
+
+            if( eventKind.equals(OVERFLOW) ) continue;
+
+            eventPath = this.directories.get(eventWatchKey).resolve(
+                ((WatchEvent<Path>) watchEvent).context()
+            );
+
+            //dispatch detected object into queue
+            this.dispatchingQueue.put(
+                    new DetectedEvent( eventKind, eventPath )
+            );
+
+            // if event is CREATE and is a Directory, attach watcher to it
+            if( eventKind.equals(ENTRY_CREATE) && PathsUtil.isDirectory(eventPath) ){
+                registerDirectories( eventPath );
             }
         }
     }
@@ -171,14 +181,21 @@ public final class Watcher implements Runnable
 //==============================================================================
 //  INNER CLASS
 //==============================================================================
-    /* inner class that walk down a given path and register all the folder.*/
+    /* class that walk down a given path and set the watcher for all the
+     * folders to rise a event when event listed below occur. */
     private class WatchServiceAdder extends SimpleFileVisitor<Path> {
+        final WatchEvent.Kind[] kindEvents = {
+                ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
+        };
+        Map<WatchKey, Path> visitedPathsByWatcher = new HashMap<>();
+
         @Override
-        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes a)
+        public FileVisitResult preVisitDirectory( Path dir,
+                                                  BasicFileAttributes attrs )
                 throws IOException {
-            WatchKey k = dir.register(watcher, mod);
-            directories.put(k, dir);
-            log.debug(String.format("Path %s saved by watcher.", dir));
+            WatchKey watchKey = dir.register( watcher, kindEvents );
+            visitedPathsByWatcher.put( watchKey, dir );
+            log.debug( String.format("Path %s saved by watcher.", dir) );
             return FileVisitResult.CONTINUE;
         }
     }
