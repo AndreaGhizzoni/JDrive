@@ -4,7 +4,6 @@ import it.hackcaffebabe.applicationutil.Locker;
 import it.hackcaffebabe.applicationutil.Util;
 import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
-import it.hackcaffebabe.jdrive.fs.DetectedEvent;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
 import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
@@ -12,7 +11,6 @@ import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.imageio.metadata.IIOMetadata;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
