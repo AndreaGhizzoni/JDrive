@@ -20,7 +20,7 @@ public abstract class WatcherEvent
         this.setNowAsTimestamp();
     }
 
-    public static WatcherEvent BuildEventFrom( WatchEvent.Kind kind, Path file ){
+    public static WatcherEvent BuildNewFrom( WatchEvent.Kind kind, Path file ){
         if( kind == StandardWatchEventKinds.ENTRY_CREATE ){
             return new Create( file );
         }else if( kind == StandardWatchEventKinds.ENTRY_MODIFY ){

@@ -6,12 +6,13 @@ import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.DetectedEvent;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
+import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
+import javax.imageio.metadata.IIOMetadata;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -131,24 +132,24 @@ public class Launcher {
                 @Override
                 public void run() {
                     log.info("JDrive closing procedure...");
-                    try {
+//                    try {
                         w.kill();
-                    } catch (IOException e) {
-                        fatal("Attempting to kill Watcher process.", e);
-                    }
+//                    } catch (IOException e) {
+//                        fatal("Attempting to kill Watcher process.", e);
+//                    }
                 }
             }, "Main-Shutdown-Hook"));
 
-            LinkedBlockingQueue<DetectedEvent> lbq = new LinkedBlockingQueue<>();
+            LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
             w.setDispatchingQueue(lbq);
             new Thread(w, "Watcher").start();
 
-            DetectedEvent detObj;
+            WatcherEvent detObj;
             boolean keepRunning = true;
             while(keepRunning){
                 detObj = lbq.take();
                 log.debug(detObj.toString());
-                if( detObj.containError() ){
+                if( Error.class.isAssignableFrom(detObj.getClass()) ){
                     log.info("Error message from Watcher: "+detObj.getMessage());
                     keepRunning = false;
                 }

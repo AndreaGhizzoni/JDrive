@@ -2,7 +2,8 @@ package it.hackcaffebabe.jdrive.fs.watcher;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
-import it.hackcaffebabe.jdrive.fs.DetectedEvent;
+import it.hackcaffebabe.jdrive.fs.watcher.events.Error;
+import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,7 +40,7 @@ public final class Watcher implements Runnable
     private WatchService watcher;
     private Map<WatchKey, Path> directories = new HashMap<>();
 
-    private LinkedBlockingQueue<DetectedEvent> dispatchingQueue;
+    private LinkedBlockingQueue<WatcherEvent> dispatchingQueue;
 
     /**
      * Retrieve the instance of Watcher with the default base path.
@@ -90,12 +91,12 @@ public final class Watcher implements Runnable
     }
 
     /**
-     * Set the dispatching queue for all the kindEvents detected by Watcher.
-     * @param dq {@link java.util.concurrent.LinkedBlockingQueue} of
-     * {@link DetectedEvent}
+     * Set the dispatching queue for all the WatcherEvent detected by Watcher.
+     * @param queue {@link java.util.concurrent.LinkedBlockingQueue} of
+     *              {@link WatcherEvent}
      */
-    public void setDispatchingQueue( LinkedBlockingQueue<DetectedEvent> dq ){
-        this.dispatchingQueue = dq;
+    public void setDispatchingQueue( LinkedBlockingQueue<WatcherEvent> queue ){
+        this.dispatchingQueue = queue;
     }
 
 //==============================================================================
@@ -121,10 +122,9 @@ public final class Watcher implements Runnable
                 // only the key associated with path.
                 if( !detectedWatchKey.reset() ){
                     Path removed = directories.remove( detectedWatchKey );
-                    if( removed.equals( this.watcherBasePath) ){
+                    if( removed.equals( this.watcherBasePath ) ){
                         this.dispatchingQueue.put(
-                                new DetectedEvent( null, null,
-                                        "Root directory deleted. Watcher stop." )
+                            new Error("Root directory deleted. Watcher stop.")
                         );
                         break;
                     }
@@ -168,7 +168,7 @@ public final class Watcher implements Runnable
 
             //dispatch detected object into queue
             this.dispatchingQueue.put(
-                    new DetectedEvent( eventKind, eventPath )
+                WatcherEvent.BuildNewFrom( eventKind, eventPath )
             );
 
             // if event is CREATE and is a Directory, attach watcher to it
