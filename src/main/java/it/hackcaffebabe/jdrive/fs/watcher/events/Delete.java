@@ -3,6 +3,8 @@ package it.hackcaffebabe.jdrive.fs.watcher.events;
 import it.hackcaffebabe.jdrive.util.DateUtils;
 
 import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
 
 /**
  * TODO add doc
@@ -21,6 +23,11 @@ public class Delete extends WatcherEvent
      * @param message
      */
     public Delete( Path file, String message ) { super( file, message ); }
+
+    @Override
+    public WatchEvent.Kind Convert() {
+        return StandardWatchEventKinds.ENTRY_DELETE;
+    }
 
     @Override
     public String toString(){

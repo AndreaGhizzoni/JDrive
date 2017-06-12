@@ -32,6 +32,8 @@ public abstract class WatcherEvent
         }
     }
 
+    public abstract WatchEvent.Kind Convert();
+
     public Path getFile(){ return this.file; }
 
     public long getTimestamp(){ return this.timestamp; }
