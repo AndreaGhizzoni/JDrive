@@ -2,16 +2,15 @@ package it.hackcaffebabe.jdrive.fs.watcher;
 
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
-import it.hackcaffebabe.jdrive.fs.DetectedEvent;
+import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import java.io.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchEvent;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -20,78 +19,47 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class WatcherTest
 {
-    LinkedBlockingQueue<DetectedEvent> lbq = new LinkedBlockingQueue<DetectedEvent>();
+    private LinkedBlockingQueue<WatcherEvent> queue = new LinkedBlockingQueue<>();
 
     @Test
     public void testWatcher(){
-        buildWD();
-        buildConfigurator();
-        Path wd = Paths.get((String)Configurator.getInstance().get(Keys.WATCHED_DIR));
+        // I need the application home directory in order to create the
+        // properties file
+        buildApplicationHomeDirectoryOrFail();
+        // create configurator to get Keys.WATCHED_DIR
+        buildConfiguratorOrFail();
+        Configurator configurator = Configurator.getInstance();
+        Path watcherBasePath = Paths.get( (String)configurator.get(Keys.WATCHED_DIR) );
 
-        Watcher w = null;
-        try {
-            w = Watcher.getInstance();
-        } catch (IOException e) {
-            Assert.fail("Fail to retrieve the Watcher. "+e.getMessage());
-        }
+        Watcher watcher = buildWatcherOrFail();
+        watcher.setDispatchingQueue(queue);
+        Thread watcherThread = new Thread(watcher);
+        watcherThread.start();
 
-        w.setDispatchingQueue(lbq);
-        Thread t = new Thread(w);
-        t.start();
-
-        // spawning folder test
-        spawnFolder( wd.toFile(), 10 );
-        listenFromQueue(
-            Arrays.asList(StandardWatchEventKinds.ENTRY_CREATE),
-            "After spawn some folders I expect ENTRY_CREATE"
+        spawnFoldersUnder( watcherBasePath );
+        checkEventsFromQueue(
+            "After spawning some folders I expect to get only Creation event " +
+                    "from queue",
+            StandardWatchEventKinds.ENTRY_CREATE
         );
 
-        // creation file and modify
-        BufferedWriter bw;
-        FileWriter fw;
-        String b = "f%d.txt";
-        int n = 10;
-        for(int i=0; i<n; i++){
-            try {
-                fw = new FileWriter(new File(wd.toFile(), String.format(b, i)));
-                bw = new BufferedWriter(fw);
+        createWriteAndDeleteFilesUnder( watcherBasePath );
+        checkEventsFromQueue(
+            "After creating, modify and deleting a file I expect to get " +
+                    "Creation, Modification and Delete event",
+            StandardWatchEventKinds.ENTRY_CREATE,
+            StandardWatchEventKinds.ENTRY_MODIFY,
+            StandardWatchEventKinds.ENTRY_DELETE
+        );
 
-                bw.append("Hello Im a new File\n");
-                bw.flush();
-                bw.close();
-                fw.close();
-
-                listenFromQueue(
-                    Arrays.asList(StandardWatchEventKinds.ENTRY_CREATE,
-                            StandardWatchEventKinds.ENTRY_MODIFY),
-                    "After spawn a file and modify it I expect ENTRY_MODIFY and" +
-                            "ENTRY_CREATE"
-                );
-            } catch (IOException e) {
-                Assert.fail(e.getMessage());
-            }
-        }
-
-        t.interrupt();
-        cleanWD(wd.toFile());
+        watcherThread.interrupt();
+        deleteFolderAndContents( watcherBasePath );
     }
 
 //==============================================================================
 //  TEST CASE UTIL METHOD
 //==============================================================================
-    public void listenFromQueue( List<WatchEvent.Kind<Path>> expected, String msg ){
-        DetectedEvent detObj;
-        while( !lbq.isEmpty() ){
-            try {
-                detObj = lbq.take();
-                Assert.assertTrue(msg, expected.contains(detObj.getKind()));
-            } catch (InterruptedException e) {
-                Assert.fail(e.getMessage());
-            }
-        }
-    }
-
-    public void buildWD(){
+    private void buildApplicationHomeDirectoryOrFail(){
         try {
             PathsUtil.createApplicationHomeDirectory();
         } catch (IOException e) {
@@ -99,36 +67,118 @@ public class WatcherTest
         }
     }
 
-    public void buildConfigurator(){
+    private void buildConfiguratorOrFail(){
        try{
-//           Configurator.getInstance().load();
-           Path cfgPath = Paths.get(PathsUtil.APP_CGF_FILE);
-           Configurator.setup(cfgPath);
+           Path cfgPath = Paths.get( PathsUtil.APP_CGF_FILE );
+           Configurator.setup( cfgPath );
        } catch (Exception e) {
            Assert.fail(e.getMessage());
        }
     }
 
-    public void spawnFolder( File parent, int n ){
-        String b = "folder%d";
-        for(int i=0; i<n; i++){
-            if(!new File(parent, String.format(b, i)).mkdirs())
-                Assert.fail("Fail to spawn folders.");
+    private Watcher buildWatcherOrFail(){
+        try {
+           return Watcher.getInstance();
+        } catch (IOException e) {
+            Assert.fail("Fail to retrieve the Watcher. "+e.getMessage());
+        }
+        return null;
+    }
+
+    private void checkEventsFromQueue( String msg,
+                                       WatchEvent.Kind... expectedEvents ){
+        List<WatchEvent.Kind> listExpEvents = Arrays.asList( expectedEvents );
+        WatcherEvent detectedEvent;
+        String message;
+        while( !queue.isEmpty() ){
+            try {
+                detectedEvent = queue.take();
+                WatchEvent.Kind actualKindEvent = detectedEvent.Convert();
+
+                message = msg.concat( ": instead found "+actualKindEvent );
+                Assert.assertTrue( message, listExpEvents.contains(actualKindEvent) );
+            } catch (InterruptedException e) {
+                Assert.fail(e.getMessage());
+            }
         }
     }
 
-    public void cleanWD(File b){
-        try{
-            for(File i : b.listFiles()){
-               if(i.isDirectory())
-                   cleanWD(i);
-               if(!i.delete())
-                   throw new IOException("Fail to delete some files in cleanWD");
+    private int spawnFoldersUnder( Path path ){
+        String folderNamePattern = "folder%d";
+        final int numberOfFolders = 10;
+
+        String folderName;
+        Path folder;
+        int counterOfFolderSpawned = 1;
+        for( ; counterOfFolderSpawned<=numberOfFolders; counterOfFolderSpawned++ ){
+            folderName = String.format( folderNamePattern, counterOfFolderSpawned );
+            folder = Paths.get( path.toString(), folderName );
+            try {
+                Files.createDirectories( folder );
+            } catch (IOException e) {
+                Assert.fail("Fail to spawn folders.");
             }
-        }catch (IOException e){
+        }
+        return counterOfFolderSpawned;
+    }
+
+    private void createWriteAndDeleteFilesUnder( Path path ){
+        String fileNamePattern = "f%d.txt";
+        final int numberOfFiles = 10;
+
+        String fileName;
+        Path filePath;
+        for( int i=0; i<numberOfFiles; i++ ){
+            try {
+                fileName = String.format( fileNamePattern, i );
+                filePath = Paths.get( path.toString(), fileName );
+                Files.write(
+                    filePath,
+                    Collections.singletonList( "Hello I'm a new File!\n" )
+                );
+                Files.delete( filePath );
+            } catch (IOException e) {
+                Assert.fail(e.getMessage());
+            }
+        }
+    }
+
+    private void deleteFolderAndContents( Path folder ){
+        try {
+            Files.walkFileTree( folder, new FileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory( Path dir,
+                                                          BasicFileAttributes attrs )
+                        throws IOException {
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile( Path file,
+                                                  BasicFileAttributes attrs )
+                        throws IOException {
+                    Files.delete( file );
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed( Path file,
+                                                        IOException exc )
+                        throws IOException {
+                    Assert.fail(exc.getMessage());
+                    return null;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory( Path dir,
+                                                           IOException exc )
+                        throws IOException {
+                    Files.delete( dir );
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
             Assert.fail(e.getMessage());
-        }catch (NullPointerException eN){
-            Assert.fail(eN.getMessage());
         }
     }
 }
