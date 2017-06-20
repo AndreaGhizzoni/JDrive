@@ -1,8 +1,5 @@
 package it.hackcaffebabe.jdrive.util;
 
-import it.hackcaffebabe.jdrive.cfg.Configurator;
-import it.hackcaffebabe.jdrive.cfg.Keys;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
