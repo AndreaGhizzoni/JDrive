@@ -69,7 +69,7 @@ public class WatcherTest
 
     private void buildConfiguratorOrFail(){
        try{
-           Path cfgPath = Paths.get( PathsUtil.APP_CGF_FILE );
+           Path cfgPath = Paths.get( PathsUtil.APP_PROPERTIES_FILE);
            Configurator.setup( cfgPath );
        } catch (Exception e) {
            Assert.fail(e.getMessage());

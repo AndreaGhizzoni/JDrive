@@ -108,7 +108,7 @@ public class Launcher {
 //            fatal("Configurator Error. Program Exit.", null);
 //        }
         try{
-            Path cfgPath = Paths.get(PathsUtil.APP_CGF_FILE);
+            Path cfgPath = Paths.get(PathsUtil.APP_PROPERTIES_FILE);
             Configurator.setup(cfgPath);
         }catch (Exception e){
             fatal("Configurator Error. Program Exit.", e);

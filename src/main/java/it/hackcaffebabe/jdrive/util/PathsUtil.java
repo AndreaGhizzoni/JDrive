@@ -19,7 +19,7 @@ public class PathsUtil
     /** Path home application folder */
     public static final String APP_HOME = USER_HOME + SEP + ".jdrive";
     /** Path to application configuration file */
-    public static final String APP_CGF_FILE = APP_HOME + SEP + "jdrive.conf";
+    public static final String APP_PROPERTIES_FILE = APP_HOME + SEP + "jdrive.conf";
 
     /** Path to watcher cache file */
     public static final String WATCHER_CACHE = APP_HOME + SEP + "jwatch.cache";

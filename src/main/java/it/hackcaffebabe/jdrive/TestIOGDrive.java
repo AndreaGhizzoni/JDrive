@@ -1,7 +1,6 @@
 package it.hackcaffebabe.jdrive;
 
 import com.google.api.client.http.InputStreamContent;
-import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
@@ -17,7 +16,6 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Date;
 
 
 /**
@@ -28,7 +26,7 @@ public class TestIOGDrive {
 
     public static void main(String... args){
         try{
-            Path cfgPath = Paths.get(PathsUtil.APP_CGF_FILE);
+            Path cfgPath = Paths.get(PathsUtil.APP_PROPERTIES_FILE);
             Configurator.setup(cfgPath);
         }catch (Exception e){
             fatal(e.getMessage(), e);
