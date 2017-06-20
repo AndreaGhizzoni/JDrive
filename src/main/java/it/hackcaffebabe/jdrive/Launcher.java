@@ -21,7 +21,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  * JDrive Application Launcher
  */
 public class Launcher {
-    private static final String VERSION = "0.0.5-dev";
 
     private static Logger log = LogManager.getLogger();
 
@@ -46,7 +45,7 @@ public class Launcher {
         }
 
         if( versionFlag ){
-            System.out.println(VERSION);
+            System.out.println( Constants.VERSION );
             System.exit(0);
         }
 
