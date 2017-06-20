@@ -37,21 +37,6 @@ public class PathsUtil
     }
 
     /**
-     * This method get the value associated with Keys.WATCHED_DIR from
-     * Configuration class and create it if not exists.
-     * @return {@link java.nio.file.Path} scanned by Watcher class.
-     * @throws IOException if make new directory fail.
-     */
-    public static Path createWatchedDirectory() throws IOException{
-        Path wd = Paths.get(
-                (String) Configurator.getInstance().get(Keys.WATCHED_DIR)
-        );
-        if( !wd.toFile().exists() )
-            Files.createDirectories(wd);
-        return wd;
-    }
-
-    /**
      * This method create an empty cache file for WatcherCache class.
      * @return {@link java.nio.file.Path} of Watcher cache file.
      * @throws IOException if fail creating the file.
@@ -71,15 +56,5 @@ public class PathsUtil
      */
     public static boolean isDirectory( Path p ){
         return Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS);
-    }
-
-    /**
-     * This method checks if given path leads to a directory or not.
-     * @param f {@link java.io.File} the file object to check.
-     * @return true if leads to a directory, false otherwise.
-     */
-    public static boolean isDirectory( File f ){
-        Path p = Paths.get(f.getAbsolutePath());
-        return PathsUtil.isDirectory(p);
     }
 }
