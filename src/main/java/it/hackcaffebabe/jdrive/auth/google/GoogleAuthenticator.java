@@ -131,7 +131,7 @@ public final class GoogleAuthenticator
     private void buildDataStore() throws IOException{
         log.debug("build Data Store...");
         DATA_STORE_FACTORY = new FileDataStoreFactory(
-                new File( PathsUtil.DATA_STORE_JSON )
+                new File( AuthenticationConst.DATA_STORE_JSON )
         );
         log.debug("build Data Store...ok");
     }
@@ -140,7 +140,7 @@ public final class GoogleAuthenticator
         log.debug("build GoogleAuthCodeFlow...");
         // Load client secrets.
         InputStream in = GoogleAuthenticator.class.getResourceAsStream(
-                PathsUtil.LOCAL_CRED
+                AuthenticationConst.LOCAL_CRED
         );
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(
                 JSON_FACTORY, new InputStreamReader(in)
