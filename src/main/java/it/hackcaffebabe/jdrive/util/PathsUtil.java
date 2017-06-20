@@ -21,14 +21,8 @@ public class PathsUtil
     // default application paths
     /** Path home application folder */
     public static final String APP_HOME = USER_HOME + SEP + ".jdrive";
-    /** Path of directory to store user credential */
-    public static final String DATA_STORE_DIR = APP_HOME + SEP + "cred";
     /** Path to application configuration file */
     public static final String APP_CGF_FILE = APP_HOME + SEP + "jdrive.conf";
-    /** Path to json file for google credential */
-    public static final String DATA_STORE_JSON = DATA_STORE_DIR + SEP +"t.json";
-    /** Path to local application credentials */
-    public static final String LOCAL_CRED = SEP + "credentials.json";
 
     /** Path to watcher cache file */
     public static final String WATCHER_CACHE = APP_HOME + SEP + "jwatch.cache";
