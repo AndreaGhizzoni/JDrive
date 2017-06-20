@@ -7,20 +7,21 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 
 /**
- * TODO add doc
+ * This class represents a Create event associated to a file path.
  */
 public class Create extends WatcherEvent
 {
     /**
-     * TODO add doc
-     * @param file
+     * Instance a Create event associated to a given file path.
+     * @param file {@link java.nio.file.Path} the file path of Create event.
      */
     public Create( Path file ){ this( file, "Creation event detected." ); }
 
     /**
-     * TODO add doc
-     * @param file
-     * @param message
+     * Instance a Create event associated to a given file path and custom human
+     * readable message.
+     * @param file {@link java.nio.file.Path} the file path of Create event.
+     * @param message {@link java.lang.String} a human readable message.
      */
     public Create( Path file, String message ) { super( file, message ); }
 

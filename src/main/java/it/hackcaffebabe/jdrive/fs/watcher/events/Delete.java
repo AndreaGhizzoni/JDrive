@@ -7,20 +7,21 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 
 /**
- * TODO add doc
+ * This class represents a Delete event associated to a file path.
  */
 public class Delete extends WatcherEvent
 {
     /**
-     * TODO add doc
-     * @param file
+     * Instance a Delete event associated to a given file path.
+     * @param file {@link java.nio.file.Path} the file path of Delete event.
      */
     public Delete( Path file ) { this( file, "Delete event detected." ); }
 
     /**
-     * TODO add doc
-     * @param file
-     * @param message
+     * Instance a Delete event associated to a given file path and custom human
+     * readable message.
+     * @param file {@link java.nio.file.Path} the file path of Delete event.
+     * @param message {@link java.lang.String} a human readable message.
      */
     public Delete( Path file, String message ) { super( file, message ); }
 

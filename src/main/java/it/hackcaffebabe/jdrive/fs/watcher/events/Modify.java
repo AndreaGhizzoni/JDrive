@@ -7,20 +7,21 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 
 /**
- * TODO add doc
+ * This class represents a Modify event associated to a file path.
  */
 public class Modify extends WatcherEvent
 {
     /**
-     * TODO add doc
-     * @param file
+     * Instance a Modify event associated to a given file path.
+     * @param file {@link java.nio.file.Path} the file path of Modify event.
      */
     public Modify( Path file ) { this( file, "Modification event detected." ); }
 
     /**
-     * TODO add doc
-     * @param file
-     * @param message
+     * Instance a Modify event associated to a given file path and custom human
+     * readable message.
+     * @param file {@link java.nio.file.Path} the file path of Modify event.
+     * @param message {@link java.lang.String} a human readable message.
      */
     public Modify( Path file, String message ) { super( file, message ); }
 
