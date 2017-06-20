@@ -14,11 +14,11 @@ import java.nio.file.Paths;
  */
 public class PathsUtil
 {
-    // utility paths
+    /** Set as System.getProperty("user.home") */
     public static final String USER_HOME = System.getProperty("user.home");
+    /** Set as System.getProperty("file.separator") */
     public static final String SEP = System.getProperty("file.separator");
 
-    // default application paths
     /** Path home application folder */
     public static final String APP_HOME = USER_HOME + SEP + ".jdrive";
     /** Path to application configuration file */
@@ -26,7 +26,6 @@ public class PathsUtil
 
     /** Path to watcher cache file */
     public static final String WATCHER_CACHE = APP_HOME + SEP + "jwatch.cache";
-
 
     /**
      * This method check if APP_HOME exists, if not creates it.
