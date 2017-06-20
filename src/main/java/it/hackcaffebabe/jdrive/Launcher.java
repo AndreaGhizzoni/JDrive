@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
@@ -20,28 +21,29 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * JDrive Application Launcher
  */
-public class Launcher {
-
+public class Launcher
+{
     private static Logger log = LogManager.getLogger();
 
-    private static CommandLine ARGS_CLI;
-    private static Options ARGS_OPTIONS = new Options();
+    private static CommandLine CLI_PARSER;
+    private static Options FLAGS = new Options();
 
     public static void main( String... args ){
-        checkCLIArgs(args);
+        populateOptionsAndCLIParser(args);
 
-        boolean startFlag = ARGS_CLI.hasOption("start");
-        boolean stopFlag = ARGS_CLI.hasOption("stop");
-        boolean statusFlag = ARGS_CLI.hasOption("status");
-        boolean helpFlag = ARGS_CLI.hasOption("help");
-        boolean versionFlag = ARGS_CLI.hasOption("version");
-        boolean noFlag = startFlag || stopFlag || statusFlag || helpFlag ||
-                         versionFlag;
+        boolean startFlag = CLI_PARSER.hasOption("start");
+        boolean stopFlag = CLI_PARSER.hasOption("stop");
+        boolean statusFlag = CLI_PARSER.hasOption("status");
+        boolean helpFlag = CLI_PARSER.hasOption("help");
+        boolean versionFlag = CLI_PARSER.hasOption("version");
+        boolean noFlag = !(startFlag || stopFlag || statusFlag || helpFlag ||
+                         versionFlag);
 
-        if( helpFlag || !noFlag ) {
-            HelpFormatter h = new HelpFormatter();
-            h.printHelp("<jar> [OPTIONS]\n" +
-                        "Where OPTIONS are listed below:", ARGS_OPTIONS);
+        if( helpFlag || noFlag ) {
+            new HelpFormatter().printHelp(
+                "<jar> [OPTIONS]\nWhere OPTIONS are listed below:",
+                FLAGS
+            );
         }
 
         if( versionFlag ){
@@ -56,7 +58,7 @@ public class Launcher {
             fatal(ioe.getMessage(), ioe);
         }
 
-        boolean isAlreadyRunning = pid != Util.getProcessID();
+        boolean isAlreadyRunning = ( pid != Util.getProcessID() );
         if( isAlreadyRunning ){
             if( statusFlag ){
                 System.out.println("TODO: checking JDrive status..");
@@ -78,49 +80,25 @@ public class Launcher {
 //  UTILITY METHODS
 //==============================================================================
     // more options @ https://goo.gl/4zOb8V
-    private static void checkCLIArgs(String...args){
+    private static void populateOptionsAndCLIParser( String... args ){
          try{
-             ARGS_OPTIONS.addOption("status", false, "check JDrive status");
-             ARGS_OPTIONS.addOption("start", false, "start JDrive");
-             ARGS_OPTIONS.addOption("stop", false, "stop JDrive");
-             ARGS_OPTIONS.addOption("help", false, "print argument usage");
-             ARGS_OPTIONS.addOption("version", false, "print current version");
-             ARGS_CLI = new DefaultParser().parse(ARGS_OPTIONS, args);
+             FLAGS.addOption("status", false, "check JDrive status");
+             FLAGS.addOption("start", false, "start JDrive");
+             FLAGS.addOption("stop", false, "stop JDrive");
+             FLAGS.addOption("help", false, "print argument usage");
+             FLAGS.addOption("version", false, "print current version");
+             CLI_PARSER = new DefaultParser().parse(FLAGS, args);
          }catch (ParseException pe){
              fatal(pe.getMessage(), pe);
          }
     }
 
-    /* start application main flow */
     private static void startJDrive(){
-        try{
-            log.info("JDrive Application Starting.");
-            log.debug("pid: "+Util.getProcessID());
-            PathsUtil.createApplicationHomeDirectory();
-            log.info(
-                "JDrive Home directory created/detected in: "+Constants.APP_HOME
-            );
-        }catch( IOException ioE ){
-            fatal(ioE.getMessage(), ioE);
-        }
-
-//        boolean cfgOK = Configurator.getInstance().load();
-//        if( !cfgOK ) {
-//            fatal("Configurator Error. Program Exit.", null);
-//        }
-        try{
-            Path cfgPath = Paths.get(Constants.APP_PROPERTIES_FILE);
-            Configurator.setup(cfgPath);
-        }catch (Exception e){
-            fatal("Configurator Error. Program Exit.", e);
-        }
-
-        // integrated with Google authentication
-        try {
-            GoogleAuthenticator.getInstance().authenticate();
-        } catch (IOException | GeneralSecurityException e) {
-            fatal(e.getMessage(), e);
-        }
+        log.info("Starting JDrive application.");
+        log.debug("pid: "+Util.getProcessID());
+        createApplicationHomeDirectoryOrFail();
+        setupConfiguratorOrFail();
+        authenticateWithGoogleOrFail();
 
         try{
             // process that will start from main application
@@ -131,11 +109,7 @@ public class Launcher {
                 @Override
                 public void run() {
                     log.info("JDrive closing procedure...");
-//                    try {
-                        w.kill();
-//                    } catch (IOException e) {
-//                        fatal("Attempting to kill Watcher process.", e);
-//                    }
+                    w.kill();
                 }
             }, "Main-Shutdown-Hook"));
 
@@ -158,6 +132,35 @@ public class Launcher {
         }
     }
 
+    private static void createApplicationHomeDirectoryOrFail() {
+        try{
+            Files.createDirectories( Paths.get(Constants.APP_HOME) );
+            log.info(
+                "JDrive Home directory created/detected in: "+Constants.APP_HOME
+            );
+        }catch (IOException ioE){
+            fatal(ioE.getMessage(), ioE);
+        }
+    }
+
+    private static void setupConfiguratorOrFail(){
+        try{
+            Configurator.setup(
+                Paths.get( Constants.APP_PROPERTIES_FILE )
+            );
+        }catch (Exception e){
+            fatal("Configurator Error. Program Exit.", e);
+        }
+    }
+
+    private static void authenticateWithGoogleOrFail(){
+        try {
+            GoogleAuthenticator.getInstance().authenticate();
+        } catch (IOException | GeneralSecurityException e) {
+            fatal(e.getMessage(), e);
+        }
+    }
+
     private static void stopJDrive( long pid ){
         try {
             log.info("Stopping JDrive from command line detected.");
@@ -167,7 +170,6 @@ public class Launcher {
         }
     }
 
-    // this method write a fatal message into log file and kill the program
     private static void fatal(String msg, Throwable t){
         log.fatal(msg, t);
         System.exit(1);
