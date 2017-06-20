@@ -124,7 +124,8 @@ public final class Configurator
     }
 
     /**
-     * Returns the value of the specific key given.
+     * Returns the value of the specific key given, or null if there isn't no object
+     * associated with given key.
      * @param key {@link java.lang.String} the key.
      * @return {@link java.lang.Object} the object of specific key or null if
      *                                  the key is null or not found.
