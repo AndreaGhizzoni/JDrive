@@ -14,7 +14,7 @@ public class Default
     public static final Map<String, Object> PROPERTIES = new HashMap<String, Object>(){
         {
             put(
-                Keys.WATCHED_DIR,
+                Keys.WATCHED_BASE_PATH,
                 PathsUtil.USER_HOME + PathsUtil.SEP + "Google Drive"
             );
         }

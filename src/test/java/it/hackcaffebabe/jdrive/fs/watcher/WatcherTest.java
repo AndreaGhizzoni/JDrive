@@ -26,10 +26,10 @@ public class WatcherTest
         // I need the application home directory in order to create the
         // properties file
         buildApplicationHomeDirectoryOrFail();
-        // create configurator to get Keys.WATCHED_DIR
+        // create configurator to get Keys.WATCHED_BASE_PATH
         buildConfiguratorOrFail();
         Configurator configurator = Configurator.getInstance();
-        Path watcherBasePath = Paths.get( (String)configurator.get(Keys.WATCHED_DIR) );
+        Path watcherBasePath = Paths.get( (String)configurator.get(Keys.WATCHED_BASE_PATH) );
 
         Watcher watcher = buildWatcherOrFail();
         watcher.setDispatchingQueue(queue);

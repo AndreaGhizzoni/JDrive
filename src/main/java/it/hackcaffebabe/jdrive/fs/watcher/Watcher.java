@@ -67,7 +67,7 @@ public final class Watcher implements Runnable
         log.debug("Try to retrieve watcher base path from configurator...");
         Configurator configurator = Configurator.getInstance();
         String watcherBasePathAsString = (String)configurator.get(
-                Keys.WATCHED_DIR
+                Keys.WATCHED_BASE_PATH
         );
 
         if( watcherBasePathAsString == null ){
