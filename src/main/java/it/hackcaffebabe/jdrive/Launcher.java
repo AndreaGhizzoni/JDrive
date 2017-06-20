@@ -174,7 +174,7 @@ public class Launcher
         if( PathsUtil.OS.toLowerCase().indexOf("windows") > 1 ) {
             return "taskkill /F /pid " + pid;
         }else{
-            return "kill -15 " + pid;
+            return "kill -SIGTERM " + pid;
         }
     }
 
