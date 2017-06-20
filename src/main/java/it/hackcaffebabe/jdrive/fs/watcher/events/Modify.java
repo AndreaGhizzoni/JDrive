@@ -39,7 +39,7 @@ public class Modify extends WatcherEvent
 
         StringBuilder b = new StringBuilder();
         b.append("{");
-        b.append(" \"kind\": ").append("\"").append( "Modification" ).append("\",");
+        b.append(" \"kind\": ").append("\"").append( "modify" ).append("\",");
         b.append(" \"path\": ").append("\"").append( p ).append("\",");
         b.append(" \"timestamp\": ").append("\"").append( l ).append("\",");
         b.append(" \"message\": ").append("\"").append( m ).append("\"");

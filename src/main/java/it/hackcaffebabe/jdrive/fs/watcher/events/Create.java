@@ -39,7 +39,7 @@ public class Create extends WatcherEvent
 
         StringBuilder b = new StringBuilder();
         b.append("{");
-        b.append(" \"kind\": ").append("\"").append( "creation" ).append("\",");
+        b.append(" \"kind\": ").append("\"").append( "create" ).append("\",");
         b.append(" \"path\": ").append("\"").append( p ).append("\",");
         b.append(" \"timestamp\": ").append("\"").append( l ).append("\",");
         b.append(" \"message\": ").append("\"").append( m ).append("\"");
