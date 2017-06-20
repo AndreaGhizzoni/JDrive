@@ -104,13 +104,12 @@ public class Launcher
             final Watcher w = Watcher.getInstance();
 
             // add a shutdown hook to close all the process above properly
-            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-                @Override
-                public void run() {
+            Runtime.getRuntime().addShutdownHook(
+                new Thread( () -> {
                     log.info("JDrive closing procedure...");
                     w.kill();
-                }
-            }, "Main-Shutdown-Hook"));
+                }, "Main-Shutdown-Hook" )
+            );
 
             LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
             w.setDispatchingQueue(lbq);
@@ -163,15 +162,19 @@ public class Launcher
     private static void stopJDrive( long pid ){
         try {
             log.info("Stopping JDrive from command line detected.");
-
-            Runtime runtime = Runtime.getRuntime();
-            if( PathsUtil.OS.toLowerCase().indexOf("windows") > 1 ) {
-                runtime.exec("taskkill /F /pid " + pid);
-            }else{
-                runtime.exec("kill -15 " + pid);
-            }
+            Runtime.getRuntime().exec(
+                getOSDependentKillCommand( pid )
+            );
         } catch (IOException e) {
             fatal(e.getMessage(), e);
+        }
+    }
+
+    private static String getOSDependentKillCommand( long pid ){
+        if( PathsUtil.OS.toLowerCase().indexOf("windows") > 1 ) {
+            return "taskkill /F /pid " + pid;
+        }else{
+            return "kill -15 " + pid;
         }
     }
 
