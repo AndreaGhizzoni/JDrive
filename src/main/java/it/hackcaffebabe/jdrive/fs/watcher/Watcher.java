@@ -145,7 +145,7 @@ public final class Watcher implements Runnable
     }
 
     /* method to walk down a path given recursively and meanwhile watcher
-     * register all the visitedPathsByWatcher. */
+     * register all the directories. */
     private void registerDirectories( Path start ) throws IOException {
         WatchServiceAdder watchServiceAdder = new WatchServiceAdder();
         Files.walkFileTree( start, watchServiceAdder );
