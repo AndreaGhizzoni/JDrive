@@ -17,6 +17,8 @@ public class PathsUtil
     public static final String USER_HOME = System.getProperty("user.home");
     /** Set as System.getProperty("file.separator") */
     public static final String SEP = System.getProperty("file.separator");
+    /** Set as System.getProperty("os.name") */
+    public static final String OS = System.getProperty("os.name");
 
     /** Path to watcher cache file */
     public static final String WATCHER_CACHE = APP_HOME + SEP + "jwatch.cache";
