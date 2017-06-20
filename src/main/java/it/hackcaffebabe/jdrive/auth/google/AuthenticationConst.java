@@ -5,7 +5,7 @@ import com.google.api.services.drive.DriveScopes;
 import java.util.Arrays;
 import java.util.List;
 
-import static it.hackcaffebabe.jdrive.util.PathsUtil.APP_HOME;
+import static it.hackcaffebabe.jdrive.Constants.APP_HOME;
 import static it.hackcaffebabe.jdrive.util.PathsUtil.SEP;
 
 final class AuthenticationConst

@@ -6,6 +6,8 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static it.hackcaffebabe.jdrive.Constants.APP_HOME;
+
 /**
  * Utility class to working with Paths
  */
@@ -15,11 +17,6 @@ public class PathsUtil
     public static final String USER_HOME = System.getProperty("user.home");
     /** Set as System.getProperty("file.separator") */
     public static final String SEP = System.getProperty("file.separator");
-
-    /** Path home application folder */
-    public static final String APP_HOME = USER_HOME + SEP + ".jdrive";
-    /** Path to application configuration file */
-    public static final String APP_PROPERTIES_FILE = APP_HOME + SEP + "jdrive.conf";
 
     /** Path to watcher cache file */
     public static final String WATCHER_CACHE = APP_HOME + SEP + "jwatch.cache";

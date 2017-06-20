@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.fs.watcher;
 
+import it.hackcaffebabe.jdrive.Constants;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
@@ -69,7 +70,7 @@ public class WatcherTest
 
     private void buildConfiguratorOrFail(){
        try{
-           Path cfgPath = Paths.get( PathsUtil.APP_PROPERTIES_FILE);
+           Path cfgPath = Paths.get( Constants.APP_PROPERTIES_FILE );
            Configurator.setup( cfgPath );
        } catch (Exception e) {
            Assert.fail(e.getMessage());

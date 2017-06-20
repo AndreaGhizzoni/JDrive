@@ -26,7 +26,7 @@ public class TestIOGDrive {
 
     public static void main(String... args){
         try{
-            Path cfgPath = Paths.get(PathsUtil.APP_PROPERTIES_FILE);
+            Path cfgPath = Paths.get(Constants.APP_PROPERTIES_FILE);
             Configurator.setup(cfgPath);
         }catch (Exception e){
             fatal(e.getMessage(), e);

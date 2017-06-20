@@ -98,7 +98,9 @@ public class Launcher {
             log.info("JDrive Application Starting.");
             log.debug("pid: "+Util.getProcessID());
             PathsUtil.createApplicationHomeDirectory();
-            log.info("JDrive Home directory created/detected in: "+PathsUtil.APP_HOME);
+            log.info(
+                "JDrive Home directory created/detected in: "+Constants.APP_HOME
+            );
         }catch( IOException ioE ){
             fatal(ioE.getMessage(), ioE);
         }
@@ -108,7 +110,7 @@ public class Launcher {
 //            fatal("Configurator Error. Program Exit.", null);
 //        }
         try{
-            Path cfgPath = Paths.get(PathsUtil.APP_PROPERTIES_FILE);
+            Path cfgPath = Paths.get(Constants.APP_PROPERTIES_FILE);
             Configurator.setup(cfgPath);
         }catch (Exception e){
             fatal("Configurator Error. Program Exit.", e);
