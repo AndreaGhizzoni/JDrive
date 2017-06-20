@@ -164,5 +164,3 @@ public final class GoogleAuthenticator
         log.info("Internet connection ok.");
     }
 }
-
-
