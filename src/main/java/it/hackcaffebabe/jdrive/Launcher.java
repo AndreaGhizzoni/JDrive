@@ -164,7 +164,13 @@ public class Launcher
     private static void stopJDrive( long pid ){
         try {
             log.info("Stopping JDrive from command line detected.");
-            Runtime.getRuntime().exec("kill -15 "+pid);
+
+            Runtime runtime = Runtime.getRuntime();
+            if( PathsUtil.OS.toLowerCase().indexOf("windows") > 1 ) {
+                runtime.exec("taskkill /F /pid " + pid);
+            }else{
+                runtime.exec("kill -15 " + pid);
+            }
         } catch (IOException e) {
             fatal(e.getMessage(), e);
         }
