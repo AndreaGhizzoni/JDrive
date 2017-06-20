@@ -70,6 +70,12 @@ public final class Watcher implements Runnable
                 Keys.WATCHED_DIR
         );
 
+        if( watcherBasePathAsString == null ){
+            throw new IOException(
+                    "Configurator is not set with Watcher base path."
+            );
+        }
+
         this.watcherBasePath = Paths.get( watcherBasePathAsString )
                 .toAbsolutePath();
         if( !this.watcherBasePath.toFile().exists() ){
