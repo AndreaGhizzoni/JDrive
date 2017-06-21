@@ -102,7 +102,6 @@ public class Launcher
         authenticateWithGoogleOrFail();
 
         try{
-            // process that will start from main application
             final Watcher watcher = Watcher.getInstance();
             LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
             watcher.setDispatchingQueue(lbq);
@@ -113,7 +112,7 @@ public class Launcher
                 () -> {
                     log.info("JDrive closing procedure...");
                     watcher.startClosingProcedure();
-                   return true;
+                    return true;
                 }
             );
             new Thread( actionServer, "CloserListener" ).start();
