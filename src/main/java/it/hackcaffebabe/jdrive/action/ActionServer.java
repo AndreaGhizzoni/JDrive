@@ -85,7 +85,8 @@ public class ActionServer implements Runnable
     private void stop(){
         try {
             log.info("Try to stop Action Server...");
-            this.serverSocket.close();
+            if( this.serverSocket != null )
+                this.serverSocket.close();
             log.info("Action Server stopped correctly.");
         } catch (IOException e) {
             log.error( e.getMessage() );
