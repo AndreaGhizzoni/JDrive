@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.server;
+package it.hackcaffebabe.jdrive.action;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,8 +12,8 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
-import static it.hackcaffebabe.jdrive.server.Constants.SERVER_PORT;
-import static it.hackcaffebabe.jdrive.server.Constants.getLocalhost;
+import static it.hackcaffebabe.jdrive.action.Constants.SERVER_PORT;
+import static it.hackcaffebabe.jdrive.action.Constants.getLocalhost;
 
 /**
  * TODO add doc
@@ -37,7 +37,7 @@ public class ActionServer implements Runnable
     public void run() {
         log.info("Starting Action Server...");
         try {
-            log.debug("Try to create a server socket to port: " + SERVER_PORT);
+            log.debug("Try to create a action socket to port: " + SERVER_PORT);
             serverSocket = new ServerSocket( SERVER_PORT, 0, getLocalhost() );
             log.debug("Server Socket created at port "+serverSocket.getLocalPort());
 

@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.server;
+package it.hackcaffebabe.jdrive.action;
 
 /**
  * TODO add doc

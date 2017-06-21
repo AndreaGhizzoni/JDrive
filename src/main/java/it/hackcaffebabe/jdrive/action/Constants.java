@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.server;
+package it.hackcaffebabe.jdrive.action;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
  */
 public final class Constants
 {
-    /** default server port */
+    /** default action port */
     public static final int SERVER_PORT = 12345;
 
     /** return {@link java.net.InetAddress} of localhost */
