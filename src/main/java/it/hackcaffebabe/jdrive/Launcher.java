@@ -5,6 +5,7 @@ import it.hackcaffebabe.applicationutil.Util;
 import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
+import it.hackcaffebabe.jdrive.fs.watcher.events.Error;
 import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
 import it.hackcaffebabe.jdrive.server.ActionServer;
 import it.hackcaffebabe.jdrive.server.Message;
@@ -27,8 +28,6 @@ public class Launcher
 
     private static CommandLine CLI_PARSER;
     private static Options FLAGS = new Options();
-
-    private static Thread closerListener;
 
     public static void main( String... args ){
         populateOptionsAndCLIParser(args);
@@ -105,7 +104,9 @@ public class Launcher
 
         try{
             // process that will start from main application
-            final Watcher w = Watcher.getInstance();
+            final Watcher watcher = Watcher.getInstance();
+            LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
+            watcher.setDispatchingQueue(lbq);
 
             // add a shutdown hook to close all the process above properly
 //            Runtime.getRuntime().addShutdownHook(
@@ -118,23 +119,19 @@ public class Launcher
             actionServer.putAction(
                 Message.QUIT,
                 () -> {
-                   log.debug("hello from lambda!");
+                    log.info("JDrive closing procedure...");
+                    watcher.startClosingProcedure();
                    return true;
                 }
             );
-            closerListener = new Thread( actionServer, "CloserListener" );
-            closerListener.start();
-
-            LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
-            w.setDispatchingQueue(lbq);
-            new Thread(w, "Watcher").start();
+            new Thread( actionServer, "CloserListener" ).start();
+            new Thread( watcher, "Watcher" ).start();
 
             WatcherEvent detObj;
             boolean keepRunning = true;
             while(keepRunning){
                 detObj = lbq.take();
-                log.debug(detObj.toString());
-                if( Error.class.isAssignableFrom(detObj.getClass()) ){
+                if( detObj instanceof Error ){
                     log.info("Error message from Watcher: "+detObj.getMessage());
                     keepRunning = false;
                 }

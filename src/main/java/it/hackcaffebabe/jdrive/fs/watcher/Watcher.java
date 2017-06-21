@@ -67,12 +67,12 @@ public final class Watcher implements Runnable
         log.debug("Try to retrieve watcher base path from configurator...");
         Configurator configurator = Configurator.getInstance();
         String watcherBasePathAsString = (String)configurator.get(
-                Keys.WATCHED_BASE_PATH
+            Keys.WATCHED_BASE_PATH
         );
 
         if( watcherBasePathAsString == null ){
             throw new IOException(
-                    "Configurator is not set with Watcher base path."
+                "Configurator is not set with Watcher base path."
             );
         }
 
@@ -85,9 +85,7 @@ public final class Watcher implements Runnable
     }
 
     /** This method close the current Watcher. */
-    public void kill() {
-        // TODO rename this method to close() ?
-        log.info("Try to kill Watch service...");
+    public void startClosingProcedure() {
         try {
             this.watcher.close();
             log.info("Watch service closed correctly.");
@@ -145,8 +143,13 @@ public final class Watcher implements Runnable
             // this exception is thrown when the close() method is called when
             // the a pool() or take() method is waiting  for a key to be queued
             // DOCS: https://goo.gl/G02AEG
+            try {
+                this.dispatchingQueue.put( new Error( "Watcher is closing." ) );
+            } catch (InterruptedException e) {
+                log.error( e.getMessage() );
+            }
         }finally {
-            this.kill();
+            this.startClosingProcedure();
         }
     }
 
@@ -158,7 +161,7 @@ public final class Watcher implements Runnable
         this.directories.putAll( watchServiceAdder.visitedPathsByWatcher );
     }
 
-    private void dispatchPollEventsFrom(WatchKey eventWatchKey )
+    private void dispatchPollEventsFrom( WatchKey eventWatchKey )
             throws InterruptedException, IOException {
 
         WatchEvent.Kind<?> eventKind;
