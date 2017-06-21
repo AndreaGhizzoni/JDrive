@@ -7,6 +7,7 @@ import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
 import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
 import it.hackcaffebabe.jdrive.server.ActionServer;
+import it.hackcaffebabe.jdrive.server.Message;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -113,7 +114,15 @@ public class Launcher
 //                    w.kill();
 //                }, "Main-Shutdown-Hook" )
 //            );
-            closerListener = new Thread( new ActionServer(), "CloserListener" );
+            ActionServer actionServer = new ActionServer();
+            actionServer.putAction(
+                Message.QUIT,
+                () -> {
+                   log.debug("hello from lambda!");
+                   return true;
+                }
+            );
+            closerListener = new Thread( actionServer, "CloserListener" );
             closerListener.start();
 
             LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
