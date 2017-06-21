@@ -6,6 +6,7 @@ import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
 import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
+import it.hackcaffebabe.jdrive.server.ActionServer;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -112,7 +113,7 @@ public class Launcher
 //                    w.kill();
 //                }, "Main-Shutdown-Hook" )
 //            );
-            closerListener = new Thread( new CloserListener(), "CloserListener" );
+            closerListener = new Thread( new ActionServer(), "CloserListener" );
             closerListener.start();
 
             LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
@@ -165,7 +166,7 @@ public class Launcher
 
     private static void stopJDriveViaNet(){
         try {
-            CloserListener.sendQuitRequest();
+            ActionServer.sendQuitRequest();
         } catch (IOException e) {
             log.error( e.getMessage() );
         }

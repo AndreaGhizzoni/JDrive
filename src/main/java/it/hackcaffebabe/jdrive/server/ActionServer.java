@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive;
+package it.hackcaffebabe.jdrive.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,7 +15,7 @@ import java.net.UnknownHostException;
 /**
  * TODO add doc
  */
-public class CloserListener implements Runnable
+public class ActionServer implements Runnable
 {
     private static Logger log = LogManager.getLogger();
 
