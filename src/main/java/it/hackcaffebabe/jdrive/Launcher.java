@@ -64,8 +64,7 @@ public class Launcher
             if( statusFlag ){
                 System.out.println("TODO: checking JDrive status..");
             }else if( stopFlag ){
-//                stopJDrive(pid);
-                stopJDriveViaNet();
+                stopJDrive();
             }else if( startFlag ){
                 System.out.println("JDrive already running. Use -status");
             }
@@ -108,13 +107,6 @@ public class Launcher
             LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
             watcher.setDispatchingQueue(lbq);
 
-            // add a shutdown hook to close all the process above properly
-//            Runtime.getRuntime().addShutdownHook(
-//                new Thread( () -> {
-//                    log.info("JDrive closing procedure...");
-//                    w.kill();
-//                }, "Main-Shutdown-Hook" )
-//            );
             ActionServer actionServer = new ActionServer();
             actionServer.putAction(
                 Message.QUIT,
@@ -170,32 +162,13 @@ public class Launcher
         }
     }
 
-    private static void stopJDriveViaNet(){
+    private static void stopJDrive(){
         try {
             ActionServer.sendQuitRequest();
         } catch (IOException e) {
             log.error( e.getMessage() );
         }
     }
-
-//    private static void stopJDrive( long pid ){
-//        try {
-//            log.info("Stopping JDrive from command line detected.");
-//            Runtime.getRuntime().exec(
-//                getOSDependentKillCommand( pid )
-//            );
-//        } catch (IOException e) {
-//            fatal(e.getMessage(), e);
-//        }
-//    }
-//
-//    private static String getOSDependentKillCommand( long pid ){
-//        if( PathsUtil.OS.toLowerCase().indexOf("windows") > 1 ) {
-//            return "taskkill /F /pid " + pid;
-//        }else{
-//            return "kill -SIGTERM " + pid;
-//        }
-//    }
 
     private static void fatal(String msg, Throwable t){
         log.fatal(msg, t);
