@@ -2,6 +2,7 @@ package it.hackcaffebabe.jdrive;
 
 import it.hackcaffebabe.applicationutil.Locker;
 import it.hackcaffebabe.applicationutil.Util;
+import it.hackcaffebabe.jdrive.action.ActionClient;
 import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
@@ -163,7 +164,7 @@ public class Launcher
 
     private static void stopJDrive(){
         try {
-            ActionServer.sendQuitRequest();
+            ActionClient.sendQuitRequest();
         } catch (IOException e) {
             log.error( e.getMessage() );
         }
