@@ -6,7 +6,6 @@ import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
 import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
-import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +25,8 @@ public class Launcher
 
     private static CommandLine CLI_PARSER;
     private static Options FLAGS = new Options();
+
+    private static Thread closerListener;
 
     public static void main( String... args ){
         populateOptionsAndCLIParser(args);
@@ -62,7 +63,8 @@ public class Launcher
             if( statusFlag ){
                 System.out.println("TODO: checking JDrive status..");
             }else if( stopFlag ){
-                stopJDrive(pid);
+//                stopJDrive(pid);
+                stopJDriveViaNet();
             }else if( startFlag ){
                 System.out.println("JDrive already running. Use -status");
             }
@@ -104,12 +106,14 @@ public class Launcher
             final Watcher w = Watcher.getInstance();
 
             // add a shutdown hook to close all the process above properly
-            Runtime.getRuntime().addShutdownHook(
-                new Thread( () -> {
-                    log.info("JDrive closing procedure...");
-                    w.kill();
-                }, "Main-Shutdown-Hook" )
-            );
+//            Runtime.getRuntime().addShutdownHook(
+//                new Thread( () -> {
+//                    log.info("JDrive closing procedure...");
+//                    w.kill();
+//                }, "Main-Shutdown-Hook" )
+//            );
+            closerListener = new Thread( new CloserListener(), "CloserListener" );
+            closerListener.start();
 
             LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
             w.setDispatchingQueue(lbq);
@@ -159,24 +163,32 @@ public class Launcher
         }
     }
 
-    private static void stopJDrive( long pid ){
+    private static void stopJDriveViaNet(){
         try {
-            log.info("Stopping JDrive from command line detected.");
-            Runtime.getRuntime().exec(
-                getOSDependentKillCommand( pid )
-            );
+            CloserListener.sendQuitRequest();
         } catch (IOException e) {
-            fatal(e.getMessage(), e);
+            log.error( e.getMessage() );
         }
     }
 
-    private static String getOSDependentKillCommand( long pid ){
-        if( PathsUtil.OS.toLowerCase().indexOf("windows") > 1 ) {
-            return "taskkill /F /pid " + pid;
-        }else{
-            return "kill -SIGTERM " + pid;
-        }
-    }
+//    private static void stopJDrive( long pid ){
+//        try {
+//            log.info("Stopping JDrive from command line detected.");
+//            Runtime.getRuntime().exec(
+//                getOSDependentKillCommand( pid )
+//            );
+//        } catch (IOException e) {
+//            fatal(e.getMessage(), e);
+//        }
+//    }
+//
+//    private static String getOSDependentKillCommand( long pid ){
+//        if( PathsUtil.OS.toLowerCase().indexOf("windows") > 1 ) {
+//            return "taskkill /F /pid " + pid;
+//        }else{
+//            return "kill -SIGTERM " + pid;
+//        }
+//    }
 
     private static void fatal(String msg, Throwable t){
         log.fatal(msg, t);
