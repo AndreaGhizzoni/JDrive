@@ -24,33 +24,28 @@ public class ActionServer implements Runnable
 
     @Override
     public void run() {
-        log.info("CloserListener started...");
+        log.info("Starting Action Server...");
         try {
             log.debug("Try to create a server socket to port: " + SERVER_PORT);
             serverSocket = new ServerSocket( SERVER_PORT, 0, getLocalhost() );
             log.debug("Server Socket created at port "+serverSocket.getLocalPort());
 
             Socket clientSocket;
-            boolean keepListening = true;
-            while( keepListening ){
+            boolean keepRunning = true;
+            while( keepRunning ){
                 log.info("Listening for clients...");
                 clientSocket = serverSocket.accept();
-                log.debug( getClientInfo(clientSocket) );
-
-                BufferedReader inFromClient = new BufferedReader(
-                        new InputStreamReader( clientSocket.getInputStream() )
+                log.debug(
+                    "Client connected:" +
+                    " ip: " + clientSocket.getLocalAddress() +
+                    " port: " + clientSocket.getLocalPort()
                 );
 
-                log.info("Waiting for message from client...");
-                String msgFromClient;
-                while( (msgFromClient = inFromClient.readLine()) != null ){
-                    if( msgFromClient.equals(Message.QUIT) ) {
-                        log.debug("quit message received.");
-                        keepListening = false;
-                        break;
-                        // TODO run consumer
-                    }
-                }
+                BufferedReader inFromClient = new BufferedReader(
+                    new InputStreamReader( clientSocket.getInputStream() )
+                );
+
+                keepRunning = manageClientMessage( inFromClient );
 
                 clientSocket.close();
             }
@@ -61,15 +56,27 @@ public class ActionServer implements Runnable
         }
     }
 
-    private String getClientInfo( Socket clientSocket ){
-        return "client connected:" +
-               " from: " + clientSocket.getLocalAddress() +
-               " port: " + clientSocket.getLocalPort();
+    private boolean manageClientMessage( BufferedReader inFromClient )
+            throws IOException {
+        log.info("Waiting for message from client...");
+
+        String msgFromClient;
+        while( (msgFromClient = inFromClient.readLine()) != null ){
+            log.debug("message received: " + Message.QUIT);
+
+            if( msgFromClient.equals(Message.QUIT) ) {
+                // TODO run consumer
+                return false;
+            }
+        }
+        return true;
     }
 
     private void stop(){
         try {
+            log.info("Try to stop Action Server...");
             this.serverSocket.close();
+            log.info("Action Server stopped correctly.");
         } catch (IOException e) {
             log.error( e.getMessage() );
         }
