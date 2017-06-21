@@ -92,13 +92,4 @@ public class ActionServer implements Runnable
             log.error( e.getMessage() );
         }
     }
-
-    public static void sendQuitRequest() throws IOException {
-        Socket socket = new Socket( getLocalhost(), SERVER_PORT );
-        PrintWriter out = new PrintWriter( socket.getOutputStream(), true );
-        out.append( Message.QUIT ).append( "\n" );
-        out.flush();
-        out.close();
-        socket.close();
-    }
 }
