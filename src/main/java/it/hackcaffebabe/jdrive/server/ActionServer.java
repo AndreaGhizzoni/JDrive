@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.concurrent.Callable;
 
 import static it.hackcaffebabe.jdrive.server.Constants.SERVER_PORT;
 import static it.hackcaffebabe.jdrive.server.Constants.getLocalhost;
@@ -21,6 +23,15 @@ public class ActionServer implements Runnable
     private static Logger log = LogManager.getLogger();
 
     private ServerSocket serverSocket;
+    private HashMap<String, Callable> actions = new HashMap<>();
+    private static final Callable DEFAULT = () ->{
+        log.error("Message not bound as an action.");
+        return true;
+    };
+
+    public void putAction( String key, Callable action ){
+        actions.put( key, action );
+    }
 
     @Override
     public void run() {
@@ -49,7 +60,7 @@ public class ActionServer implements Runnable
 
                 clientSocket.close();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error( e.getMessage() );
         } finally {
             this.stop();
@@ -57,7 +68,7 @@ public class ActionServer implements Runnable
     }
 
     private boolean manageClientMessage( BufferedReader inFromClient )
-            throws IOException {
+            throws Exception {
         log.info("Waiting for message from client...");
 
         String msgFromClient;
@@ -65,7 +76,7 @@ public class ActionServer implements Runnable
             log.debug("message received: " + Message.QUIT);
 
             if( msgFromClient.equals(Message.QUIT) ) {
-                // TODO run consumer
+                this.actions.getOrDefault( Message.QUIT, DEFAULT ).call();
                 return false;
             }
         }
