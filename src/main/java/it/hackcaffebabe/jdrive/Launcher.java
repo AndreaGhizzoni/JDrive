@@ -56,7 +56,7 @@ public class Launcher
         try{
             pid = new Locker("JDriveApplication").checkLock();
         }catch (IOException ioe){
-            fatal(ioe.getMessage(), ioe);
+            fatalAndQuit(ioe.getMessage(), ioe);
         }
 
         boolean isAlreadyRunning = ( pid != Util.getProcessID() );
@@ -90,7 +90,7 @@ public class Launcher
              FLAGS.addOption("version", false, "print current version");
              CLI_PARSER = new DefaultParser().parse(FLAGS, args);
          }catch (ParseException pe){
-             fatal(pe.getMessage(), pe);
+             fatalAndQuit(pe.getMessage(), pe);
          }
     }
 
@@ -129,7 +129,7 @@ public class Launcher
                 }
             }
         }catch( Exception ex ){
-            fatal(ex.getMessage(), ex);
+            fatalAndQuit(ex.getMessage(), ex);
         }
     }
 
@@ -140,7 +140,7 @@ public class Launcher
                 "JDrive Home directory created/detected in: "+Constants.APP_HOME
             );
         }catch (IOException ioE){
-            fatal(ioE.getMessage(), ioE);
+            fatalAndQuit(ioE.getMessage(), ioE);
         }
     }
 
@@ -150,7 +150,7 @@ public class Launcher
                 Paths.get( Constants.APP_PROPERTIES_FILE )
             );
         }catch (Exception e){
-            fatal("Configurator Error. Program Exit.", e);
+            fatalAndQuit("Configurator Error. Program Exit.", e);
         }
     }
 
@@ -158,7 +158,7 @@ public class Launcher
         try {
             GoogleAuthenticator.getInstance().authenticate();
         } catch (IOException | GeneralSecurityException e) {
-            fatal(e.getMessage(), e);
+            fatalAndQuit(e.getMessage(), e);
         }
     }
 
@@ -170,7 +170,7 @@ public class Launcher
         }
     }
 
-    private static void fatal(String msg, Throwable t){
+    private static void fatalAndQuit(String msg, Throwable t){
         log.fatal(msg, t);
         System.exit(1);
     }
