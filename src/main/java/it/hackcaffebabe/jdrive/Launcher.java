@@ -42,6 +42,7 @@ public class Launcher
                          versionFlag);
 
         if( helpFlag || noFlag ) {
+            System.out.println( "JDrive version: " + Constants.VERSION );
             new HelpFormatter().printHelp(
                 "<jar> [OPTIONS]\nWhere OPTIONS are listed below:",
                 FLAGS
