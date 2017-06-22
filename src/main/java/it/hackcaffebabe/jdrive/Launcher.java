@@ -64,7 +64,7 @@ public class Launcher
         boolean isAlreadyRunning = ( pid != Util.getProcessID() );
         if( isAlreadyRunning ){
             if( statusFlag ){
-                System.out.println("TODO: checking JDrive status..");
+                statusJDrive();
             }else if( stopFlag ){
                 stopJDrive();
             }else if( startFlag ){
@@ -98,10 +98,13 @@ public class Launcher
 
     private static void startJDrive(){
         log.info("Starting JDrive application.");
+        Status.WATCHER = "Starting JDrive application. ";
         log.debug("pid: "+Util.getProcessID());
         createApplicationHomeDirectoryOrFail();
         setupConfiguratorOrFail();
+        Status.WATCHER = "JDrive configured properly.";
         authenticateWithGoogleOrFail();
+        Status.WATCHER = "JDrive logged in.";
 
         try{
             final Watcher watcher = Watcher.getInstance();
@@ -114,7 +117,14 @@ public class Launcher
                 () -> {
                     log.info("JDrive closing procedure...");
                     watcher.startClosingProcedure();
-                    return true;
+                    return "JDrive closing procedure done.";
+                }
+            );
+            actionServer.putAction(
+                Message.STATUS,
+                () -> {
+                    log.info("Current status requested: "+Status.WATCHER);
+                    return Status.WATCHER;
                 }
             );
             new Thread( actionServer, "CloserListener" ).start();
@@ -166,6 +176,15 @@ public class Launcher
     private static void stopJDrive(){
         try {
             ActionClient.sendQuitRequest();
+        } catch (IOException e) {
+            log.error( e.getMessage() );
+        }
+    }
+
+    private static void statusJDrive(){
+        try {
+            String currentStatus = ActionClient.sendStatusRequest();
+            System.out.println( currentStatus );
         } catch (IOException e) {
             log.error( e.getMessage() );
         }
