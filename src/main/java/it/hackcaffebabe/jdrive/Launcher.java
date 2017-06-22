@@ -127,7 +127,7 @@ public class Launcher
                     return Status.WATCHER;
                 }
             );
-            new Thread( actionServer, "CloserListener" ).start();
+            new Thread( actionServer, "ActionServer" ).start();
             new Thread( watcher, "Watcher" ).start();
 
             WatcherEvent detObj;
