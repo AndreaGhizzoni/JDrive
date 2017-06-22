@@ -3,9 +3,7 @@ package it.hackcaffebabe.jdrive.action;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -25,7 +23,7 @@ public class ActionServer implements Runnable
     private HashMap<String, Callable> actions = new HashMap<>();
     private static final Callable DEFAULT = () ->{
         log.error("Message not bound as an action.");
-        return true;
+        return "";
     };
 
     public void putAction( String key, Callable action ){
@@ -54,8 +52,11 @@ public class ActionServer implements Runnable
                 BufferedReader inFromClient = new BufferedReader(
                     new InputStreamReader( clientSocket.getInputStream() )
                 );
+                BufferedWriter outToClient = new BufferedWriter(
+                    new OutputStreamWriter( clientSocket.getOutputStream() )
+                );
 
-                keepRunning = manageClientMessage( inFromClient );
+                keepRunning = manageClientMessage( inFromClient, outToClient );
 
                 clientSocket.close();
             }
@@ -66,16 +67,22 @@ public class ActionServer implements Runnable
         }
     }
 
-    private boolean manageClientMessage( BufferedReader inFromClient )
+    private boolean manageClientMessage( BufferedReader inFromClient,
+                                         BufferedWriter outToClient )
             throws Exception {
         log.info("Waiting for message from client...");
 
         String msgFromClient;
         while( (msgFromClient = inFromClient.readLine()) != null ){
-            log.debug("message received: " + Message.QUIT);
+            log.debug("message received: " + msgFromClient);
+            String computedAction = (String)this.actions
+                    .getOrDefault(msgFromClient, DEFAULT).call();
+            log.debug("response from action: "+computedAction);
+
+            outToClient.append( computedAction ).append( "\n" );
+            outToClient.flush();
 
             if( msgFromClient.equals(Message.QUIT) ) {
-                this.actions.getOrDefault( Message.QUIT, DEFAULT ).call();
                 return false;
             }
         }
