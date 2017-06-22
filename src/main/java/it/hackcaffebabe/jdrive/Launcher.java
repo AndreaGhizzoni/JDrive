@@ -6,10 +6,10 @@ import it.hackcaffebabe.jdrive.action.ActionClient;
 import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
-import it.hackcaffebabe.jdrive.fs.watcher.events.Error;
-import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
+import it.hackcaffebabe.jdrive.fs.watcher.events.*;
 import it.hackcaffebabe.jdrive.action.ActionServer;
 import it.hackcaffebabe.jdrive.action.Message;
+import it.hackcaffebabe.jdrive.fs.watcher.events.Error;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -134,8 +134,14 @@ public class Launcher
             boolean keepRunning = true;
             while(keepRunning){
                 detObj = lbq.take();
-                if( detObj instanceof Error ){
-                    log.info("Error message from Watcher: "+detObj.getMessage());
+                if( detObj instanceof Create ){
+                    log.debug( ((Create)detObj).toString() );
+                }else if( detObj instanceof Modify ){
+                    log.debug( ((Modify)detObj).toString() );
+                }else if( detObj instanceof Delete ){
+                    log.debug( ((Delete)detObj).toString() );
+                }else if( detObj instanceof Error ){
+                    log.debug( ((Error)detObj).toString() );
                     keepRunning = false;
                 }
             }
