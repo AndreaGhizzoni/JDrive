@@ -1,7 +1,7 @@
 package it.hackcaffebabe.jdrive;
 
 /**
- * TODO add doc
+ * This class holds a shared variable to store the current application status.
  */
 public class Status
 {

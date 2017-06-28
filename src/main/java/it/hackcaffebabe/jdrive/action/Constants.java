@@ -4,7 +4,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * TODO add doc
+ * Constants for package jdrive.action
  */
 final class Constants
 {

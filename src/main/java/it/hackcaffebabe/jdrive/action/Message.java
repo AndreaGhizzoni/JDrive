@@ -1,7 +1,7 @@
 package it.hackcaffebabe.jdrive.action;
 
 /**
- * TODO add doc
+ * This class describe the messages between ActionServer and ActionClient
  */
 public final class Message
 {

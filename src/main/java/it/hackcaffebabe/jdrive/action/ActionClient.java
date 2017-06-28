@@ -7,16 +7,16 @@ import static it.hackcaffebabe.jdrive.action.Constants.SERVER_PORT;
 import static it.hackcaffebabe.jdrive.action.Constants.getLocalhost;
 
 /**
- * TODO add doc
+ * This class provide methods to send and receive message to/from ActionServer.
  */
 public class ActionClient
 {
-    /** TODO add doc */
+    /** Send Message.QUIT to action server. */
     public static void sendQuitRequest() throws IOException {
         send( Message.QUIT );
     }
 
-    /** TODO add doc */
+    /** Send Message.STATUS to action server and return the response. */
     public static String sendStatusRequest() throws IOException {
         return send( Message.STATUS );
     }

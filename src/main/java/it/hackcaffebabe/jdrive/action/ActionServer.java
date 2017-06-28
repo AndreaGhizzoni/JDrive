@@ -13,7 +13,8 @@ import static it.hackcaffebabe.jdrive.action.Constants.SERVER_PORT;
 import static it.hackcaffebabe.jdrive.action.Constants.getLocalhost;
 
 /**
- * TODO add doc
+ * ActionServer manage simple actions based on line of text received from
+ * localhost. Message must be declared in {@link Message} class as constant.
  */
 public class ActionServer implements Runnable
 {
@@ -26,6 +27,12 @@ public class ActionServer implements Runnable
         return "";
     };
 
+    /**
+     * This method adds a new action indexed with string key.
+     * @param key {@link java.lang.String} of action
+     * @param action {@link java.util.concurrent.Callable} to take when message
+     *               received from localhost is equal to key.
+     */
     public void putAction( String key, Callable action ){
         actions.put( key, action );
     }
