@@ -29,12 +29,12 @@ public class ActionServer implements Runnable
 
     /**
      * This method adds a new action indexed with string key.
-     * @param key {@link java.lang.String} of action
-     * @param action {@link java.util.concurrent.Callable} to take when message
+     * @param withMessage {@link java.lang.String} of action
+     * @param doThisAction {@link java.util.concurrent.Callable} to take when message
      *               received from localhost is equal to key.
      */
-    public void putAction( String key, Callable action ){
-        actions.put( key, action );
+    public void addAction( String withMessage, Callable doThisAction ){
+        actions.put( withMessage, doThisAction );
     }
 
     @Override

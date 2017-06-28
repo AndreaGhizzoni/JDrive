@@ -112,7 +112,7 @@ public class Launcher
             watcher.setDispatchingQueue(lbq);
 
             ActionServer actionServer = new ActionServer();
-            actionServer.putAction(
+            actionServer.addAction(
                 Message.QUIT,
                 () -> {
                     log.info("JDrive closing procedure...");
@@ -120,7 +120,7 @@ public class Launcher
                     return "JDrive closing procedure done.";
                 }
             );
-            actionServer.putAction(
+            actionServer.addAction(
                 Message.STATUS,
                 () -> {
                     log.info("Current status requested: "+Status.WATCHER);
