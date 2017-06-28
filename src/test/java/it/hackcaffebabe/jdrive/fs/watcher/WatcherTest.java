@@ -14,13 +14,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test case for {@link it.hackcaffebabe.jdrive.fs.watcher.Watcher}
  */
 public class WatcherTest
 {
-    private LinkedBlockingQueue<WatcherEvent> queue = new LinkedBlockingQueue<>();
+    private final LinkedBlockingQueue<WatcherEvent> queue = new LinkedBlockingQueue<>();
+    private final static int SPAWN_COUNT = 10;
+    private final static long POLL_TIMEOUT = 5;
 
     @Test
     public void testWatcher(){
@@ -30,30 +33,31 @@ public class WatcherTest
         // create configurator to get Keys.WATCHED_BASE_PATH
         buildConfiguratorOrFail();
         Configurator configurator = Configurator.getInstance();
-        Path watcherBasePath = Paths.get( (String)configurator.get(Keys.WATCHED_BASE_PATH) );
+        final Path watcherBasePath = Paths.get( (String)configurator.get(Keys.WATCHED_BASE_PATH) );
 
         Watcher watcher = buildWatcherOrFail();
         watcher.setDispatchingQueue(queue);
-        Thread watcherThread = new Thread(watcher);
-        watcherThread.start();
+        new Thread(watcher).start();
 
-        spawnFoldersUnder( watcherBasePath );
-        checkEventsFromQueue(
+        new Thread( () -> spawnFoldersUnder(watcherBasePath) ).start();
+        checkNEventsFromQueue(
             "After spawning some folders I expect to get only Creation event " +
                     "from queue",
+            SPAWN_COUNT,
             StandardWatchEventKinds.ENTRY_CREATE
         );
 
-        createWriteAndDeleteFilesUnder( watcherBasePath );
-        checkEventsFromQueue(
+        new Thread( () -> createWriteAndDeleteFilesUnder( watcherBasePath ) ).start();
+        checkNEventsFromQueue(
             "After creating, modify and deleting a file I expect to get " +
                     "Creation, Modification and Delete event",
+            3*SPAWN_COUNT,
             StandardWatchEventKinds.ENTRY_CREATE,
             StandardWatchEventKinds.ENTRY_MODIFY,
             StandardWatchEventKinds.ENTRY_DELETE
         );
 
-        watcherThread.interrupt();
+        watcher.startClosingProcedure();
         deleteFolderAndContents( watcherBasePath );
     }
 
@@ -86,32 +90,34 @@ public class WatcherTest
         return null;
     }
 
-    private void checkEventsFromQueue( String msg,
+    private void checkNEventsFromQueue( String msg, int numberOfEvents,
                                        WatchEvent.Kind... expectedEvents ){
         List<WatchEvent.Kind> listExpEvents = Arrays.asList( expectedEvents );
         WatcherEvent detectedEvent;
         String message;
-        while( !queue.isEmpty() ){
-            try {
-                detectedEvent = queue.take();
-                WatchEvent.Kind actualKindEvent = detectedEvent.Convert();
+        int eventCount = 0;
 
-                message = msg.concat( ": instead found "+actualKindEvent );
-                Assert.assertTrue( message, listExpEvents.contains(actualKindEvent) );
-            } catch (InterruptedException e) {
-                Assert.fail(e.getMessage());
+        try {
+            while( (detectedEvent = queue.poll(POLL_TIMEOUT, TimeUnit.SECONDS )) != null ){
+                eventCount++;
+                WatchEvent.Kind actualKindEvent = detectedEvent.Convert();
+                message = msg.concat(": instead found " + actualKindEvent);
+                Assert.assertTrue(message, listExpEvents.contains(actualKindEvent));
             }
+        } catch (InterruptedException e) {
+            Assert.fail(e.getMessage());
         }
+
+        Assert.assertEquals("eventCount mismatch", numberOfEvents, eventCount);
     }
 
     private int spawnFoldersUnder( Path path ){
         String folderNamePattern = "folder%d";
-        final int numberOfFolders = 10;
 
         String folderName;
         Path folder;
-        int counterOfFolderSpawned = 1;
-        for( ; counterOfFolderSpawned<=numberOfFolders; counterOfFolderSpawned++ ){
+        int counterOfFolderSpawned = 0;
+        for(; counterOfFolderSpawned< SPAWN_COUNT; counterOfFolderSpawned++ ){
             folderName = String.format( folderNamePattern, counterOfFolderSpawned );
             folder = Paths.get( path.toString(), folderName );
             try {
@@ -125,11 +131,10 @@ public class WatcherTest
 
     private void createWriteAndDeleteFilesUnder( Path path ){
         String fileNamePattern = "f%d.txt";
-        final int numberOfFiles = 10;
 
         String fileName;
         Path filePath;
-        for( int i=0; i<numberOfFiles; i++ ){
+        for( int i=0; i<SPAWN_COUNT; i++ ){
             try {
                 fileName = String.format( fileNamePattern, i );
                 filePath = Paths.get( path.toString(), fileName );
