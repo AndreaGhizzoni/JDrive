@@ -3,9 +3,9 @@ package it.hackcaffebabe.jdrive;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.FileList;
 import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
-import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,12 +16,13 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
  *
  */
-public class TestIOGDrive {
+public class Testing_API {
     private static Logger log = LogManager.getLogger();
 
     public static void main(String... args){
@@ -56,16 +57,76 @@ public class TestIOGDrive {
         // plain text ok
         // jpg        ok
 
-        Path uploadPath = Paths.get("/home/andrea/Google Drive/upload");
-        ArrayList<File> remoteFiles = new ArrayList<>();
-        for( java.io.File f : uploadPath.toFile().listFiles() ){
-            File remoteFile = uploadFile(d, f.toPath());
-            remoteFiles.add(remoteFile);
-        }
+//        Path uploadPath = Paths.get("/home/andrea/Google Drive/upload");
+//        ArrayList<File> remoteFiles = new ArrayList<>();
+//        for( java.io.File f : uploadPath.toFile().listFiles() ){
+//            File remoteFile = uploadFile(d, f.toPath());
+//            remoteFiles.add(remoteFile);
+//        }
+//
+//        for(File remoteFile : remoteFiles ){
+//            downloadRemoteFile(d,remoteFile);
+//        }
 
-        for(File remoteFile : remoteFiles ){
-            downloadRemoteFile(d,remoteFile);
+        try {
+            List<File> files = retrieveJDriveRemoteFolder( d );
+            files.forEach( file -> System.out.println(file.getName()));
+
+            List<File> contents = retrieveFilesFrom( d, files.get(0));
+            contents.forEach( file -> System.out.println(file.toString()));
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
+    }
+
+    private static List<File> retrieveJDriveRemoteFolder(Drive service) throws IOException {
+        List<File> result = new ArrayList<>();
+        String q = "mimeType = 'application/vnd.google-apps.folder' and " +
+                   "not trashed and "+
+                   "'root' in parents and "+
+                   "name = 'JDrive'";
+        Drive.Files.List request = service.files().list()
+                .setQ( q )
+                .setSpaces("drive");
+
+        do {
+            try {
+                FileList files = request.execute();
+
+                result.addAll(files.getFiles());
+                request.setPageToken(files.getNextPageToken());
+            } catch (IOException e) {
+                log.error("An error occurred: " + e);
+                request.setPageToken(null);
+            }
+        } while (request.getPageToken() != null &&
+                request.getPageToken().length() > 0);
+
+        return result;
+    }
+
+    private static List<File> retrieveFilesFrom(Drive service, File folder) throws IOException{
+        List<File> result = new ArrayList<>();
+        String q = "not trashed and "+
+                   "'%s' in parents";
+        Drive.Files.List request = service.files().list()
+                .setQ( String.format(q, folder.getId()) )
+                .setSpaces("drive");
+
+        do {
+            try {
+                FileList files = request.execute();
+
+                result.addAll(files.getFiles());
+                request.setPageToken(files.getNextPageToken());
+            } catch (IOException e) {
+                log.error("An error occurred: " + e);
+                request.setPageToken(null);
+            }
+        } while (request.getPageToken() != null &&
+                request.getPageToken().length() > 0);
+
+        return result;
     }
 
     // NB: invoke this method multiple times will always create a NEW file
