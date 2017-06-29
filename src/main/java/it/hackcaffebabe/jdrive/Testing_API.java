@@ -1,6 +1,5 @@
 package it.hackcaffebabe.jdrive;
 
-import com.google.api.client.http.FileContent;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
@@ -15,7 +14,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,32 +25,43 @@ import java.util.List;
 
 public class Testing_API {
     private static Logger log = LogManager.getLogger();
-    private static Drive d;
-    private static HashMap<String, String> MIMETypeConversion = new HashMap<>();
+
+    private static Drive driveService;
+
+    private static final String DRIVE = "drive";
+
+    private static final String MIME_TYPE_SPREADSHEET = "application/vnd.google-apps.spreadsheet";
+    private static final String MIME_TYPE_DOCUMENT = "application/vnd.google-apps.document";
+    private static final String MIME_TYPE_DRAWING = "application/vnd.google-apps.drawing";
+    private static final String MIME_TYPE_PRESENTATION = "application/vnd.google-apps.presentation";
+    private static final String MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
+    private static HashMap<String, String> MIMETypeConversion = new HashMap<String, String>() {{
+        put( MIME_TYPE_DOCUMENT, "application/pdf" );
+        put( MIME_TYPE_SPREADSHEET, "application/pdf" );
+        put( MIME_TYPE_DRAWING, "image/png" );
+        put( MIME_TYPE_PRESENTATION, "application/pdf" );
+    }};
 
     public static void main(String... args) {
         try {
-            Path cfgPath = Paths.get(Constants.APP_PROPERTIES_FILE);
-            Configurator.setup(cfgPath);
+            Configurator configurator = Configurator.setup(
+                Paths.get( Constants.APP_PROPERTIES_FILE )
+            );
+            Path watcherBasePath = Paths.get(
+                (String)configurator.get( Keys.WATCHED_BASE_PATH )
+            );
+            Files.createDirectories( watcherBasePath );
         } catch (Exception e) {
-            fatal(e.getMessage(), e);
+            fatal(e);
         }
 
         try {
             GoogleAuthenticator g = GoogleAuthenticator.getInstance();
             g.authenticate();
-            d = g.getDriveService();
+            driveService = g.getDriveService();
         } catch (Exception e) {
-            fatal(e.getMessage(), e);
+            fatal(e);
         }
-
-//        String id = createEmptyFile(d);
-//        log.info("File ID: " + id);
-
-//        Path localFilePath = Paths.get("/home/andrea/Google Drive/test.txt");
-//        File insertedFile = uploadFile(d, localFilePath);
-//        log.info("id file: "+insertedFile.getId());
-//        downloadRemoteFile(d, insertedFile.getId());
 
         // FILEs TESTED:
         // binary     ok
@@ -61,90 +70,72 @@ public class Testing_API {
         // plain text ok
         // jpg        ok
 
-//        Path uploadPath = Paths.get("/home/andrea/Google Drive/upload");
-//        ArrayList<File> remoteFiles = new ArrayList<>();
-//        for( java.io.File f : uploadPath.toFile().listFiles() ){
-//            File remoteFile = uploadFile(d, f.toPath());
-//            remoteFiles.add(remoteFile);
-//        }
-//
-//        for(File remoteFile : remoteFiles ){
-//            downloadRemoteFile(d,remoteFile);
-//        }
+        // TODO: figure out how to delete remote folder/file
+        // TODO: figure out how to update works
 
-
-//        MIMETypeConversion.put(
-//                "application/vnd.google-apps.spreadsheet", "application/pdf"
-//        );
-//        MIMETypeConversion.put(
-//                "application/vnd.google-apps.document", "application/pdf"
-//        );
-//        MIMETypeConversion.put(
-//                "application/vnd.google-apps.drawing", "image/png"
-//        );
-//        MIMETypeConversion.put(
-//                "application/vnd.google-apps.presentation", "application/pdf"
-//        );
-//
         try {
-            List<File> files = retrieveJDriveRemoteFolder(d);
-            files.forEach(file -> logFile(file));
-//
-//            List<File> contents = retrieveFilesFrom(d, files.get(0));
-//            contents.forEach(
-//                file -> {
-//                    logFile(file);
-//                    downloadRemoteFile(d, file);
-//                }
-//            );
+            File jDriveMainFolder = getJDriveMainFolder();
+            logFile( jDriveMainFolder );
+
+            List<File> contents = listContentFrom(jDriveMainFolder);
+            contents.forEach(
+                file -> {
+                    logFile(file);
+                    try {
+                        downloadRemoteFile(file);
+                    } catch (IOException e) {
+                        fatal(e);
+                    }
+                }
+            );
 
             Path fileToUpload = Paths.get(
                 Configurator.getInstance().get(Keys.WATCHED_BASE_PATH)
                     + "/file1.txt"
             );
-            uploadFile(d, fileToUpload, files.get(0).getId() );
+            File uploadedFile = uploadFile( fileToUpload, jDriveMainFolder.getId() );
+            log.info("Uploaded file with id: "+uploadedFile.getId());
 
         } catch (IOException e) {
             log.error(e.getMessage());
         }
-
-
     }
 
-    private static List<File> retrieveJDriveRemoteFolder(Drive service) throws IOException {
-        List<File> result = new ArrayList<>();
-        String q = "mimeType = 'application/vnd.google-apps.folder' and " +
-                   "not trashed and "+
-                   "'root' in parents and "+
-                   "name = 'JDrive'";
-        Drive.Files.List request = service.files().list()
+    private static File getJDriveMainFolder() throws IOException {
+        String qPattern = "mimeType = '%s' and not trashed and "+
+                          "'root' in parents and name = 'JDrive'";
+        String q = String.format( qPattern, MIME_TYPE_FOLDER );
+
+        Drive.Files.List request = driveService.files().list()
                 .setQ( q )
                 .setSpaces("drive");
 
+        List<File> result = new ArrayList<>();
         do {
-            try {
-                FileList files = request.execute();
+            FileList files = request.execute();
 
-                result.addAll(files.getFiles());
-                request.setPageToken(files.getNextPageToken());
-            } catch (IOException e) {
-                log.error("An error occurred: " + e);
-                request.setPageToken(null);
-            }
+            result.addAll(files.getFiles());
+            request.setPageToken(files.getNextPageToken());
         } while (request.getPageToken() != null &&
                  request.getPageToken().length() > 0);
 
-        return result;
+
+        if( result.isEmpty() ){
+            throw new IOException( "JDrive remote folder not found." );
+        }else if( result.size() > 1 ){
+            throw new IOException( "Multiple JDrive remote folder found." );
+        }
+
+        return result.get(0);
     }
 
-    private static List<File> retrieveFilesFrom(Drive service, File folder) throws IOException{
-        List<File> result = new ArrayList<>();
-        String q = "not trashed and "+
-                   "'%s' in parents";
-        Drive.Files.List request = service.files().list()
-                .setQ( String.format(q, folder.getId()) )
+    private static List<File> listContentFrom(File folder) throws IOException{
+        String q = String.format("not trashed and '%s' in parents", folder.getId() );
+        Drive.Files.List request = driveService.files().list()
+                .setQ( q )
                 .setSpaces("drive");
 
+        List<File> result = new ArrayList<>();
         do {
             try {
                 FileList files = request.execute();
@@ -161,29 +152,47 @@ public class Testing_API {
         return result;
     }
 
-    private static void downloadRemoteFile(Drive driveService, File file){
-        try {
-            String basePath = (String) Configurator.getInstance().get(Keys.WATCHED_BASE_PATH);
-            java.io.File localFile = Paths.get(basePath+"/"+file.getName()).toFile();
-            Files.createFile( localFile.toPath() );
+    private static void downloadRemoteFile( File file ) throws IOException {
+        String basePath = (String) Configurator.getInstance().get(Keys.WATCHED_BASE_PATH);
+        java.io.File localFile = Paths.get(basePath+"/"+file.getName()).toFile();
 
-            log.info("Try to download to: "+localFile.getAbsolutePath());
-            OutputStream outputStream = new FileOutputStream(localFile);
+        log.info("Try to download to: "+localFile.getAbsolutePath());
+        OutputStream outputStream = new FileOutputStream(localFile);
 
-            String conversion = MIMETypeConversion.getOrDefault(file.getMimeType(), "");
-            log.info(file.getMimeType() +" -> "+ conversion);
-            if( conversion.isEmpty() ){
-                driveService.files().get(file.getId())
-                    .executeMediaAndDownloadTo(outputStream);
-            }else{
-                driveService.files().export( file.getId(), conversion )
-                    .executeMediaAndDownloadTo(outputStream);
-            }
+        String conversion = MIMETypeConversion.getOrDefault(file.getMimeType(), "");
+        log.info(file.getMimeType() +" > converted to > "+ conversion);
 
-            log.info("download ok.");
-        } catch (Exception e) {
-            fatal(e.getMessage(), e);
+        if( conversion.isEmpty() ){
+            driveService.files().get( file.getId() )
+                .executeMediaAndDownloadTo(outputStream);
+        }else{
+            driveService.files().export( file.getId(), conversion )
+                .executeMediaAndDownloadTo(outputStream);
         }
+
+        log.info("Download ok.");
+    }
+
+    private static File uploadFile( Path localFilePath, String parentId ) throws IOException {
+        java.io.File localFile = localFilePath.toFile();
+        log.info("Try to upload file: "+localFile.getAbsolutePath());
+
+        File fileMetadata = new File()
+            .setName( localFile.getName() )
+            .setParents( Collections.singletonList(parentId) )
+            .setDescription("description");
+
+        InputStreamContent inputStreamContent = new InputStreamContent(
+            null,
+            new FileInputStream( localFile )
+        );
+
+        File uploaded = driveService.files()
+                .create(fileMetadata, inputStreamContent)
+                .execute();
+
+        log.info("upload ok.");
+        return uploaded;
     }
 
     private static void logFile( File file ){
@@ -204,54 +213,9 @@ public class Testing_API {
         log.info("<<<");
     }
 
-    // NB: invoke this method multiple times will always create a NEW file
-    private static String createEmptyFile(Drive driveService){
-        File fileMetadata = new File();
-        fileMetadata.setName("Project plan.txt");
-        fileMetadata.setMimeType("application/vnd.google-apps.drive-sdk");
-
-        File file = null;
-        try {
-            log.info("Execution of remote file creation.");
-            file = driveService.files().create(fileMetadata)
-                    .setFields("id")
-                    .execute();
-        } catch (IOException e) {
-            fatal(e.getMessage(), e);
-        }
-        return file.getId();
-    }
-
-    // from here https://goo.gl/zxWV9n
-    private static File uploadFile(Drive service, Path localFilePath,
-                                   String parentId) {
-        java.io.File localFile = localFilePath.toFile();
-
-        try {
-            File fileMetadata = new File()
-                .setName(localFile.getName())
-                .setParents( Collections.singletonList(parentId))
-                .setDescription("description");
-
-            log.info("try to make input stream content...");
-            InputStreamContent inputStreamContent = new InputStreamContent(
-                    null,
-                    new FileInputStream( localFile )
-            );
-
-            log.info("try to upload "+localFile.getAbsolutePath());
-            return service.files().create(fileMetadata, inputStreamContent)
-                    .execute();
-        } catch (IOException e) {
-            fatal(e.getMessage(), e);
-        }
-        return null;
-    }
-
-
-    // this method write a fatal message into log file and kill the program
-    private static void fatal(String msg, Throwable t){
-        log.fatal(msg, t);
+    private static void fatal(Exception e){
+        log.fatal(e.getMessage());
+        e.printStackTrace();
         System.exit(1);
     }
 }
