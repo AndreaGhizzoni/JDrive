@@ -5,7 +5,9 @@ import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import java.io.*;
 import java.nio.file.*;
@@ -23,19 +25,29 @@ public class WatcherTest
 {
     private final LinkedBlockingQueue<WatcherEvent> queue = new LinkedBlockingQueue<>();
     private final static int SPAWN_COUNT = 10;
-    private final static long POLL_TIMEOUT = 5;
+    private final static long POLL_TIMEOUT = 10;
 
-    @Test
-    public void testWatcher(){
+    private Watcher watcher;
+    private Path watcherBasePath;
+
+    @Before
+    public void setUp(){
         // I need the application home directory in order to create the
         // properties file
         buildApplicationHomeDirectoryOrFail();
         // create configurator to get Keys.WATCHED_BASE_PATH
         buildConfiguratorOrFail();
-        Configurator configurator = Configurator.getInstance();
-        final Path watcherBasePath = Paths.get( (String)configurator.get(Keys.WATCHED_BASE_PATH) );
 
-        Watcher watcher = buildWatcherOrFail();
+        Configurator configurator = Configurator.getInstance();
+        watcherBasePath = Paths.get( (String)configurator.get(Keys.WATCHED_BASE_PATH) );
+    }
+
+
+    @Test
+    public void testWatcher(){
+        final Path watcherBasePath = this.watcherBasePath;
+
+        watcher = buildWatcherOrFail();
         watcher.setDispatchingQueue(queue);
         new Thread(watcher).start();
 
@@ -56,7 +68,10 @@ public class WatcherTest
             StandardWatchEventKinds.ENTRY_MODIFY,
             StandardWatchEventKinds.ENTRY_DELETE
         );
+    }
 
+    @After
+    public void tearDown(){
         watcher.startClosingProcedure();
         deleteFolderAndContents( watcherBasePath );
     }
