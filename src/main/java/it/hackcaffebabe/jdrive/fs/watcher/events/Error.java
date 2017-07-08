@@ -26,4 +26,9 @@ public class Error extends WatcherEvent
 
     @Override
     public WatchEvent.Kind Convert() { return null; }
+
+    @Override
+    public String toString(){
+        return String.format( super.toString(), "error" );
+    }
 }
