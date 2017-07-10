@@ -8,6 +8,7 @@ import com.google.api.services.drive.model.FileList;
 import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,10 +71,10 @@ public class Testing_API {
 
         // useful docs here: https://goo.gl/wbZZfs
         try {
-            File jDriveMainFolder = getJDriveMainFolder();
-            logFile( jDriveMainFolder );
+            File jDriveRemoteFolder = getJDriveRemoteFolder();
+            logFile( jDriveRemoteFolder );
 
-            List<File> contents = listContentFrom(jDriveMainFolder);
+            List<File> contents = listContentFrom( jDriveRemoteFolder );
             contents.forEach(
                 file -> {
                     logFile(file);
@@ -87,19 +88,15 @@ public class Testing_API {
                 }
             );
 
-            Path fileToUpload = Paths.get(
-                Configurator.getInstance().get(Keys.WATCHED_BASE_PATH)
-                    + "/file1.txt"
-            );
-            Files.createFile( fileToUpload );
-            File uploadedFile = uploadFile( fileToUpload, jDriveMainFolder.getId() );
-            log.info("Uploaded file with id: "+uploadedFile.getId());
+            Path fileToUpload = createEmptyLocalFile( "file1.txt" );
+            File remoteFile = uploadLocalFile( fileToUpload, jDriveRemoteFolder.getId() );
+            log.info("Uploaded file with id: "+remoteFile.getId());
 
-            Files.write(fileToUpload, Collections.singletonList("this is a line"));
-            File updatedFile = updateRemoteContent( uploadedFile, fileToUpload.toFile() );
+            writeTestLineInto( fileToUpload );
+            File updatedFile = updateRemoteContent( remoteFile, fileToUpload.toFile() );
             log.info("Updated file with id: "+updatedFile.getId());
         } catch (IOException e) {
-            log.error(e.getMessage());
+            fatal(e);
         }
     }
 
@@ -133,10 +130,10 @@ public class Testing_API {
         File newContent = new File();
         newContent.setTrashed(true);
         driveService.files().update( file.getId(), newContent ).execute();
-        log.info("Trash ok:");
+        log.info("Trash ok");
     }
 
-    private static File getJDriveMainFolder() throws IOException {
+    private static File getJDriveRemoteFolder() throws IOException {
         String qPattern = "mimeType = '%s' and not trashed and "+
                           "'root' in parents and name = 'JDrive'";
         String q = String.format( qPattern, MIME_TYPE_FOLDER );
@@ -213,7 +210,7 @@ public class Testing_API {
         log.info("Download ok.");
     }
 
-    private static File uploadFile( Path localFilePath, String parentId ) throws IOException {
+    private static File uploadLocalFile(Path localFilePath, String parentId ) throws IOException {
         if( localFilePath == null )
             throw new IOException( "" );
 
@@ -260,6 +257,17 @@ public class Testing_API {
         log.info("File.getParents(): "+file.getParents());
         log.info("File.getSize(): "+file.getSize());
         log.info("<<<");
+    }
+
+    private static Path createEmptyLocalFile( String name ) throws IOException{
+        Path localEmptyFile = Paths.get( Configurator.getInstance()
+                .get(Keys.WATCHED_BASE_PATH)+ PathsUtil.SEP + name );
+        Files.createFile( localEmptyFile );
+        return localEmptyFile;
+    }
+
+    private static void writeTestLineInto( Path localFile ) throws IOException {
+        Files.write( localFile, Collections.singletonList("this is a line") );
     }
 
     private static void fatal(Exception e){
