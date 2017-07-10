@@ -21,6 +21,9 @@ final class AuthenticationConst
     /** List of scopes API */
     static final List<String> SCOPES = Arrays.asList(
         DriveScopes.DRIVE,
-        DriveScopes.DRIVE_FILE
+        DriveScopes.DRIVE_FILE,
+        DriveScopes.DRIVE_APPDATA,
+        DriveScopes.DRIVE_SCRIPTS,
+        DriveScopes.DRIVE_METADATA
     );
 }
