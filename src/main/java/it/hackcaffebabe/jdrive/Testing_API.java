@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive;
 
+import com.google.api.client.http.FileContent;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
@@ -17,10 +18,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 
 public class Testing_API {
@@ -70,7 +68,6 @@ public class Testing_API {
         // plain text ok
         // jpg        ok
 
-        // TODO: figure out how to delete remote folder/file
         // TODO: figure out how to update works
 
         try {
@@ -83,6 +80,8 @@ public class Testing_API {
                     logFile(file);
                     try {
                         downloadRemoteFile(file);
+//                        deleteRemoteFile(file);
+                        trashRemoteFile(file);
                     } catch (IOException e) {
                         fatal(e);
                     }
@@ -93,12 +92,49 @@ public class Testing_API {
                 Configurator.getInstance().get(Keys.WATCHED_BASE_PATH)
                     + "/file1.txt"
             );
+            Files.createFile( fileToUpload );
             File uploadedFile = uploadFile( fileToUpload, jDriveMainFolder.getId() );
             log.info("Uploaded file with id: "+uploadedFile.getId());
 
+            Files.write(fileToUpload, Collections.singletonList("this is a line"));
+            File updatedFile = updateRemoteContent( uploadedFile, fileToUpload.toFile() );
+            log.info("Updated file with id: "+updatedFile.getId());
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private static File updateRemoteContent( File remoteFile, java.io.File updatedFile ) throws IOException{
+        // This method doesn't work for docs, presentation spreadsheet ecc.
+        // Maybe check if mime type of remoteFile to exclude them.
+
+        log.info("Try to update file: "+updatedFile.getAbsolutePath());
+        FileContent mediaContent = new FileContent( remoteFile.getMimeType(), updatedFile );
+        File updatedRemoteFile = driveService.files()
+            .update( remoteFile.getId(), new File(), mediaContent )
+            .execute();
+        log.info("Update ok.");
+        return updatedRemoteFile;
+    }
+
+    private static void deleteRemoteFile( File file ) throws IOException {
+        if( file == null )
+            throw new IOException( "Given file can not be null." );
+
+        log.info("Try to delete remote file: "+file.getName()+" with id: "+file.getId());
+        driveService.files().delete( file.getId() ).execute();
+        log.info("Delete ok:");
+    }
+
+    private static void trashRemoteFile( File file ) throws IOException {
+        if( file == null )
+            throw new IOException( "Given file can not be null." );
+
+        log.info("Try to trash remote file: "+file.getName()+" with id: "+file.getId());
+        File newContent = new File();
+        newContent.setTrashed(true);
+        driveService.files().update( file.getId(), newContent ).execute();
+        log.info("Trash ok:");
     }
 
     private static File getJDriveMainFolder() throws IOException {
@@ -107,14 +143,14 @@ public class Testing_API {
         String q = String.format( qPattern, MIME_TYPE_FOLDER );
 
         Drive.Files.List request = driveService.files().list()
-                .setQ( q )
-                .setSpaces("drive");
+            .setQ( q )
+            .setSpaces(DRIVE);
 
         List<File> result = new ArrayList<>();
         do {
             FileList files = request.execute();
-
             result.addAll(files.getFiles());
+
             request.setPageToken(files.getNextPageToken());
         } while (request.getPageToken() != null &&
                  request.getPageToken().length() > 0);
@@ -132,15 +168,15 @@ public class Testing_API {
     private static List<File> listContentFrom(File folder) throws IOException{
         String q = String.format("not trashed and '%s' in parents", folder.getId() );
         Drive.Files.List request = driveService.files().list()
-                .setQ( q )
-                .setSpaces("drive");
+            .setQ( q )
+            .setSpaces("drive");
 
         List<File> result = new ArrayList<>();
         do {
             try {
                 FileList files = request.execute();
-
                 result.addAll(files.getFiles());
+
                 request.setPageToken(files.getNextPageToken());
             } catch (IOException e) {
                 log.error("An error occurred: " + e);
@@ -153,6 +189,11 @@ public class Testing_API {
     }
 
     private static void downloadRemoteFile( File file ) throws IOException {
+        if( file.getMimeType().equals(MIME_TYPE_FOLDER) ){
+            log.info( "Try to Download a folder > SKIP." );
+            return;
+        }
+
         String basePath = (String) Configurator.getInstance().get(Keys.WATCHED_BASE_PATH);
         java.io.File localFile = Paths.get(basePath+"/"+file.getName()).toFile();
 
@@ -174,7 +215,16 @@ public class Testing_API {
     }
 
     private static File uploadFile( Path localFilePath, String parentId ) throws IOException {
+        if( localFilePath == null )
+            throw new IOException( "" );
+
+        if( parentId == null || parentId.isEmpty() )
+            throw new IOException( "" );
+
         java.io.File localFile = localFilePath.toFile();
+
+        if( !localFile.exists() )
+            throw new IOException( "File not exists: "+localFile.getAbsolutePath() );
         log.info("Try to upload file: "+localFile.getAbsolutePath());
 
         File fileMetadata = new File()
