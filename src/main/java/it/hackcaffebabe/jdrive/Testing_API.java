@@ -68,8 +68,7 @@ public class Testing_API {
         // plain text ok
         // jpg        ok
 
-        // TODO: figure out how to update works
-
+        // useful docs here: https://goo.gl/wbZZfs
         try {
             File jDriveMainFolder = getJDriveMainFolder();
             logFile( jDriveMainFolder );
