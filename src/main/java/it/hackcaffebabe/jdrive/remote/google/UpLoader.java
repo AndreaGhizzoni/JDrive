@@ -69,6 +69,16 @@ public class UpLoader  implements Runnable
                     Testing_API.logFile(updatedRemoteFile);
                 }else if( detectedEvent instanceof Delete){
                     log.debug( ((Delete)detectedEvent).toString() );
+                    String remoteFileId = localToRemoteFileCombination.get(
+                        detectedEvent.getFile()
+                    );
+                    if( remoteFileId == null || remoteFileId.isEmpty() ){
+                        throw new NoSuchElementException(
+                            "No remote File associated with "+detectedEvent.getFile().toAbsolutePath()
+                        );
+                    }
+
+                    driveFileManager.deleteRemoteFile( remoteFileId );
                 }else if( detectedEvent instanceof Error ){
                     log.debug( ((Error)detectedEvent).toString() );
                     keepRunning = false;
