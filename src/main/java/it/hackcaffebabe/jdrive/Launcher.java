@@ -10,6 +10,7 @@ import it.hackcaffebabe.jdrive.fs.watcher.events.*;
 import it.hackcaffebabe.jdrive.action.ActionServer;
 import it.hackcaffebabe.jdrive.action.Message;
 import it.hackcaffebabe.jdrive.fs.watcher.events.Error;
+import it.hackcaffebabe.jdrive.remote.UpLoader;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -127,24 +128,14 @@ public class Launcher
                     return Status.WATCHER;
                 }
             );
+
             new Thread( actionServer, "ActionServer" ).start();
             new Thread( watcher, "Watcher" ).start();
+            Thread upLoaderThread = new Thread( new UpLoader(lbq), "Uploader" );
+            upLoaderThread.start();
+            upLoaderThread.join();
+            log.debug("Uploader has been closed, shutting down.");
 
-            WatcherEvent detObj;
-            boolean keepRunning = true;
-            while(keepRunning){
-                detObj = lbq.take();
-                if( detObj instanceof Create ){
-                    log.debug( ((Create)detObj).toString() );
-                }else if( detObj instanceof Modify ){
-                    log.debug( ((Modify)detObj).toString() );
-                }else if( detObj instanceof Delete ){
-                    log.debug( ((Delete)detObj).toString() );
-                }else if( detObj instanceof Error ){
-                    log.debug( ((Error)detObj).toString() );
-                    keepRunning = false;
-                }
-            }
         }catch( Exception ex ){
             fatalAndQuit(ex.getMessage(), ex);
         }
