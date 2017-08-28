@@ -27,13 +27,13 @@ public class Testing_API {
 
     private static Drive driveService;
 
-    private static final String DRIVE = "drive";
+    public static final String DRIVE = "drive";
 
     private static final String MIME_TYPE_SPREADSHEET = "application/vnd.google-apps.spreadsheet";
     private static final String MIME_TYPE_DOCUMENT = "application/vnd.google-apps.document";
     private static final String MIME_TYPE_DRAWING = "application/vnd.google-apps.drawing";
     private static final String MIME_TYPE_PRESENTATION = "application/vnd.google-apps.presentation";
-    private static final String MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
+    public static final String MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
     private static HashMap<String, String> MIMETypeConversion = new HashMap<String, String>() {{
         put( MIME_TYPE_DOCUMENT, "application/pdf" );
         put( MIME_TYPE_SPREADSHEET, "application/pdf" );
@@ -233,7 +233,7 @@ public class Testing_API {
         return uploaded;
     }
 
-    private static void logFile( File file ){
+    public static void logFile( File file ){
         log.info(">>>");
         log.info("File.getId(): "+file.getId());
         log.info("File.getName(): "+file.getName());
