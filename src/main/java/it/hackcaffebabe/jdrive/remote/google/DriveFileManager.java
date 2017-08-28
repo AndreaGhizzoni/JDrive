@@ -110,12 +110,14 @@ public class DriveFileManager
     }
 
     public void deleteRemoteFile( File file ) throws IOException {
-        deleteRemoteFile(file.getId());
+        if( file == null )
+            throw new IllegalArgumentException("Remote file to delete can not be null");
+        deleteRemoteFile( file.getId() );
     }
 
     public void deleteRemoteFile( String fileId ) throws IOException {
         if( fileId == null || fileId.isEmpty() )
-            throw new IOException( "Given file id can not be null or empty." );
+            throw new IOException( "Given file id can not be null or empty" );
 
         log.info("Try to delete remote file with id="+fileId );
         driveService.files().delete( fileId ).execute();
