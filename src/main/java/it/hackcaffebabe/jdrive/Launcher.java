@@ -9,7 +9,7 @@ import it.hackcaffebabe.jdrive.fs.watcher.Watcher;
 import it.hackcaffebabe.jdrive.fs.watcher.events.*;
 import it.hackcaffebabe.jdrive.action.ActionServer;
 import it.hackcaffebabe.jdrive.action.Message;
-import it.hackcaffebabe.jdrive.remote.UpLoader;
+import it.hackcaffebabe.jdrive.remote.google.UpLoader;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

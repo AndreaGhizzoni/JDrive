@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.remote;
+package it.hackcaffebabe.jdrive.remote.google;
 
 import com.google.api.client.http.FileContent;
 import com.google.api.client.http.InputStreamContent;
