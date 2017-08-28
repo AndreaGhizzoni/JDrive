@@ -122,6 +122,23 @@ public class DriveFileManager
         log.debug("Delete of remote file with id="+fileId+" ok");
     }
 
+    public void trashRemoteFile( File file ) throws IOException {
+        if( file == null )
+            throw new IllegalArgumentException("remote file to trash can not be null");
+        trashRemoteFile( file.getId() );
+    }
+
+    public void trashRemoteFile( String fileId ) throws IOException {
+        if( fileId == null || fileId.isEmpty() )
+            throw new IllegalArgumentException( "Given fileId can not be null or empty" );
+
+        log.info("Try to trash remote file with id: "+fileId);
+        File newContent = new File();
+        newContent.setTrashed(true);
+        driveService.files().update( fileId, newContent ).execute();
+        log.debug("Trash remote file with id="+fileId+" ok");
+    }
+
     private File getJDriveRemoteFolder() throws IOException {
         String queryPattern = "mimeType = '%s' and not trashed and "+
                               "'root' in parents and name = 'JDrive'";
