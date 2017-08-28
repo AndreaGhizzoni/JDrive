@@ -5,13 +5,19 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import it.hackcaffebabe.jdrive.cfg.Configurator;
+import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.remote.google.auth.GoogleAuthenticator;
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,11 +59,11 @@ public class DriveFileManager
         log.info("JDrive remote folder found.");
     }
 
-    public File uploadFile(Path localFilePath ) throws IOException {
+    public File uploadFile( Path localFilePath ) throws IOException {
         return uploadFile( localFilePath, jDriveRemoteFolder.getId() );
     }
 
-    public File uploadFile(Path localFilePath, String remoteParentId ) throws IOException {
+    public File uploadFile( Path localFilePath, String remoteParentId ) throws IOException {
         if( localFilePath == null )
             throw new IllegalArgumentException( "Local file path can not be null" );
 
@@ -87,7 +93,7 @@ public class DriveFileManager
         return fileUploaded;
     }
 
-    public File updateRemoteContent( File remoteFile, java.io.File updatedFile ) throws IOException{
+    public File updateRemoteContent( File remoteFile, java.io.File updatedFile ) throws IOException {
         if( remoteFile == null )
             throw new IllegalArgumentException("Remote file to update can not be null");
 
