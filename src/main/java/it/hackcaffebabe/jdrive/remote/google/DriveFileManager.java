@@ -53,50 +53,26 @@ public class DriveFileManager
         log.info("JDrive remote folder found.");
     }
 
-    /**
-     * TODO add doc
-     * @param remoteFileId
-     * @return
-     * @throws IOException
-     */
-    public File getRemoteFileFromId( String remoteFileId ) throws IOException {
-        File remoteFile = getFolderContent( jDriveRemoteFolder ).stream()
-            .filter(file -> file.getId().equals(remoteFileId))
-            .findAny()
-            .orElse(null);
-        if( remoteFile == null ){
-            throw new IOException("File with id="+remoteFileId+" not found");
-        }
-        return remoteFile;
+    public File uploadFile(Path localFilePath ) throws IOException {
+        return uploadFile( localFilePath, jDriveRemoteFolder.getId() );
     }
 
-    /**
-     * TODO add doc
-     * @param localFilePath
-     * @return
-     * @throws IOException
-     */
-    public File uploadLocalFile( Path localFilePath ) throws IOException {
-        return uploadLocalFile( localFilePath, jDriveRemoteFolder.getId() );
-    }
-
-    private File uploadLocalFile(Path localFilePath, String parentId ) throws IOException {
+    public File uploadFile(Path localFilePath, String remoteParentId ) throws IOException {
         if( localFilePath == null )
-            throw new IOException( "" );
+            throw new IllegalArgumentException( "Local file path can not be null" );
 
-        if( parentId == null || parentId.isEmpty() )
-            throw new IOException( "" );
+        if( remoteParentId == null || remoteParentId.isEmpty() )
+            throw new IllegalArgumentException( "Remote parent id can not be null or empty" );
 
         java.io.File localFile = localFilePath.toFile();
 
         if( !localFile.exists() )
             throw new IOException( "File not exists: "+localFile.getAbsolutePath() );
 
-        log.debug("Try to upload file: "+localFile.getAbsolutePath());
+        log.info("Try to upload file: "+localFile.getAbsolutePath());
         File fileMetadata = new File()
             .setName( localFile.getName() )
-            .setParents( Collections.singletonList(parentId) );
-//            .setDescription("description");
+            .setParents( Collections.singletonList(remoteParentId) );
 
         InputStreamContent inputStreamContent = new InputStreamContent(
             null,
@@ -107,28 +83,29 @@ public class DriveFileManager
             .create(fileMetadata, inputStreamContent)
             .execute();
 
-        log.debug("upload ok.");
+        log.debug("Upload of "+localFile.getAbsolutePath()+" ok.");
         return fileUploaded;
     }
 
-    /**
-     * TODO add doc
-     * @param remoteFile
-     * @param updatedFile
-     * @return
-     * @throws IOException
-     */
     public File updateRemoteContent( File remoteFile, java.io.File updatedFile ) throws IOException{
+        if( remoteFile == null )
+            throw new IllegalArgumentException("Remote file to update can not be null");
+
+        if( updatedFile == null )
+            throw new IllegalArgumentException("Updated local file can not be null");
+        if( !updatedFile.exists() )
+            throw new IOException("Updated local file doesn't exists");
+
         // This method doesn't work for docs, presentation spreadsheet ecc.
         // Maybe check if mime type of remoteFile to exclude them.
-        log.debug("Try to update file: "+updatedFile.getAbsolutePath());
+        log.info("Try to update remote copy of: "+updatedFile.getAbsolutePath());
 
         FileContent mediaContent = new FileContent( remoteFile.getMimeType(), updatedFile );
         File updatedRemoteFile = driveService.files()
             .update( remoteFile.getId(), new File(), mediaContent )
             .execute();
 
-        log.info("update ok.");
+        log.debug("Update of remote file with id="+remoteFile.getId()+" ok.");
         return updatedRemoteFile;
     }
 
@@ -139,11 +116,10 @@ public class DriveFileManager
     public void deleteRemoteFile( String fileId ) throws IOException {
         if( fileId == null || fileId.isEmpty() )
             throw new IOException( "Given file id can not be null or empty." );
-        log.debug("Try to delete remote remote file with id: "+fileId );
 
+        log.info("Try to delete remote file with id="+fileId );
         driveService.files().delete( fileId ).execute();
-
-        log.info("Delete ok:");
+        log.debug("Delete of remote file with id="+fileId+" ok");
     }
 
     private File getJDriveRemoteFolder() throws IOException {
@@ -160,6 +136,21 @@ public class DriveFileManager
         }
 
         return result.get(0);
+    }
+
+    public File getRemoteFileFromId( String remoteFileId ) throws IOException {
+        if( remoteFileId == null || remoteFileId.isEmpty() )
+            throw new IllegalArgumentException("remote file id can not be null or empty");
+
+        log.info("Try to get remote file with id= "+remoteFileId);
+        File remoteFile = getFolderContent( jDriveRemoteFolder ).stream()
+            .filter(file -> file.getId().equals(remoteFileId))
+            .findAny()
+            .orElse(null);
+        if( remoteFile == null ){
+            throw new IOException("File with id="+remoteFileId+" not found");
+        }
+        return remoteFile;
     }
 
     private List<File> getFolderContent(File folder ) throws IOException{

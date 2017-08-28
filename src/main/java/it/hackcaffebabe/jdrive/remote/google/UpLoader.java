@@ -39,9 +39,9 @@ public class UpLoader  implements Runnable
             WatcherEvent detectedEvent;
             while( keepRunning ){
                 detectedEvent = queueFromWatcher.take();
-                if( detectedEvent instanceof Create){
+                if( detectedEvent instanceof Create ){
                     log.debug( ((Create)detectedEvent).toString() );
-                    File uploaded = driveFileManager.uploadLocalFile(
+                    File uploaded = driveFileManager.uploadFile(
                         detectedEvent.getFile()
                     );
                     Testing_API.logFile( uploaded );
@@ -49,7 +49,7 @@ public class UpLoader  implements Runnable
                         detectedEvent.getFile(),
                         uploaded.getId()
                     );
-                }else if( detectedEvent instanceof Modify){
+                }else if( detectedEvent instanceof Modify ){
                     log.debug( ((Modify)detectedEvent).toString() );
                     String remoteFileId = localToRemoteFileCombination.get(
                         detectedEvent.getFile()
@@ -67,7 +67,7 @@ public class UpLoader  implements Runnable
                             remoteFile, detectedEvent.getFile().toFile()
                     );
                     Testing_API.logFile(updatedRemoteFile);
-                }else if( detectedEvent instanceof Delete){
+                }else if( detectedEvent instanceof Delete ){
                     log.debug( ((Delete)detectedEvent).toString() );
                     String remoteFileId = localToRemoteFileCombination.get(
                         detectedEvent.getFile()
