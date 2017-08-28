@@ -103,12 +103,13 @@ public class Testing_API {
     private static File updateRemoteContent( File remoteFile, java.io.File updatedFile ) throws IOException{
         // This method doesn't work for docs, presentation spreadsheet ecc.
         // Maybe check if mime type of remoteFile to exclude them.
-
         log.info("Try to update file: "+updatedFile.getAbsolutePath());
+
         FileContent mediaContent = new FileContent( remoteFile.getMimeType(), updatedFile );
         File updatedRemoteFile = driveService.files()
             .update( remoteFile.getId(), new File(), mediaContent )
             .execute();
+
         log.info("Update ok.");
         return updatedRemoteFile;
     }
@@ -116,20 +117,22 @@ public class Testing_API {
     private static void deleteRemoteFile( File file ) throws IOException {
         if( file == null )
             throw new IOException( "Given file can not be null." );
-
         log.info("Try to delete remote file: "+file.getName()+" with id: "+file.getId());
+
         driveService.files().delete( file.getId() ).execute();
+
         log.info("Delete ok:");
     }
 
     private static void trashRemoteFile( File file ) throws IOException {
         if( file == null )
             throw new IOException( "Given file can not be null." );
-
         log.info("Try to trash remote file: "+file.getName()+" with id: "+file.getId());
+
         File newContent = new File();
         newContent.setTrashed(true);
         driveService.files().update( file.getId(), newContent ).execute();
+
         log.info("Trash ok");
     }
 
@@ -138,19 +141,7 @@ public class Testing_API {
                           "'root' in parents and name = 'JDrive'";
         String q = String.format( qPattern, MIME_TYPE_FOLDER );
 
-        Drive.Files.List request = driveService.files().list()
-            .setQ( q )
-            .setSpaces(DRIVE);
-
-        List<File> result = new ArrayList<>();
-        do {
-            FileList files = request.execute();
-            result.addAll(files.getFiles());
-
-            request.setPageToken(files.getNextPageToken());
-        } while (request.getPageToken() != null &&
-                 request.getPageToken().length() > 0);
-
+        List<File> result = doQuery( q );
 
         if( result.isEmpty() ){
             throw new IOException( "JDrive remote folder not found." );
@@ -163,21 +154,20 @@ public class Testing_API {
 
     private static List<File> listContentFrom(File folder) throws IOException{
         String q = String.format("not trashed and '%s' in parents", folder.getId() );
+        return doQuery( q );
+    }
+
+    private static List<File> doQuery( String query ) throws IOException {
         Drive.Files.List request = driveService.files().list()
-            .setQ( q )
-            .setSpaces("drive");
+            .setQ( query )
+            .setSpaces(DRIVE);
 
         List<File> result = new ArrayList<>();
         do {
-            try {
-                FileList files = request.execute();
-                result.addAll(files.getFiles());
+            FileList files = request.execute();
+            result.addAll(files.getFiles());
 
-                request.setPageToken(files.getNextPageToken());
-            } catch (IOException e) {
-                log.error("An error occurred: " + e);
-                request.setPageToken(null);
-            }
+            request.setPageToken(files.getNextPageToken());
         } while (request.getPageToken() != null &&
                 request.getPageToken().length() > 0);
 
@@ -191,7 +181,9 @@ public class Testing_API {
         }
 
         String basePath = (String) Configurator.getInstance().get(Keys.WATCHED_BASE_PATH);
-        java.io.File localFile = Paths.get(basePath+"/"+file.getName()).toFile();
+        java.io.File localFile = Paths.get(
+                basePath + PathsUtil.SEP + file.getName()
+        ).toFile();
 
         log.info("Try to download to: "+localFile.getAbsolutePath());
         OutputStream outputStream = new FileOutputStream(localFile);
