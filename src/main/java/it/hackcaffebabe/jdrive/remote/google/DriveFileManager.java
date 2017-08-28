@@ -60,13 +60,12 @@ public class DriveFileManager
      * @throws IOException
      */
     public File getRemoteFileFromId( String remoteFileId ) throws IOException {
-        List<File> files = listContentFrom( jDriveRemoteFolder );
-        File remoteFile = files.stream()
+        File remoteFile = getFolderContent( jDriveRemoteFolder ).stream()
             .filter(file -> file.getId().equals(remoteFileId))
             .findAny()
             .orElse(null);
         if( remoteFile == null ){
-            throw new IOException("File with id "+remoteFileId+" not found");
+            throw new IOException("File with id="+remoteFileId+" not found");
         }
         return remoteFile;
     }
@@ -122,7 +121,7 @@ public class DriveFileManager
     public File updateRemoteContent( File remoteFile, java.io.File updatedFile ) throws IOException{
         // This method doesn't work for docs, presentation spreadsheet ecc.
         // Maybe check if mime type of remoteFile to exclude them.
-        log.info("Try to update file: "+updatedFile.getAbsolutePath());
+        log.debug("Try to update file: "+updatedFile.getAbsolutePath());
 
         FileContent mediaContent = new FileContent( remoteFile.getMimeType(), updatedFile );
         File updatedRemoteFile = driveService.files()
@@ -131,6 +130,41 @@ public class DriveFileManager
 
         log.info("update ok.");
         return updatedRemoteFile;
+    }
+
+    public void deleteRemoteFile( File file ) throws IOException {
+        deleteRemoteFile(file.getId());
+    }
+
+    public void deleteRemoteFile( String fileId ) throws IOException {
+        if( fileId == null || fileId.isEmpty() )
+            throw new IOException( "Given file id can not be null or empty." );
+        log.debug("Try to delete remote remote file with id: "+fileId );
+
+        driveService.files().delete( fileId ).execute();
+
+        log.info("Delete ok:");
+    }
+
+    private File getJDriveRemoteFolder() throws IOException {
+        String queryPattern = "mimeType = '%s' and not trashed and "+
+                              "'root' in parents and name = 'JDrive'";
+        String query = String.format( queryPattern, MIME_TYPE_FOLDER );
+
+        List<File> result = doQuery( query );
+
+        if( result.isEmpty() ){
+            throw new IOException( "JDrive remote folder not found." );
+        }else if( result.size() > 1 ){
+            throw new IOException( "Multiple JDrive remote folder found." );
+        }
+
+        return result.get(0);
+    }
+
+    private List<File> getFolderContent(File folder ) throws IOException{
+        String q = String.format("not trashed and '%s' in parents", folder.getId() );
+        return doQuery( q );
     }
 
     private List<File> doQuery( String query ) throws IOException {
@@ -148,26 +182,5 @@ public class DriveFileManager
                 request.getPageToken().length() > 0);
 
         return result;
-    }
-
-    private File getJDriveRemoteFolder() throws IOException {
-        String qPattern = "mimeType = '%s' and not trashed and "+
-                          "'root' in parents and name = 'JDrive'";
-        String q = String.format( qPattern, MIME_TYPE_FOLDER );
-
-        List<File> result = doQuery( q );
-
-        if( result.isEmpty() ){
-            throw new IOException( "JDrive remote folder not found." );
-        }else if( result.size() > 1 ){
-            throw new IOException( "Multiple JDrive remote folder found." );
-        }
-
-        return result.get(0);
-    }
-
-    private List<File> listContentFrom(File folder) throws IOException{
-        String q = String.format("not trashed and '%s' in parents", folder.getId() );
-        return doQuery( q );
     }
 }
