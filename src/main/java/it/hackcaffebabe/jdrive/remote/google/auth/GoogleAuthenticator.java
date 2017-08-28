@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.auth.google;
+package it.hackcaffebabe.jdrive.remote.google.auth;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -13,7 +13,6 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 
 import com.google.api.services.drive.Drive;
 import it.hackcaffebabe.jdrive.util.NetworkUtil;
-import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,7 +52,7 @@ public final class GoogleAuthenticator
 
     /**
      * Instances a new Google Authenticator object.
-     * @return {@link it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator}
+     * @return {@link GoogleAuthenticator}
      *         the object to provide the authentication.
      * @throws GeneralSecurityException
      * @throws IOException

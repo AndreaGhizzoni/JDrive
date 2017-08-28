@@ -6,7 +6,7 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import it.hackcaffebabe.jdrive.Testing_API;
-import it.hackcaffebabe.jdrive.auth.google.GoogleAuthenticator;
+import it.hackcaffebabe.jdrive.remote.google.auth.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.fs.watcher.events.Create;
 import it.hackcaffebabe.jdrive.fs.watcher.events.Delete;
 import it.hackcaffebabe.jdrive.fs.watcher.events.Modify;

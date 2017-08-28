@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.auth.google;
+package it.hackcaffebabe.jdrive.remote.google.auth;
 
 import com.google.api.services.drive.DriveScopes;
 
