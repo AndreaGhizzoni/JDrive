@@ -36,8 +36,9 @@ public class DriveFileManager
     private DriveFileManager() throws Exception {
         this.driveService = GoogleAuthenticator.getInstance().getDriveService();
         this.jDriveRemoteFolder = getJDriveRemoteFolder();
-        this.remoteToLocalFiles = recursivelyListFrom( this.jDriveRemoteFolder.getId() );
         log.info("JDrive remote folder found.");
+        this.remoteToLocalFiles = recursivelyListFrom( this.jDriveRemoteFolder.getId() );
+        log.info("Mapping remote and local file complete.");
     }
 
     public File uploadFile( Path localFilePath ) throws IOException {
@@ -75,12 +76,12 @@ public class DriveFileManager
         return fileUploaded;
     }
 
-    public File updateRemoteContent( Path updatedFile ) throws IOException {
+    public File updateRemoteFile( Path updatedFile ) throws IOException {
         File remoteFile = this.getRemoteFileFromLocalPath( updatedFile );
-        return updateRemoteContent( remoteFile, updatedFile.toFile() );
+        return updateRemoteFile( remoteFile, updatedFile.toFile() );
     }
 
-    public File updateRemoteContent( File remoteFile, java.io.File updatedFile ) throws IOException {
+    private File updateRemoteFile( File remoteFile, java.io.File updatedFile ) throws IOException {
         if( remoteFile == null )
             throw new IllegalArgumentException("Remote file to update can not be null");
 
@@ -103,12 +104,16 @@ public class DriveFileManager
     }
 
     public void deleteRemoteFileFrom( Path localFile ) throws IOException {
-        // TODO check il localFile == null || exists
+        if( localFile == null )
+            throw new IllegalArgumentException("Local file path to delete can not be null");
+        if( !localFile.toFile().exists() )
+            throw new IOException("Local file to delete does not exists");
+
         File remoteFile = this.getRemoteFileFromLocalPath( localFile );
         deleteRemoteFile( remoteFile );
     }
 
-    public void deleteRemoteFile( File file ) throws IOException {
+    private void deleteRemoteFile( File file ) throws IOException {
         if( file == null )
             throw new IllegalArgumentException("Remote file to delete can not be null");
 
@@ -119,23 +124,27 @@ public class DriveFileManager
     }
 
     public void trashRemoteFileFrom( Path localFile ) throws IOException {
+        if( localFile == null )
+            throw new IllegalArgumentException("Local file path to trash can not be null");
+        if( !localFile.toFile().exists() )
+            throw new IOException("Local file to trash does not exists");
+
         File remoteFile = this.getRemoteFileFromLocalPath( localFile );
         trashRemoteFile( remoteFile );
     }
 
-    public void trashRemoteFile( File file ) throws IOException {
+    private void trashRemoteFile( File file ) throws IOException {
         if( file == null )
             throw new IllegalArgumentException("remote file to trash can not be null");
 
         log.info("Try to trash remote file with name="+file.getName());
-
         File newContent = new File();
         newContent.setTrashed(true);
         driveService.files().update( file.getId(), newContent ).execute();
         this.deleteFromMap( file );
-
         log.debug("Trash remote file with name="+file.getName()+" ok");
     }
+
 
     private File getJDriveRemoteFolder() throws IOException {
         String queryPattern = "mimeType = '%s' and not trashed and "+
