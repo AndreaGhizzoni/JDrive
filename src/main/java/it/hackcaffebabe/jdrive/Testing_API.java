@@ -74,27 +74,24 @@ public class Testing_API {
             File jDriveRemoteFolder = getJDriveRemoteFolder();
             logFile( jDriveRemoteFolder );
 
-            List<File> contents = listContentFrom( jDriveRemoteFolder );
-            contents.forEach(
-                file -> {
-                    logFile(file);
-                    try {
-                        downloadRemoteFile(file);
+            List<File> contents = recursivelyListFrom(jDriveRemoteFolder.getId());
+//            List<File> contents = listContentFrom( jDriveRemoteFolder );
+            //                    try {
+//                        downloadRemoteFile(file);
 //                        deleteRemoteFile(file);
-                        trashRemoteFile(file);
-                    } catch (IOException e) {
-                        fatal(e);
-                    }
-                }
-            );
+//                        trashRemoteFile(file);
+//                    } catch (IOException e) {
+//                        fatal(e);
+//                    }
+            contents.forEach( Testing_API::logFile );
 
-            Path fileToUpload = createEmptyLocalFile( "file1.txt" );
-            File remoteFile = uploadLocalFile( fileToUpload, jDriveRemoteFolder.getId() );
-            log.info("Uploaded file with id: "+remoteFile.getId());
-
-            writeTestLineInto( fileToUpload );
-            File updatedFile = updateRemoteContent( remoteFile, fileToUpload.toFile() );
-            log.info("Updated file with id: "+updatedFile.getId());
+//            Path fileToUpload = createEmptyLocalFile( "file1.txt" );
+//            File remoteFile = uploadLocalFile( fileToUpload, jDriveRemoteFolder.getId() );
+//            log.info("Uploaded file with id: "+remoteFile.getId());
+//
+//            writeTestLineInto( fileToUpload );
+//            File updatedFile = updateRemoteContent( remoteFile, fileToUpload.toFile() );
+//            log.info("Updated file with id: "+updatedFile.getId());
         } catch (IOException e) {
             fatal(e);
         }
@@ -155,6 +152,24 @@ public class Testing_API {
     private static List<File> listContentFrom(File folder) throws IOException{
         String q = String.format("not trashed and '%s' in parents", folder.getId() );
         return doQuery( q );
+    }
+
+    private static List<File> recursivelyListFrom( String remoteParentsId ) throws IOException {
+        String q = String.format("not trashed and '%s' in parents", remoteParentsId );
+        List<File> folderContent = new ArrayList<>();
+        doQuery( q ).forEach(
+            file -> {
+                folderContent.add( file );
+                try {
+                    if( file.getMimeType().equals(MIME_TYPE_FOLDER) ){
+                        folderContent.addAll( recursivelyListFrom(file.getId()) );
+                    }
+                } catch (IOException e) {
+                    fatal(e);
+                }
+            }
+        );
+        return folderContent;
     }
 
     private static List<File> doQuery( String query ) throws IOException {
@@ -234,21 +249,26 @@ public class Testing_API {
     }
 
     public static void logFile( File file ){
-        log.info(">>>");
-        log.info("File.getId(): "+file.getId());
-        log.info("File.getName(): "+file.getName());
-        log.info("File.getOriginalFileName(): "+file.getOriginalFilename());
-        log.info("File.getDescription(): "+file.getDescription());
-        log.info("File.getFileExtension(): "+file.getFileExtension());
-        log.info("File.getFullFileExtension(): "+file.getFullFileExtension());
-        log.info("File.getKind(): "+file.getKind());
-        log.info("File.getMimeType(): "+file.getMimeType());
-        log.info("File.getCreatedTime(): "+file.getCreatedTime());
-        log.info("File.getLastModifyingUser(): "+file.getLastModifyingUser());
-        log.info("File.getOwners(): "+file.getOwners());
-        log.info("File.getParents(): "+file.getParents());
-        log.info("File.getSize(): "+file.getSize());
-        log.info("<<<");
+        String l = String.format(
+            ">>> %s %s %s",
+            file.getName(), file.getId(), file.getMimeType()
+        );
+        log.debug( l );
+//        log.info(">>> ");
+//        log.info("File.getId(): "+file.getId());
+//        log.info("File.getName(): "+file.getName());
+//        log.info("File.getOriginalFileName(): "+file.getOriginalFilename());
+//        log.info("File.getDescription(): "+file.getDescription());
+//        log.info("File.getFileExtension(): "+file.getFileExtension());
+//        log.info("File.getFullFileExtension(): "+file.getFullFileExtension());
+//        log.info("File.getKind(): "+file.getKind());
+//        log.info("File.getMimeType(): "+file.getMimeType());
+//        log.info("File.getCreatedTime(): "+file.getCreatedTime());
+//        log.info("File.getLastModifyingUser(): "+file.getLastModifyingUser());
+//        log.info("File.getOwners(): "+file.getOwners());
+//        log.info("File.getParents(): "+file.getParents());
+//        log.info("File.getSize(): "+file.getSize());
+//        log.info("<<<");
     }
 
     private static Path createEmptyLocalFile( String name ) throws IOException{
