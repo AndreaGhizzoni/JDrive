@@ -46,10 +46,10 @@ public class UpLoader  implements Runnable
                 } else if (detectedEvent instanceof Modify) {
                     log.debug(((Modify) detectedEvent).toString());
 
-//                    File updatedRemoteFile = driveFileManager.updateRemoteFile(
-//                        detectedEvent.getFile()
-//                    );
-//                    Testing_API.logFile(updatedRemoteFile);
+                    File updatedRemoteFile = driveFileManager.updateRemoteFile(
+                        detectedEvent.getFile()
+                    );
+                    Testing_API.logFile(updatedRemoteFile);
                 } else if (detectedEvent instanceof Delete) {
                     log.debug(((Delete) detectedEvent).toString());
 
