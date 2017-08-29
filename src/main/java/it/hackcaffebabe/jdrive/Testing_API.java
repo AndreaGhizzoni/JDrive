@@ -64,23 +64,7 @@ public class Testing_API {
             logFile( jDriveRemoteFolder );
 
             List<File> contents = recursivelyListFrom(jDriveRemoteFolder.getId());
-//            List<File> contents = listContentFrom( jDriveRemoteFolder );
-            //                    try {
-//                        downloadRemoteFile(file);
-//                        deleteRemoteFile(file);
-//                        trashRemoteFile(file);
-//                    } catch (IOException e) {
-//                        fatal(e);
-//                    }
             contents.forEach( Testing_API::logFile );
-
-//            Path fileToUpload = createEmptyLocalFile( "file1.txt" );
-//            File remoteFile = uploadLocalFile( fileToUpload, jDriveRemoteFolder.getId() );
-//            log.info("Uploaded file with id: "+remoteFile.getId());
-//
-//            writeTestLineInto( fileToUpload );
-//            File updatedFile = updateRemoteContent( remoteFile, fileToUpload.toFile() );
-//            log.info("Updated file with id: "+updatedFile.getId());
         } catch (IOException e) {
             fatal(e);
         }
