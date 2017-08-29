@@ -215,11 +215,6 @@ public class DriveFileManager
         return result.get(0);
     }
 
-    private List<File> getFolderContent( File folder ) throws IOException{
-        String q = String.format("not trashed and '%s' in parents", folder.getId() );
-        return doQuery( q );
-    }
-
     private HashMap<File, Path> recursivelyListFrom( String remoteParentsId ) throws IOException {
         String q = String.format("not trashed and '%s' in parents", remoteParentsId );
         HashMap<File, Path> folderContent = new HashMap<>();
