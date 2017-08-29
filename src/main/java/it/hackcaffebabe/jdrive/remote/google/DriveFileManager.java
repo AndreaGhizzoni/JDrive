@@ -19,6 +19,8 @@ import java.util.*;
 
 /**
  * TODO add doc
+ * PROBLEMS:
+ * - rename a folder with files in it: folder will be rename but is empty on JDrive
  */
 public class DriveFileManager
 {
@@ -78,6 +80,9 @@ public class DriveFileManager
     }
 
     public File uploadFile( Path localFilePath ) throws IOException {
+        if( localFilePath == null )
+            throw new IllegalArgumentException("Local file path can not be null");
+
         if ( localFilePath.toFile().isDirectory() )
             return createRemoteFolderFrom( localFilePath );
 
@@ -90,7 +95,7 @@ public class DriveFileManager
         return uploadFile(localFilePath, remoteParentFile.getId());
     }
 
-    public File uploadFile( Path localFilePath, String remoteParentId ) throws IOException {
+    private File uploadFile( Path localFilePath, String remoteParentId ) throws IOException {
         if( localFilePath == null )
             throw new IllegalArgumentException( "Local file path can not be null" );
 
@@ -122,6 +127,9 @@ public class DriveFileManager
     }
 
     public File updateRemoteFile( Path updatedFile ) throws IOException {
+        if( updatedFile == null )
+            throw new IllegalArgumentException("Updated file path can not be null");
+
         File remoteFile = this.getRemoteFileFromLocalPath( updatedFile );
         return updateRemoteFile( remoteFile, updatedFile.toFile() );
     }
