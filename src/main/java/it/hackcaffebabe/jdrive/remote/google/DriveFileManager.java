@@ -24,7 +24,6 @@ public class DriveFileManager
 
     private Drive driveService;
     private File jDriveRemoteFolder;
-//    private List<File> remoteFiles;
 
     private HashMap<File, Path> remoteToLocalFiles;
 
@@ -71,7 +70,6 @@ public class DriveFileManager
             .create(fileMetadata, inputStreamContent)
             .execute();
 
-//        this.addToRemoteFileList( fileUploaded );
         this.addToMap( fileUploaded, localFilePath );
         log.debug("Upload of "+localFile.getAbsolutePath()+" ok.");
         return fileUploaded;
@@ -194,23 +192,6 @@ public class DriveFileManager
 
         return result;
     }
-
-
-//    private void addToRemoteFileList( File remoteFile ) {
-//        this.remoteFiles.add( remoteFile );
-//    }
-//
-//    private void deleteFromRemoteFileList( String remoteFileId ) throws IOException {
-//        File remoteFileToRemove = this.remoteFiles
-//            .stream()
-//            .filter( file -> file.getId().equals(remoteFileId) )
-//            .findAny()
-//            .orElse(null);
-//        if( remoteFileToRemove == null ){
-//            throw new IOException("File with id="+remoteFileId+" not found");
-//        }
-//        this.remoteFiles.remove( remoteFileToRemove );
-//    }
 
 
     private void addToMap( File remoteFile, Path localFilePath ) {
