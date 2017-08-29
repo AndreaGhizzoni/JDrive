@@ -5,6 +5,8 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import it.hackcaffebabe.jdrive.cfg.Configurator;
+import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.remote.google.auth.GoogleAuthenticator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -27,6 +30,10 @@ public class DriveFileManager
 
     private HashMap<File, Path> remoteToLocalFiles;
 
+    private Path jdriveBasePath = Paths.get(
+        (String)Configurator.getInstance().get( Keys.WATCHED_BASE_PATH )
+    );
+
     public static DriveFileManager getInstance() throws Exception {
         if( instance == null )
             instance = new DriveFileManager();
@@ -41,7 +48,39 @@ public class DriveFileManager
         log.info("Mapping remote and local file complete.");
     }
 
+    private File createRemoteFolderFrom( Path localFolder ) throws IOException {
+        Path parent = localFolder.getParent();
+        log.debug("parent is "+parent);
+
+        if( parent.equals(jdriveBasePath) ){
+            return createRemoteFolder( localFolder, jDriveRemoteFolder );
+        }else{
+            File remoteParentFile = getRemoteFileFromLocalPathIfExsists( parent );
+            if( remoteParentFile != null ){
+                return createRemoteFolder( localFolder, remoteParentFile );
+            }else {
+                return createRemoteFolderFrom( parent );
+            }
+        }
+    }
+
+    private File createRemoteFolder( Path folderPath, File parentRemoteFile ) throws IOException {
+        // TODO do some checks
+        log.info("Try to create remote folder from "+folderPath);
+        File fileMetadata = new File();
+        fileMetadata.setName( folderPath.getFileName().toString() );
+        fileMetadata.setMimeType( MIMEType.FOLDER );
+        fileMetadata.setParents( Collections.singletonList(parentRemoteFile.getId()) );
+        File remoteFolder = driveService.files().create( fileMetadata ).execute();
+        log.debug("Remote folder has been created with id="+remoteFolder.getId());
+        this.addToMap( remoteFolder, folderPath );
+        return remoteFolder;
+    }
+
     public File uploadFile( Path localFilePath ) throws IOException {
+        if ( localFilePath.toFile().isDirectory() )
+            return createRemoteFolderFrom( localFilePath );
+
         return uploadFile( localFilePath, jDriveRemoteFolder.getId() );
     }
 
@@ -106,8 +145,6 @@ public class DriveFileManager
     public void deleteRemoteFileFrom( Path localFile ) throws IOException {
         if( localFile == null )
             throw new IllegalArgumentException("Local file path to delete can not be null");
-        if( !localFile.toFile().exists() )
-            throw new IOException("Local file to delete does not exists");
 
         File remoteFile = this.getRemoteFileFromLocalPath( localFile );
         deleteRemoteFile( remoteFile );
@@ -221,5 +258,17 @@ public class DriveFileManager
             throw new IOException(
                     "Remote fileId for local path "+localFilePath+" not found");
         return mapEntry.getKey();
+    }
+
+    private File getRemoteFileFromLocalPathIfExsists( Path localFilePath ) {
+        Map.Entry<File, Path> mapEntry = this.remoteToLocalFiles.entrySet()
+            .stream()
+            .filter( entry -> entry.getValue() != null && entry.getValue().toAbsolutePath().equals(localFilePath) )
+            .findAny()
+            .orElse(null);
+        if( mapEntry == null )
+            return null;
+        else
+            return mapEntry.getKey();
     }
 }
