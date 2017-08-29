@@ -29,8 +29,6 @@ public class DriveFileManager
     private File jDriveRemoteFolder;
     private List<File> remoteFiles;
 
-    public static final String DRIVE = "drive";
-
     public static DriveFileManager getInstance() throws Exception {
         if( instance == null )
             instance = new DriveFileManager();
@@ -194,7 +192,7 @@ public class DriveFileManager
     private List<File> doQuery( String query ) throws IOException {
         Drive.Files.List request = driveService.files().list()
             .setQ( query )
-            .setSpaces(DRIVE);
+            .setSpaces("drive");
 
         List<File> result = new ArrayList<>();
         do {
