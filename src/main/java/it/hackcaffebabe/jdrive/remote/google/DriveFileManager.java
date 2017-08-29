@@ -30,17 +30,6 @@ public class DriveFileManager
     private List<File> remoteFiles;
 
     public static final String DRIVE = "drive";
-    public static final String MIME_TYPE_SPREADSHEET = "application/vnd.google-apps.spreadsheet";
-    public static final String MIME_TYPE_DOCUMENT = "application/vnd.google-apps.document";
-    public static final String MIME_TYPE_DRAWING = "application/vnd.google-apps.drawing";
-    public static final String MIME_TYPE_PRESENTATION = "application/vnd.google-apps.presentation";
-    public static final String MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
-    public static HashMap<String, String> MIMETypeConversion = new HashMap<String, String>() {{
-        put( MIME_TYPE_DOCUMENT, "application/pdf" );
-        put( MIME_TYPE_SPREADSHEET, "application/pdf" );
-        put( MIME_TYPE_DRAWING, "image/png" );
-        put( MIME_TYPE_PRESENTATION, "application/pdf" );
-    }};
 
     public static DriveFileManager getInstance() throws Exception {
         if( instance == null )
@@ -124,7 +113,7 @@ public class DriveFileManager
 
     public void deleteRemoteFile( String fileId ) throws IOException {
         if( fileId == null || fileId.isEmpty() )
-            throw new IOException( "Given file id can not be null or empty" );
+            throw new IllegalArgumentException( "Given file id can not be null or empty" );
 
         log.info("Try to delete remote file with id="+fileId );
         driveService.files().delete( fileId ).execute();
@@ -151,7 +140,7 @@ public class DriveFileManager
     private File getJDriveRemoteFolder() throws IOException {
         String queryPattern = "mimeType = '%s' and not trashed and "+
                               "'root' in parents and name = 'JDrive'";
-        String query = String.format( queryPattern, MIME_TYPE_FOLDER );
+        String query = String.format( queryPattern, MIMEType.FOLDER );
 
         List<File> result = doQuery( query );
 
@@ -191,7 +180,7 @@ public class DriveFileManager
             file -> {
                 folderContent.add( file );
                 try {
-                    if( file.getMimeType().equals(MIME_TYPE_FOLDER) ){
+                    if( file.getMimeType().equals(MIMEType.FOLDER) ){
                         folderContent.addAll( recursivelyListFrom(file.getId()) );
                     }
                 } catch (IOException e) {
