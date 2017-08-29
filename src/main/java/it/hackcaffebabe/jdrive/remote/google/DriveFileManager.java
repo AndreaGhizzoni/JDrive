@@ -44,9 +44,11 @@ public class DriveFileManager
 
     private DriveFileManager() throws Exception {
         this.driveService = GoogleAuthenticator.getInstance().getDriveService();
+
         this.jDriveRemoteFolder = getJDriveRemoteFolder();
         log.info("JDrive remote folder found.");
         this.remoteToLocalFiles = recursivelyListFrom( this.jDriveRemoteFolder.getId() );
+        this.addToMap(jDriveRemoteFolder, jdriveBasePath);
         log.info("Mapping remote and local file complete.");
     }
 
