@@ -12,9 +12,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * TODO add doc
@@ -26,7 +24,9 @@ public class DriveFileManager
 
     private Drive driveService;
     private File jDriveRemoteFolder;
-    private List<File> remoteFiles;
+//    private List<File> remoteFiles;
+
+    private HashMap<File, Path> remoteToLocalFiles;
 
     public static DriveFileManager getInstance() throws Exception {
         if( instance == null )
@@ -37,7 +37,7 @@ public class DriveFileManager
     private DriveFileManager() throws Exception {
         this.driveService = GoogleAuthenticator.getInstance().getDriveService();
         this.jDriveRemoteFolder = getJDriveRemoteFolder();
-        this.remoteFiles = recursivelyListFrom( this.jDriveRemoteFolder.getId() );
+        this.remoteToLocalFiles = recursivelyListFrom( this.jDriveRemoteFolder.getId() );
         log.info("JDrive remote folder found.");
     }
 
@@ -71,14 +71,15 @@ public class DriveFileManager
             .create(fileMetadata, inputStreamContent)
             .execute();
 
-        this.addToRemoteFileList( fileUploaded );
+//        this.addToRemoteFileList( fileUploaded );
+        this.addToMap( fileUploaded, localFilePath );
         log.debug("Upload of "+localFile.getAbsolutePath()+" ok.");
         return fileUploaded;
     }
 
-    public File updateRemoteContent( String remoteFileId, java.io.File updatedFile ) throws IOException {
-        File remoteFile = getRemoteFileFromId( remoteFileId );
-        return updateRemoteContent( remoteFile, updatedFile );
+    public File updateRemoteContent( Path updatedFile ) throws IOException {
+        File remoteFile = this.getRemoteFileFromLocalPath( updatedFile );
+        return updateRemoteContent( remoteFile, updatedFile.toFile() );
     }
 
     public File updateRemoteContent( File remoteFile, java.io.File updatedFile ) throws IOException {
@@ -103,40 +104,39 @@ public class DriveFileManager
         return updatedRemoteFile;
     }
 
+    public void deleteRemoteFileFrom( Path localFile ) throws IOException {
+        // TODO check il localFile == null || exists
+        File remoteFile = this.getRemoteFileFromLocalPath( localFile );
+        deleteRemoteFile( remoteFile );
+    }
+
     public void deleteRemoteFile( File file ) throws IOException {
         if( file == null )
             throw new IllegalArgumentException("Remote file to delete can not be null");
-        deleteRemoteFile( file.getId() );
+
+        log.info("Try to delete remote file with name="+file.getName() );
+        driveService.files().delete( file.getId() ).execute();
+        this.deleteFromMap( file );
+        log.debug("Delete of remote file with name="+file.getName()+" ok");
     }
 
-    public void deleteRemoteFile( String fileId ) throws IOException {
-        if( fileId == null || fileId.isEmpty() )
-            throw new IllegalArgumentException( "Given file id can not be null or empty" );
-
-        log.info("Try to delete remote file with id="+fileId );
-        driveService.files().delete( fileId ).execute();
-
-        this.deleteFromRemoteFileList(fileId);
-        log.debug("Delete of remote file with id="+fileId+" ok");
+    public void trashRemoteFileFrom( Path localFile ) throws IOException {
+        File remoteFile = this.getRemoteFileFromLocalPath( localFile );
+        trashRemoteFile( remoteFile );
     }
 
     public void trashRemoteFile( File file ) throws IOException {
         if( file == null )
             throw new IllegalArgumentException("remote file to trash can not be null");
-        trashRemoteFile( file.getId() );
-    }
 
-    public void trashRemoteFile( String fileId ) throws IOException {
-        if( fileId == null || fileId.isEmpty() )
-            throw new IllegalArgumentException( "Given fileId can not be null or empty" );
+        log.info("Try to trash remote file with name="+file.getName());
 
-        log.info("Try to trash remote file with id: "+fileId);
         File newContent = new File();
         newContent.setTrashed(true);
-        driveService.files().update( fileId, newContent ).execute();
+        driveService.files().update( file.getId(), newContent ).execute();
+        this.deleteFromMap( file );
 
-        this.deleteFromRemoteFileList(fileId);
-        log.debug("Trash remote file with id="+fileId+" ok");
+        log.debug("Trash remote file with name="+file.getName()+" ok");
     }
 
     private File getJDriveRemoteFolder() throws IOException {
@@ -155,35 +155,20 @@ public class DriveFileManager
         return result.get(0);
     }
 
-    public File getRemoteFileFromId( String remoteFileId ) throws IOException {
-        if( remoteFileId == null || remoteFileId.isEmpty() )
-            throw new IllegalArgumentException("remote file id can not be null or empty");
-
-        log.info("Try to get remote file with id= "+remoteFileId);
-        File remoteFile = this.remoteFiles.stream()
-            .filter(file -> file.getId().equals(remoteFileId))
-            .findAny()
-            .orElse(null);
-        if( remoteFile == null ){
-            throw new IOException("File with id="+remoteFileId+" not found");
-        }
-        return remoteFile;
-    }
-
     private List<File> getFolderContent( File folder ) throws IOException{
         String q = String.format("not trashed and '%s' in parents", folder.getId() );
         return doQuery( q );
     }
 
-    private List<File> recursivelyListFrom( String remoteParentsId ) throws IOException {
+    private HashMap<File, Path> recursivelyListFrom( String remoteParentsId ) throws IOException {
         String q = String.format("not trashed and '%s' in parents", remoteParentsId );
-        List<File> folderContent = new ArrayList<>();
+        HashMap<File, Path> folderContent = new HashMap<>();
         doQuery( q ).forEach(
             file -> {
-                folderContent.add( file );
+                folderContent.put( file, null );
                 try {
                     if( file.getMimeType().equals(MIMEType.FOLDER) ){
-                        folderContent.addAll( recursivelyListFrom(file.getId()) );
+                        folderContent.putAll( recursivelyListFrom(file.getId()) );
                     }
                 } catch (IOException e) {
                     log.error(e.getMessage(), e);
@@ -211,19 +196,40 @@ public class DriveFileManager
     }
 
 
-    private void addToRemoteFileList( File remoteFile ) {
-        this.remoteFiles.add( remoteFile );
+//    private void addToRemoteFileList( File remoteFile ) {
+//        this.remoteFiles.add( remoteFile );
+//    }
+//
+//    private void deleteFromRemoteFileList( String remoteFileId ) throws IOException {
+//        File remoteFileToRemove = this.remoteFiles
+//            .stream()
+//            .filter( file -> file.getId().equals(remoteFileId) )
+//            .findAny()
+//            .orElse(null);
+//        if( remoteFileToRemove == null ){
+//            throw new IOException("File with id="+remoteFileId+" not found");
+//        }
+//        this.remoteFiles.remove( remoteFileToRemove );
+//    }
+
+
+    private void addToMap( File remoteFile, Path localFilePath ) {
+        this.remoteToLocalFiles.put( remoteFile, localFilePath );
     }
 
-    private void deleteFromRemoteFileList( String remoteFileId ) throws IOException {
-        File remoteFileToRemove = this.remoteFiles
-            .stream()
-            .filter( file -> file.getId().equals(remoteFileId) )
-            .findAny()
-            .orElse(null);
-        if( remoteFileToRemove == null ){
-            throw new IOException("File with id="+remoteFileId+" not found");
-        }
-        this.remoteFiles.remove( remoteFileToRemove );
+    private void deleteFromMap( File remoteFile ) {
+        this.remoteToLocalFiles.remove( remoteFile );
+    }
+
+    private File getRemoteFileFromLocalPath( Path localFilePath ) throws IOException {
+        Map.Entry<File, Path> mapEntry = this.remoteToLocalFiles.entrySet()
+                .stream()
+                .filter( entry -> entry.getValue() != null && entry.getValue().toAbsolutePath().equals(localFilePath))
+                .findAny()
+                .orElse(null);
+        if( mapEntry == null )
+            throw new IOException(
+                    "Remote fileId for local path "+localFilePath+" not found");
+        return mapEntry.getKey();
     }
 }
