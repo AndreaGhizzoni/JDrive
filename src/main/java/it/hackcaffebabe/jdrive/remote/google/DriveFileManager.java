@@ -59,7 +59,7 @@ public class DriveFileManager
         if( parent.equals(jdriveBasePath) ){
             return createRemoteFolder( localFolder, jDriveRemoteFolder );
         }else{
-            File remoteParentFile = getRemoteFileFromLocalPathIfExsists( parent );
+            File remoteParentFile = getRemoteFileFromLocalPathIfExists( parent );
             if( remoteParentFile != null ){
                 return createRemoteFolder( localFolder, remoteParentFile );
             }else {
@@ -89,7 +89,7 @@ public class DriveFileManager
             return createRemoteFolderFrom( localFilePath );
 
         Path parent = localFilePath.getParent();
-        File remoteParentFile = getRemoteFileFromLocalPathIfExsists( parent );
+        File remoteParentFile = getRemoteFileFromLocalPathIfExists( parent );
         if( remoteParentFile == null ) {
             remoteParentFile = createRemoteFolderFrom(parent);
         }
@@ -271,7 +271,7 @@ public class DriveFileManager
         return mapEntry.getKey();
     }
 
-    private File getRemoteFileFromLocalPathIfExsists( Path localFilePath ) {
+    private File getRemoteFileFromLocalPathIfExists(Path localFilePath ) {
         Map.Entry<File, Path> mapEntry = this.remoteToLocalFiles.entrySet()
             .stream()
             .filter( entry -> entry.getValue() != null && entry.getValue().toAbsolutePath().equals(localFilePath) )
