@@ -5,19 +5,13 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
-import it.hackcaffebabe.jdrive.cfg.Configurator;
-import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.remote.google.auth.GoogleAuthenticator;
-import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,6 +27,7 @@ public class DriveFileManager
 
     private Drive driveService;
     private File jDriveRemoteFolder;
+    private List<File> remoteFiles;
 
     public static final String DRIVE = "drive";
     public static final String MIME_TYPE_SPREADSHEET = "application/vnd.google-apps.spreadsheet";
@@ -56,6 +51,7 @@ public class DriveFileManager
     private DriveFileManager() throws Exception {
         this.driveService = GoogleAuthenticator.getInstance().getDriveService();
         this.jDriveRemoteFolder = getJDriveRemoteFolder();
+        this.remoteFiles = recursivelyListFrom( this.jDriveRemoteFolder.getId() );
         log.info("JDrive remote folder found.");
     }
 
@@ -91,6 +87,11 @@ public class DriveFileManager
 
         log.debug("Upload of "+localFile.getAbsolutePath()+" ok.");
         return fileUploaded;
+    }
+
+    public File updateRemoteContent( String remoteFileId, java.io.File updatedFile ) throws IOException {
+        File remoteFile = getRemoteFileFromId( remoteFileId );
+        return updateRemoteContent( remoteFile, updatedFile );
     }
 
     public File updateRemoteContent( File remoteFile, java.io.File updatedFile ) throws IOException {
@@ -168,7 +169,7 @@ public class DriveFileManager
             throw new IllegalArgumentException("remote file id can not be null or empty");
 
         log.info("Try to get remote file with id= "+remoteFileId);
-        File remoteFile = getFolderContent( jDriveRemoteFolder ).stream()
+        File remoteFile = this.remoteFiles.stream()
             .filter(file -> file.getId().equals(remoteFileId))
             .findAny()
             .orElse(null);
@@ -181,6 +182,24 @@ public class DriveFileManager
     private List<File> getFolderContent(File folder ) throws IOException{
         String q = String.format("not trashed and '%s' in parents", folder.getId() );
         return doQuery( q );
+    }
+
+    private List<File> recursivelyListFrom( String remoteParentsId ) throws IOException {
+        String q = String.format("not trashed and '%s' in parents", remoteParentsId );
+        List<File> folderContent = new ArrayList<>();
+        doQuery( q ).forEach(
+            file -> {
+                folderContent.add( file );
+                try {
+                    if( file.getMimeType().equals(MIME_TYPE_FOLDER) ){
+                        folderContent.addAll( recursivelyListFrom(file.getId()) );
+                    }
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+        );
+        return folderContent;
     }
 
     private List<File> doQuery( String query ) throws IOException {
