@@ -40,13 +40,13 @@ public class UpLoader  implements Runnable
                     log.debug(((Create) detectedEvent).toString());
 
                     File uploaded = driveFileManager.uploadFile(
-                            detectedEvent.getFile()
+                        detectedEvent.getFile()
                     );
                     Testing_API.logFile(uploaded);
                 } else if (detectedEvent instanceof Modify) {
                     log.debug(((Modify) detectedEvent).toString());
 
-                    File updatedRemoteFile = driveFileManager.updateRemoteContent(
+                    File updatedRemoteFile = driveFileManager.updateRemoteFile(
                         detectedEvent.getFile()
                     );
                     Testing_API.logFile(updatedRemoteFile);
