@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -72,6 +71,7 @@ public class DriveFileManager
             .create(fileMetadata, inputStreamContent)
             .execute();
 
+        this.addToRemoteFileList( fileUploaded );
         log.debug("Upload of "+localFile.getAbsolutePath()+" ok.");
         return fileUploaded;
     }
@@ -115,6 +115,8 @@ public class DriveFileManager
 
         log.info("Try to delete remote file with id="+fileId );
         driveService.files().delete( fileId ).execute();
+
+        this.deleteFromRemoteFileList(fileId);
         log.debug("Delete of remote file with id="+fileId+" ok");
     }
 
@@ -132,6 +134,8 @@ public class DriveFileManager
         File newContent = new File();
         newContent.setTrashed(true);
         driveService.files().update( fileId, newContent ).execute();
+
+        this.deleteFromRemoteFileList(fileId);
         log.debug("Trash remote file with id="+fileId+" ok");
     }
 
@@ -166,7 +170,7 @@ public class DriveFileManager
         return remoteFile;
     }
 
-    private List<File> getFolderContent(File folder ) throws IOException{
+    private List<File> getFolderContent( File folder ) throws IOException{
         String q = String.format("not trashed and '%s' in parents", folder.getId() );
         return doQuery( q );
     }
@@ -204,5 +208,22 @@ public class DriveFileManager
                 request.getPageToken().length() > 0);
 
         return result;
+    }
+
+
+    private void addToRemoteFileList( File remoteFile ) {
+        this.remoteFiles.add( remoteFile );
+    }
+
+    private void deleteFromRemoteFileList( String remoteFileId ) throws IOException {
+        File remoteFileToRemove = this.remoteFiles
+            .stream()
+            .filter( file -> file.getId().equals(remoteFileId) )
+            .findAny()
+            .orElse(null);
+        if( remoteFileToRemove == null ){
+            throw new IOException("File with id="+remoteFileId+" not found");
+        }
+        this.remoteFiles.remove( remoteFileToRemove );
     }
 }
