@@ -10,6 +10,7 @@ import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -39,21 +40,33 @@ public class UpLoader  implements Runnable
                 if (detectedEvent instanceof Create) {
                     log.debug(((Create) detectedEvent).toString());
 
-                    File uploaded = driveFileManager.uploadFile(
-                        detectedEvent.getFile()
-                    );
-                    Testing_API.logFile(uploaded);
+                    try {
+                        File uploaded = driveFileManager.uploadFile(
+                            detectedEvent.getFile()
+                        );
+                        Testing_API.logFile(uploaded);
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
+                    }
                 } else if (detectedEvent instanceof Modify) {
                     log.debug(((Modify) detectedEvent).toString());
 
-                    File updatedRemoteFile = driveFileManager.updateRemoteFile(
-                        detectedEvent.getFile()
-                    );
-                    Testing_API.logFile(updatedRemoteFile);
+                    try {
+                        File updatedRemoteFile = driveFileManager.updateRemoteFile(
+                            detectedEvent.getFile()
+                        );
+                        Testing_API.logFile(updatedRemoteFile);
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
+                    }
                 } else if (detectedEvent instanceof Delete) {
                     log.debug(((Delete) detectedEvent).toString());
 
-                    driveFileManager.deleteRemoteFileFrom( detectedEvent.getFile() );
+                    try {
+                        driveFileManager.deleteRemoteFileFrom( detectedEvent.getFile() );
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
+                    }
                 } else if (detectedEvent instanceof Error) {
                     log.debug(((Error) detectedEvent).toString());
                     keepRunning = false;
@@ -61,7 +74,7 @@ public class UpLoader  implements Runnable
             }
 
             log.info("Uploader closing.");
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             log.fatal(e.getMessage(), e);
         }
     }
