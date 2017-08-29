@@ -81,7 +81,13 @@ public class DriveFileManager
         if ( localFilePath.toFile().isDirectory() )
             return createRemoteFolderFrom( localFilePath );
 
-        return uploadFile( localFilePath, jDriveRemoteFolder.getId() );
+        Path parent = localFilePath.getParent();
+        File remoteParentFile = getRemoteFileFromLocalPathIfExsists( parent );
+        if( remoteParentFile == null ) {
+            remoteParentFile = createRemoteFolderFrom(parent);
+        }
+
+        return uploadFile(localFilePath, remoteParentFile.getId());
     }
 
     public File uploadFile( Path localFilePath, String remoteParentId ) throws IOException {
