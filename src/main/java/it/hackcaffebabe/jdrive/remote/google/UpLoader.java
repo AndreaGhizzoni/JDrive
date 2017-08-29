@@ -10,8 +10,6 @@ import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.nio.file.Path;
-import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -22,7 +20,6 @@ public class UpLoader  implements Runnable
     private static final Logger log = LogManager.getLogger();
     private LinkedBlockingQueue<WatcherEvent> queueFromWatcher;
     private DriveFileManager driveFileManager;
-    private HashMap<Path, String> localToRemoteFileCombination = new HashMap<>();
 
     public UpLoader( LinkedBlockingQueue<WatcherEvent> queueFromWatcher ) throws Exception {
         this.queueFromWatcher = queueFromWatcher;
