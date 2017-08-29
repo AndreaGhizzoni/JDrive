@@ -60,11 +60,8 @@ public class UpLoader  implements Runnable
                         );
                     }
 
-                    File remoteFile = driveFileManager.getRemoteFileFromId(
-                        remoteFileId
-                    );
                     File updatedRemoteFile = driveFileManager.updateRemoteContent(
-                            remoteFile, detectedEvent.getFile().toFile()
+                            remoteFileId, detectedEvent.getFile().toFile()
                     );
                     Testing_API.logFile(updatedRemoteFile);
                 }else if( detectedEvent instanceof Delete ){
