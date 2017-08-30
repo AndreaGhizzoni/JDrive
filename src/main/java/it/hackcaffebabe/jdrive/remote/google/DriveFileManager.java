@@ -20,6 +20,7 @@ import java.util.*;
  * TODO add doc
  * PROBLEMS:
  * - rename a folder with files in it: folder will be rename but is empty on JDrive
+ * ==> possible bug: https://bugs.openjdk.java.net/browse/JDK-8162948
  */
 public class DriveFileManager
 {
