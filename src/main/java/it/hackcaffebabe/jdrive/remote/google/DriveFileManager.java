@@ -76,7 +76,10 @@ public class DriveFileManager
         fileMetadata.setName( folderPath.getFileName().toString() );
         fileMetadata.setMimeType( MIMEType.FOLDER );
         fileMetadata.setParents( Collections.singletonList(parentRemoteFile.getId()) );
-        File remoteFolder = driveService.files().create( fileMetadata ).execute();
+        File remoteFolder = driveService.files()
+                .create( fileMetadata )
+                .setFields("id,modifiedTime,name,parents,trashed,mimeType")
+                .execute();
         log.debug("Remote folder has been created with id="+remoteFolder.getId());
         this.addToMap( remoteFolder, folderPath );
         return remoteFolder;
@@ -115,13 +118,17 @@ public class DriveFileManager
             .setName( localFile.getName() )
             .setParents( Collections.singletonList(remoteParentId) );
 
-        String mimeType = MIMEType.Conversion.get(
-            PathsUtil.getFileExtension(localFile)
-        );
-        FileContent fileContent = new FileContent( mimeType, localFile );
+        String mimeType;
+        if( localFile.isDirectory() ){
+            mimeType = MIMEType.FOLDER;
+        }else{
+            mimeType = MIMEType.Conversion.get(
+                PathsUtil.getFileExtension(localFile)
+            );
+        }
 
         File fileUploaded = driveService.files()
-            .create(fileMetadata, fileContent)
+            .create(fileMetadata, new FileContent(mimeType, localFile) )
             .setFields("id,modifiedTime,name,parents,trashed,mimeType")
             .execute();
 
@@ -151,11 +158,26 @@ public class DriveFileManager
         // Maybe check if mime type of remoteFile to exclude them.
         log.info("Try to update remote copy of: "+updatedFile.getAbsolutePath());
 
-        FileContent mediaContent = new FileContent( remoteFile.getMimeType(), updatedFile );
-        File updatedRemoteFile = driveService.files()
-            .update( remoteFile.getId(), new File(), mediaContent )
-            .setFields("id,modifiedTime,name,parents,trashed,mimeType")
-            .execute();
+        File fileMetadata = new File();
+        fileMetadata.setName( updatedFile.getName() );
+
+        FileContent mediaContent;
+        File updatedRemoteFile;
+        if( updatedFile.isDirectory() ){
+            updatedRemoteFile = driveService.files()
+                .update( remoteFile.getId(), fileMetadata )
+                .setFields("id,modifiedTime,name,parents,trashed,mimeType")
+                .execute();
+        }else{
+            String mimeType = MIMEType.Conversion.get(
+                PathsUtil.getFileExtension(updatedFile)
+            );
+            mediaContent = new FileContent( mimeType, updatedFile );
+            updatedRemoteFile = driveService.files()
+                .update( remoteFile.getId(), fileMetadata, mediaContent )
+                .setFields("id,modifiedTime,name,parents,trashed,mimeType")
+                .execute();
+        }
 
         log.debug("Update of remote file with id="+remoteFile.getId()+" ok.");
         return updatedRemoteFile;
@@ -273,26 +295,20 @@ public class DriveFileManager
     }
 
     private File getRemoteFileFromLocalPath( Path localFilePath ) throws IOException {
-        Map.Entry<File, Path> mapEntry = this.remoteToLocalFiles.entrySet()
-                .stream()
-                .filter( entry -> entry.getValue() != null && entry.getValue().toAbsolutePath().equals(localFilePath))
-                .findAny()
-                .orElse(null);
-        if( mapEntry == null )
+        File file = getRemoteFileFromLocalPathIfExists( localFilePath );
+        if( file == null )
             throw new IOException(
-                    "Remote fileId for local path "+localFilePath+" not found");
-        return mapEntry.getKey();
+                    "Remote file for local path "+localFilePath+" not found");
+        return file;
     }
 
-    private File getRemoteFileFromLocalPathIfExists(Path localFilePath ) {
+    private File getRemoteFileFromLocalPathIfExists( Path localFilePath ) {
         Map.Entry<File, Path> mapEntry = this.remoteToLocalFiles.entrySet()
             .stream()
             .filter( entry -> entry.getValue() != null && entry.getValue().toAbsolutePath().equals(localFilePath) )
             .findAny()
             .orElse(null);
-        if( mapEntry == null )
-            return null;
-        else
-            return mapEntry.getKey();
+
+        return mapEntry == null ? null : mapEntry.getKey();
     }
 }
