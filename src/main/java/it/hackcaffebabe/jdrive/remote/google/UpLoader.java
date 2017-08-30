@@ -1,7 +1,6 @@
 package it.hackcaffebabe.jdrive.remote.google;
 
 import com.google.api.services.drive.model.File;
-import it.hackcaffebabe.jdrive.Testing_API;
 import it.hackcaffebabe.jdrive.fs.watcher.events.Create;
 import it.hackcaffebabe.jdrive.fs.watcher.events.Delete;
 import it.hackcaffebabe.jdrive.fs.watcher.events.Modify;
@@ -44,7 +43,7 @@ public class UpLoader  implements Runnable
                         File uploaded = driveFileManager.uploadFile(
                             detectedEvent.getFile()
                         );
-                        Testing_API.logFile(uploaded);
+                        DriveFileManager.logFile(uploaded);
                     } catch (IOException e) {
                         log.error(e.getMessage(), e);
                     }
@@ -55,7 +54,7 @@ public class UpLoader  implements Runnable
                         File updatedRemoteFile = driveFileManager.updateRemoteFile(
                             detectedEvent.getFile()
                         );
-                        Testing_API.logFile(updatedRemoteFile);
+                        DriveFileManager.logFile(updatedRemoteFile);
                     } catch (IOException e) {
                         log.error(e.getMessage(), e);
                     }
