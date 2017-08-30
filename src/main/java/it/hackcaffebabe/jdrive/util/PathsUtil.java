@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -57,7 +58,7 @@ public class PathsUtil
      * @param file
      * @return
      */
-    public static String getFileExtension(java.io.File file) {
+    public static String getFileExtension( File file ) {
         String fileName = file.getName();
         if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
             return fileName.substring(fileName.lastIndexOf(".")+1);
