@@ -1,7 +1,6 @@
 package it.hackcaffebabe.jdrive.remote.google;
 
 import com.google.api.client.http.FileContent;
-import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
@@ -12,7 +11,6 @@ import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,7 +68,6 @@ public class DriveFileManager
     }
 
     private File createRemoteFolder( Path folderPath, File parentRemoteFile ) throws IOException {
-        // TODO do some checks
         log.info("Try to create remote folder from "+folderPath);
         File fileMetadata = new File();
         fileMetadata.setName( folderPath.getFileName().toString() );
@@ -98,7 +95,7 @@ public class DriveFileManager
             remoteParentFile = createRemoteFolderFrom(parent);
         }
 
-        return uploadFile(localFilePath, remoteParentFile.getId());
+        return uploadFile( localFilePath, remoteParentFile.getId() );
     }
 
     private File uploadFile( Path localFilePath, String remoteParentId ) throws IOException {
@@ -118,21 +115,16 @@ public class DriveFileManager
             .setName( localFile.getName() )
             .setParents( Collections.singletonList(remoteParentId) );
 
-        String mimeType;
-        if( localFile.isDirectory() ){
-            mimeType = MIMEType.FOLDER;
-        }else{
-            mimeType = MIMEType.Conversion.get(
-                PathsUtil.getFileExtension(localFile)
-            );
-        }
+        String mimeType = MIMEType.Conversion.get(
+            PathsUtil.getFileExtension(localFile)
+        );
 
         File fileUploaded = driveService.files()
             .create(fileMetadata, new FileContent(mimeType, localFile) )
             .setFields("id,modifiedTime,name,parents,trashed,mimeType")
             .execute();
-
         this.addToMap( fileUploaded, localFilePath );
+
         log.debug("Upload of "+localFile.getAbsolutePath()+" ok.");
         return fileUploaded;
     }
@@ -146,9 +138,6 @@ public class DriveFileManager
     }
 
     private File updateRemoteFile( File remoteFile, java.io.File updatedFile ) throws IOException {
-        if( remoteFile == null )
-            throw new IllegalArgumentException("Remote file to update can not be null");
-
         if( updatedFile == null )
             throw new IllegalArgumentException("Updated local file can not be null");
         if( !updatedFile.exists() )
@@ -192,9 +181,6 @@ public class DriveFileManager
     }
 
     private void deleteRemoteFile( File file ) throws IOException {
-        if( file == null )
-            throw new IllegalArgumentException("Remote file to delete can not be null");
-
         log.info("Try to delete remote file with name="+file.getName() );
         driveService.files().delete( file.getId() ).execute();
         this.deleteFromMap( file );
@@ -212,12 +198,8 @@ public class DriveFileManager
     }
 
     private void trashRemoteFile( File file ) throws IOException {
-        if( file == null )
-            throw new IllegalArgumentException("remote file to trash can not be null");
-
         log.info("Try to trash remote file with name="+file.getName());
-        File newContent = new File();
-        newContent.setTrashed(true);
+        File newContent = new File().setTrashed(true);
         driveService.files().update( file.getId(), newContent ).execute();
         this.deleteFromMap( file );
         log.debug("Trash remote file with name="+file.getName()+" ok");
