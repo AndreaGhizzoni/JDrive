@@ -27,11 +27,10 @@ public class DriveFileManager
     private static DriveFileManager instance;
 
     private Drive driveService;
-    private File jDriveRemoteFolder;
+    private RemoteToLocalFiles remoteToLocalFiles;
 
-    private HashMap<File, Path> remoteToLocalFiles;
-
-    private Path jdriveBasePath = Paths.get(
+    private File jdriveRemoteFolder;
+    private Path jdriveLocalBasePath = Paths.get(
         (String)Configurator.getInstance().get( Keys.WATCHED_BASE_PATH )
     );
 
@@ -42,12 +41,14 @@ public class DriveFileManager
     }
 
     private DriveFileManager() throws Exception {
-        this.driveService = GoogleAuthenticator.getInstance().getDriveService();
+        driveService = GoogleAuthenticator.getInstance().getDriveService();
+        remoteToLocalFiles = RemoteToLocalFiles.getInstance();
 
-        this.jDriveRemoteFolder = getJDriveRemoteFolder();
+        jdriveRemoteFolder = getJDriveRemoteFolder();
         log.info("JDrive remote folder found.");
-        this.remoteToLocalFiles = recursivelyListFrom( this.jDriveRemoteFolder.getId() );
-        this.addToMap(jDriveRemoteFolder, jdriveBasePath);
+
+        remoteToLocalFiles.putAll( recursivelyListFrom( jdriveRemoteFolder.getId() ) );
+        remoteToLocalFiles.put(jdriveRemoteFolder, jdriveLocalBasePath);
         log.info("Mapping remote and local file complete.");
     }
 
@@ -55,10 +56,10 @@ public class DriveFileManager
         Path parent = localFolder.getParent();
         log.debug("parent is "+parent);
 
-        if( parent.equals(jdriveBasePath) ){
-            return createRemoteFolder( localFolder, jDriveRemoteFolder );
+        if( parent.equals(jdriveLocalBasePath) ){
+            return createRemoteFolder( localFolder, jdriveRemoteFolder);
         }else{
-            File remoteParentFile = getRemoteFileFromLocalPathIfExists( parent );
+            File remoteParentFile = remoteToLocalFiles.getIfExists( parent );
             if( remoteParentFile != null ){
                 return createRemoteFolder( localFolder, remoteParentFile );
             }else {
@@ -78,7 +79,7 @@ public class DriveFileManager
                 .setFields("id,modifiedTime,name,parents,trashed,mimeType")
                 .execute();
         log.debug("Remote folder has been created with id="+remoteFolder.getId());
-        this.addToMap( remoteFolder, folderPath );
+        remoteToLocalFiles.put( remoteFolder, folderPath );
         return remoteFolder;
     }
 
@@ -90,7 +91,7 @@ public class DriveFileManager
             return createRemoteFolderFrom( localFilePath );
 
         Path parent = localFilePath.getParent();
-        File remoteParentFile = getRemoteFileFromLocalPathIfExists( parent );
+        File remoteParentFile = remoteToLocalFiles.getIfExists( parent );
         if( remoteParentFile == null ) {
             remoteParentFile = createRemoteFolderFrom(parent);
         }
@@ -123,7 +124,7 @@ public class DriveFileManager
             .create(fileMetadata, new FileContent(mimeType, localFile) )
             .setFields("id,modifiedTime,name,parents,trashed,mimeType")
             .execute();
-        this.addToMap( fileUploaded, localFilePath );
+        remoteToLocalFiles.put( fileUploaded, localFilePath );
 
         log.debug("Upload of "+localFile.getAbsolutePath()+" ok.");
         return fileUploaded;
@@ -133,7 +134,7 @@ public class DriveFileManager
         if( updatedFile == null )
             throw new IllegalArgumentException("Updated file path can not be null");
 
-        File remoteFile = this.getRemoteFileFromLocalPath( updatedFile );
+        File remoteFile = remoteToLocalFiles.get( updatedFile );
         return updateRemoteFile( remoteFile, updatedFile.toFile() );
     }
 
@@ -176,14 +177,14 @@ public class DriveFileManager
         if( localFile == null )
             throw new IllegalArgumentException("Local file path to delete can not be null");
 
-        File remoteFile = this.getRemoteFileFromLocalPath( localFile );
+        File remoteFile = remoteToLocalFiles.get( localFile );
         deleteRemoteFile( remoteFile );
     }
 
     private void deleteRemoteFile( File file ) throws IOException {
         log.info("Try to delete remote file with name="+file.getName() );
         driveService.files().delete( file.getId() ).execute();
-        this.deleteFromMap( file );
+        remoteToLocalFiles.remove( file );
         log.debug("Delete of remote file with name="+file.getName()+" ok");
     }
 
@@ -193,7 +194,7 @@ public class DriveFileManager
         if( !localFile.toFile().exists() )
             throw new IOException("Local file to trash does not exists");
 
-        File remoteFile = this.getRemoteFileFromLocalPath( localFile );
+        File remoteFile = remoteToLocalFiles.get( localFile );
         trashRemoteFile( remoteFile );
     }
 
@@ -201,7 +202,7 @@ public class DriveFileManager
         log.info("Try to trash remote file with name="+file.getName());
         File newContent = new File().setTrashed(true);
         driveService.files().update( file.getId(), newContent ).execute();
-        this.deleteFromMap( file );
+        remoteToLocalFiles.remove( file );
         log.debug("Trash remote file with name="+file.getName()+" ok");
     }
 
@@ -266,31 +267,5 @@ public class DriveFileManager
             file.getModifiedTime(), file.getParents()
         );
         log.debug(l);
-    }
-
-    private void addToMap( File remoteFile, Path localFilePath ) {
-        this.remoteToLocalFiles.put( remoteFile, localFilePath );
-    }
-
-    private void deleteFromMap( File remoteFile ) {
-        this.remoteToLocalFiles.remove( remoteFile );
-    }
-
-    private File getRemoteFileFromLocalPath( Path localFilePath ) throws IOException {
-        File file = getRemoteFileFromLocalPathIfExists( localFilePath );
-        if( file == null )
-            throw new IOException(
-                    "Remote file for local path "+localFilePath+" not found");
-        return file;
-    }
-
-    private File getRemoteFileFromLocalPathIfExists( Path localFilePath ) {
-        Map.Entry<File, Path> mapEntry = this.remoteToLocalFiles.entrySet()
-            .stream()
-            .filter( entry -> entry.getValue() != null && entry.getValue().toAbsolutePath().equals(localFilePath) )
-            .findAny()
-            .orElse(null);
-
-        return mapEntry == null ? null : mapEntry.getKey();
     }
 }
