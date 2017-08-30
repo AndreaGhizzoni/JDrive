@@ -223,8 +223,9 @@ public class Testing_API {
 
     public static void logFile( File file ){
         String l = String.format(
-            ">>> %s %s %s",
-            file.getName(), file.getId(), file.getMimeType()
+            ">>> %s %s %s %s %s",
+            file.getParents(), file.getName(), file.getId(), file.getMimeType(),
+            file.getModifiedTime()
         );
         log.debug( l );
 //        log.info(">>> ");
