@@ -15,5 +15,6 @@ public class MIMEType
         put( SPREADSHEET, "application/pdf" );
         put( DRAWING, "image/png" );
         put( PRESENTATION, "application/pdf" );
+        put( "txt", "text/plain"); // TODO add more reverse conversion
     }};
 }
