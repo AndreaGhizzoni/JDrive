@@ -16,5 +16,6 @@ public class MIMEType
         put( DRAWING, "image/png" );
         put( PRESENTATION, "application/pdf" );
         put( "txt", "text/plain"); // TODO add more reverse conversion
+        put( "", "text/plain");
     }};
 }
