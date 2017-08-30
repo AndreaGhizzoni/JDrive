@@ -109,7 +109,7 @@ public class Testing_API {
     private static File getJDriveRemoteFolder() throws IOException {
         String qPattern = "mimeType = '%s' and not trashed and "+
                           "'root' in parents and name = 'JDrive'";
-        String q = String.format( qPattern, MIMEType.FOLDER );
+        String q = String.format( qPattern, MIMEType.GOOGLE_FOLDER);
 
         List<File> result = doQuery( q );
 
@@ -134,7 +134,7 @@ public class Testing_API {
             file -> {
                 folderContent.add( file );
                 try {
-                    if( file.getMimeType().equals(MIMEType.FOLDER) ){
+                    if( file.getMimeType().equals(MIMEType.GOOGLE_FOLDER) ){
                         folderContent.addAll( recursivelyListFrom(file.getId()) );
                     }
                 } catch (IOException e) {
@@ -163,7 +163,7 @@ public class Testing_API {
     }
 
     private static void downloadRemoteFile( File file ) throws IOException {
-        if( file.getMimeType().equals(MIMEType.FOLDER) ){
+        if( file.getMimeType().equals(MIMEType.GOOGLE_FOLDER) ){
             log.info( "Try to Download a folder > SKIP." );
             return;
         }
@@ -176,7 +176,7 @@ public class Testing_API {
         log.info("Try to download to: "+localFile.getAbsolutePath());
         OutputStream outputStream = new FileOutputStream(localFile);
 
-        String conversion = MIMEType.Conversion.getOrDefault(file.getMimeType(), "");
+        String conversion = MIMEType.convert( file.getMimeType()         );
         log.info(file.getMimeType() +" > converted to > "+ conversion);
 
         if( conversion.isEmpty() ){

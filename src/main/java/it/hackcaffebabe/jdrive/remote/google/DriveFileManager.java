@@ -71,7 +71,7 @@ public class DriveFileManager
         log.info("Try to create remote folder from "+folderPath);
         File fileMetadata = new File();
         fileMetadata.setName( folderPath.getFileName().toString() );
-        fileMetadata.setMimeType( MIMEType.FOLDER );
+        fileMetadata.setMimeType( MIMEType.GOOGLE_FOLDER);
         fileMetadata.setParents( Collections.singletonList(parentRemoteFile.getId()) );
         File remoteFolder = driveService.files()
                 .create( fileMetadata )
@@ -115,7 +115,7 @@ public class DriveFileManager
             .setName( localFile.getName() )
             .setParents( Collections.singletonList(remoteParentId) );
 
-        String mimeType = MIMEType.Conversion.get(
+        String mimeType = MIMEType.convert(
             PathsUtil.getFileExtension(localFile)
         );
 
@@ -158,7 +158,7 @@ public class DriveFileManager
                 .setFields("id,modifiedTime,name,parents,trashed,mimeType")
                 .execute();
         }else{
-            String mimeType = MIMEType.Conversion.get(
+            String mimeType = MIMEType.convert(
                 PathsUtil.getFileExtension(updatedFile)
             );
             mediaContent = new FileContent( mimeType, updatedFile );
@@ -209,7 +209,7 @@ public class DriveFileManager
     private File getJDriveRemoteFolder() throws IOException {
         String queryPattern = "mimeType = '%s' and not trashed and "+
                               "'root' in parents and name = 'JDrive'";
-        String query = String.format( queryPattern, MIMEType.FOLDER );
+        String query = String.format( queryPattern, MIMEType.GOOGLE_FOLDER);
 
         List<File> result = doQuery( query );
 
@@ -230,7 +230,7 @@ public class DriveFileManager
                 logFile( file );
                 folderContent.put( file, null );
                 try {
-                    if( file.getMimeType().equals(MIMEType.FOLDER) ){
+                    if( file.getMimeType().equals(MIMEType.GOOGLE_FOLDER) ){
                         folderContent.putAll( recursivelyListFrom(file.getId()) );
                     }
                 } catch (IOException e) {
