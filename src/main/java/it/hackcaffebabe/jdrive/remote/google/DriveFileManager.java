@@ -5,6 +5,7 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import it.hackcaffebabe.jdrive.Testing_API;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.remote.google.auth.GoogleAuthenticator;
@@ -220,6 +221,7 @@ public class DriveFileManager
         HashMap<File, Path> folderContent = new HashMap<>();
         doQuery( q ).forEach(
             file -> {
+                Testing_API.logFile( file );
                 folderContent.put( file, null );
                 try {
                     if( file.getMimeType().equals(MIMEType.FOLDER) ){
@@ -236,6 +238,7 @@ public class DriveFileManager
     private List<File> doQuery( String query ) throws IOException {
         Drive.Files.List request = driveService.files().list()
             .setQ( query )
+            .setFields("files(id, name, parents, mimeType, kind, size, modifiedTime)")
             .setSpaces("drive");
 
         List<File> result = new ArrayList<>();
