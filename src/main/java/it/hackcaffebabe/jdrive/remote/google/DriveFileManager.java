@@ -8,6 +8,7 @@ import com.google.api.services.drive.model.FileList;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.remote.google.auth.GoogleAuthenticator;
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -114,13 +115,14 @@ public class DriveFileManager
             .setName( localFile.getName() )
             .setParents( Collections.singletonList(remoteParentId) );
 
-        InputStreamContent inputStreamContent = new InputStreamContent(
-            null,
-            new FileInputStream( localFile )
+        String mimeType = MIMEType.Conversion.get(
+            PathsUtil.getFileExtension(localFile)
         );
+        FileContent fileContent = new FileContent( mimeType, localFile );
 
         File fileUploaded = driveService.files()
-            .create(fileMetadata, inputStreamContent)
+            .create(fileMetadata, fileContent)
+            .setFields("id,modifiedTime,name,parents,trashed,mimeType")
             .execute();
 
         this.addToMap( fileUploaded, localFilePath );
