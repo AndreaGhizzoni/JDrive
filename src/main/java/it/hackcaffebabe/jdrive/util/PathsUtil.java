@@ -51,4 +51,16 @@ public class PathsUtil
     public static boolean isDirectory( Path p ){
         return Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS);
     }
+
+    /**
+     * TODO add doc
+     * @param file
+     * @return
+     */
+    public static String getFileExtension(java.io.File file) {
+        String fileName = file.getName();
+        if(fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
+            return fileName.substring(fileName.lastIndexOf(".")+1);
+        else return "";
+    }
 }
