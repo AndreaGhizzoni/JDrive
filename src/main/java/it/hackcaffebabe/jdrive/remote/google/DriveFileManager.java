@@ -154,6 +154,7 @@ public class DriveFileManager
         FileContent mediaContent = new FileContent( remoteFile.getMimeType(), updatedFile );
         File updatedRemoteFile = driveService.files()
             .update( remoteFile.getId(), new File(), mediaContent )
+            .setFields("id,modifiedTime,name,parents,trashed,mimeType")
             .execute();
 
         log.debug("Update of remote file with id="+remoteFile.getId()+" ok.");
@@ -257,8 +258,8 @@ public class DriveFileManager
     public static void logFile( File file ) {
         String l = String.format(
             ">>> %s %s %s %s %s",
-            file.getParents(), file.getName(), file.getId(), file.getMimeType(),
-            file.getModifiedTime()
+            file.getName(), file.getId(), file.getMimeType(),
+            file.getModifiedTime(), file.getParents()
         );
         log.debug(l);
     }
