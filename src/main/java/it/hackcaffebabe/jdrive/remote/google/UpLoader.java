@@ -9,7 +9,6 @@ import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -44,7 +43,7 @@ public class UpLoader  implements Runnable
                             detectedEvent.getFile()
                         );
                         DriveFileManager.logFile(uploaded);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     }
                 } else if (detectedEvent instanceof Modify) {
@@ -55,7 +54,7 @@ public class UpLoader  implements Runnable
                             detectedEvent.getFile()
                         );
                         DriveFileManager.logFile(updatedRemoteFile);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     }
                 } else if (detectedEvent instanceof Delete) {
@@ -63,7 +62,7 @@ public class UpLoader  implements Runnable
 
                     try {
                         driveFileManager.deleteRemoteFileFrom( detectedEvent.getFile() );
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     }
                 } else if (detectedEvent instanceof Error) {
@@ -73,7 +72,7 @@ public class UpLoader  implements Runnable
             }
 
             log.info("Uploader closing.");
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             log.fatal(e.getMessage(), e);
         }
     }
