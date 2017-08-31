@@ -1,5 +1,9 @@
 package it.hackcaffebabe.jdrive.remote.google;
 
+import com.google.api.client.googleapis.media.MediaHttpDownloader;
+import com.google.api.client.googleapis.media.MediaHttpDownloaderProgressListener;
+import com.google.api.client.googleapis.media.MediaHttpUploader;
+import com.google.api.client.googleapis.media.MediaHttpUploaderProgressListener;
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
@@ -14,6 +18,8 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 
 /**
@@ -21,6 +27,8 @@ import java.util.*;
  * PROBLEMS:
  * - rename a folder with files in it: folder will be rename but is empty on JDrive
  * ==> possible bug: https://bugs.openjdk.java.net/browse/JDK-8162948
+ *
+ * Download and upload speed counter obtained form: https://goo.gl/wtKHvT
  */
 public class DriveFileManager
 {
@@ -76,9 +84,9 @@ public class DriveFileManager
         fileMetadata.setMimeType( MIMEType.GOOGLE_FOLDER);
         fileMetadata.setParents( Collections.singletonList(parentRemoteFile.getId()) );
         File remoteFolder = driveService.files()
-                .create( fileMetadata )
-                .setFields("id,modifiedTime,name,parents,trashed,mimeType")
-                .execute();
+            .create( fileMetadata )
+            .setFields("id,modifiedTime,name,parents,trashed,mimeType")
+            .execute();
         log.debug("Remote folder has been created with id="+remoteFolder.getId());
         remoteToLocalFiles.put( remoteFolder, folderPath );
         return remoteFolder;
@@ -121,10 +129,18 @@ public class DriveFileManager
             PathsUtil.getFileExtension(localFile)
         );
 
-        File fileUploaded = driveService.files()
-            .create(fileMetadata, new FileContent(mimeType, localFile) )
+        Drive.Files.Create create = driveService.files()
+            .create(fileMetadata, new FileContent(mimeType, localFile) );
+
+        create.getMediaHttpUploader()
+            .setDirectUploadEnabled( false )
+            .setChunkSize( MediaHttpUploader.MINIMUM_CHUNK_SIZE )
+            .setProgressListener( new FileUploadProgressListener() );
+
+        File fileUploaded = create
             .setFields("id,modifiedTime,name,parents,trashed,mimeType")
             .execute();
+
         remoteToLocalFiles.put( fileUploaded, localFilePath );
 
         log.debug("Upload of "+localFile.getAbsolutePath()+" ok.");
@@ -149,26 +165,28 @@ public class DriveFileManager
         // Maybe check if mime type of remoteFile to exclude them.
         log.info("Try to update remote copy of: "+updatedFile.getAbsolutePath());
 
-        File fileMetadata = new File();
-        fileMetadata.setName( updatedFile.getName() );
+        File fileMetadata = new File().setName( updatedFile.getName() );
 
-        FileContent mediaContent;
-        File updatedRemoteFile;
+        Drive.Files.Update update;
         if( updatedFile.isDirectory() ){
-            updatedRemoteFile = driveService.files()
-                .update( remoteFile.getId(), fileMetadata )
-                .setFields("id,modifiedTime,name,parents,trashed,mimeType")
-                .execute();
+            update = driveService.files().update( remoteFile.getId(), fileMetadata );
         }else{
             String mimeType = MIMEType.convert(
                 PathsUtil.getFileExtension(updatedFile)
             );
-            mediaContent = new FileContent( mimeType, updatedFile );
-            updatedRemoteFile = driveService.files()
-                .update( remoteFile.getId(), fileMetadata, mediaContent )
-                .setFields("id,modifiedTime,name,parents,trashed,mimeType")
-                .execute();
+            FileContent mediaContent = new FileContent( mimeType, updatedFile );
+            update = driveService.files()
+                    .update( remoteFile.getId(), fileMetadata, mediaContent );
         }
+
+        update.getMediaHttpUploader()
+            .setDirectUploadEnabled( false )
+            .setChunkSize( MediaHttpUploader.MINIMUM_CHUNK_SIZE )
+            .setProgressListener( new FileUploadProgressListener() );
+
+        File updatedRemoteFile = update
+            .setFields("id,modifiedTime,name,parents,trashed,mimeType")
+            .execute();
 
         log.debug("Update of remote file with id="+remoteFile.getId()+" ok.");
         return updatedRemoteFile;
@@ -268,5 +286,52 @@ public class DriveFileManager
             file.getModifiedTime(), file.getParents()
         );
         log.debug(l);
+    }
+
+    private class FileUploadProgressListener implements
+            MediaHttpUploaderProgressListener {
+        @Override
+        public void progressChanged(MediaHttpUploader mediaHttpUploader)
+                throws IOException {
+            if (mediaHttpUploader == null) return;
+            switch (mediaHttpUploader.getUploadState()) {
+                case INITIATION_STARTED:
+                    log.debug("init upload started");
+                    break;
+                case INITIATION_COMPLETE:
+                    log.debug("init upload complete");
+                    break;
+                case MEDIA_IN_PROGRESS:
+                    double percent = mediaHttpUploader.getProgress() * 100;
+                    NumberFormat formatter = new DecimalFormat("#00.00");
+                    log.debug("Upload: "+formatter.format(percent) +" %");
+                    break;
+                case MEDIA_COMPLETE:
+                    log.debug("Upload complete");
+                    break;
+            }
+        }
+    }
+
+    private class FileDownloadProgressListener implements
+            MediaHttpDownloaderProgressListener {
+        @Override
+        public void progressChanged(MediaHttpDownloader downloader) throws IOException {
+            if (downloader == null) return;
+            switch (downloader.getDownloadState()){
+                case NOT_STARTED:
+                    log.debug("Download not stared");
+                    break;
+                case MEDIA_IN_PROGRESS:
+                    double percent =  downloader.getProgress();
+                    NumberFormat formatter = new DecimalFormat("#00.00");
+                    log.debug("Download: "+formatter.format(percent)+" %");
+                    break;
+                case MEDIA_COMPLETE:
+                    log.debug("Download complete");
+                    break;
+            }
+
+        }
     }
 }
