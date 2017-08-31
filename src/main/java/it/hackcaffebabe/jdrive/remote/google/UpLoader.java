@@ -18,11 +18,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class UpLoader  implements Runnable
 {
     private static final Logger log = LogManager.getLogger();
-    private LinkedBlockingQueue<WatcherEvent> queueFromWatcher;
+    private LinkedBlockingQueue<WatcherEvent> eventsQueue;
     private DriveFileManager driveFileManager;
 
-    public UpLoader( LinkedBlockingQueue<WatcherEvent> queueFromWatcher ) throws Exception {
-        this.queueFromWatcher = queueFromWatcher;
+    public UpLoader( LinkedBlockingQueue<WatcherEvent> eventsQueue ) throws Exception {
+        this.eventsQueue = eventsQueue;
         this.driveFileManager = DriveFileManager.getInstance();
         log.info("Uploader ready to start.");
     }
@@ -35,7 +35,7 @@ public class UpLoader  implements Runnable
             boolean keepRunning = true;
             WatcherEvent detectedEvent;
             while( keepRunning ) {
-                detectedEvent = queueFromWatcher.take();
+                detectedEvent = eventsQueue.take();
                 if (detectedEvent instanceof Create) {
                     log.debug(((Create) detectedEvent).toString());
 
