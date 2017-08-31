@@ -9,7 +9,7 @@ import static it.hackcaffebabe.jdrive.util.PathsUtil.USER_HOME;
 public class Constants
 {
     /** JDrive application version */
-    public static final String VERSION = "0.0.5-dev";
+    public static final String VERSION = "0.1.0-dev";
 
     /** Path home application folder */
     public static final String APP_HOME = USER_HOME + SEP + ".jdrive";
