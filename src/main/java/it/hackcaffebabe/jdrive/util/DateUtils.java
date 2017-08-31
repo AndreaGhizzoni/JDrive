@@ -16,7 +16,7 @@ public final class DateUtils {
     public static String formatTimestamp( long timestamp ){
         if( timestamp <= 0L ) return "0000.00.00 'at' 00:00:00";
 
-        String default_format = "yyyy.MM.dd 'at' HH:mm:ss";
+        String default_format = "yyyy.MM.dd 'at' HH:mm:ss.SSSSSS";
         return new SimpleDateFormat(default_format).format( new Date(timestamp) );
     }
 }
