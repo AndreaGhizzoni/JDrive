@@ -56,6 +56,7 @@ public class DriveFileManager
         log.info("JDrive remote folder found.");
 
         remoteToLocalFiles.putAll( recursivelyListFrom( jdriveRemoteFolder.getId() ) );
+        remoteToLocalFiles.put( jdriveRemoteFolder, jdriveLocalBasePath );
         log.info("Mapping remote and local file complete.");
     }
 
@@ -94,10 +95,9 @@ public class DriveFileManager
         if ( localFilePath.toFile().isDirectory() )
             return createRemoteFolderFrom( localFilePath );
 
-        Path parent = localFilePath.getParent();
-        File remoteParentFile = remoteToLocalFiles.getIfExists( parent );
+        File remoteParentFile = remoteToLocalFiles.getIfExists( localFilePath.getParent() );
         if( remoteParentFile == null ) {
-            remoteParentFile = createRemoteFolderFrom(parent);
+            remoteParentFile = createRemoteFolderFrom( localFilePath.getParent() );
         }
 
         return uploadFile( localFilePath, remoteParentFile.getId() );
