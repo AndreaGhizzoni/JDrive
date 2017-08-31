@@ -38,7 +38,6 @@ public class DriveFileManager
     private Drive driveService;
     private RemoteToLocalFiles remoteToLocalFiles;
 
-    private File jdriveRemoteFolder;
     private Path jdriveLocalBasePath = Paths.get(
         (String)Configurator.getInstance().get( Keys.WATCHED_BASE_PATH )
     );
@@ -53,36 +52,32 @@ public class DriveFileManager
         driveService = GoogleAuthenticator.getInstance().getDriveService();
         remoteToLocalFiles = RemoteToLocalFiles.getInstance();
 
-        jdriveRemoteFolder = getJDriveRemoteFolder();
+        File jdriveRemoteFolder = getJDriveRemoteFolderOrCreate();
         log.info("JDrive remote folder found.");
 
         remoteToLocalFiles.putAll( recursivelyListFrom( jdriveRemoteFolder.getId() ) );
-        remoteToLocalFiles.put(jdriveRemoteFolder, jdriveLocalBasePath);
         log.info("Mapping remote and local file complete.");
     }
 
     private File createRemoteFolderFrom( Path localFolder ) throws IOException {
-        Path parent = localFolder.getParent();
-        log.debug("parent is "+parent);
+        if( localFolder.equals(jdriveLocalBasePath) ){
+            return createRemoteFolder( jdriveLocalBasePath, "root" );
+        }
 
-        if( parent.equals(jdriveLocalBasePath) ){
-            return createRemoteFolder( localFolder, jdriveRemoteFolder);
-        }else{
-            File remoteParentFile = remoteToLocalFiles.getIfExists( parent );
-            if( remoteParentFile != null ){
-                return createRemoteFolder( localFolder, remoteParentFile );
-            }else {
-                return createRemoteFolderFrom( parent );
-            }
+        File remoteParentFile = remoteToLocalFiles.getIfExists( localFolder.getParent() );
+        if( remoteParentFile != null ){
+            return createRemoteFolder( localFolder, remoteParentFile.getId() );
+        }else {
+            return createRemoteFolderFrom( localFolder.getParent() );
         }
     }
 
-    private File createRemoteFolder( Path folderPath, File parentRemoteFile ) throws IOException {
+    private File createRemoteFolder( Path folderPath, String parentRemoteFileId ) throws IOException {
         log.info("Try to create remote folder from "+folderPath);
         File fileMetadata = new File();
         fileMetadata.setName( folderPath.getFileName().toString() );
         fileMetadata.setMimeType( MIMEType.GOOGLE_FOLDER);
-        fileMetadata.setParents( Collections.singletonList(parentRemoteFile.getId()) );
+        fileMetadata.setParents( Collections.singletonList(parentRemoteFileId) );
         File remoteFolder = driveService.files()
             .create( fileMetadata )
             .setFields("id,modifiedTime,name,parents,trashed,mimeType")
@@ -226,15 +221,15 @@ public class DriveFileManager
     }
 
 
-    private File getJDriveRemoteFolder() throws IOException {
+    private File getJDriveRemoteFolderOrCreate() throws IOException {
         String queryPattern = "mimeType = '%s' and not trashed and "+
-                              "'root' in parents and name = 'JDrive'";
+                              "'root' in parents and name = 'Google Drive'";
         String query = String.format( queryPattern, MIMEType.GOOGLE_FOLDER);
 
         List<File> result = doQuery( query );
 
         if( result.isEmpty() ){
-            throw new IOException( "JDrive remote folder not found." );
+            return createRemoteFolderFrom( jdriveLocalBasePath );
         }else if( result.size() > 1 ){
             throw new IOException( "Multiple JDrive remote folder found." );
         }
