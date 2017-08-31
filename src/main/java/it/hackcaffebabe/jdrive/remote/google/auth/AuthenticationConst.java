@@ -16,7 +16,7 @@ final class AuthenticationConst
     /** Directory path as string where google credential will be stored. */
     static final String DATA_STORE_JSON = APP_HOME + SEP + "cred";
     /** Path as string of local credentials */
-    static final String LOCAL_CRED = SEP + "credentials.json";
+    static final String LOCAL_CRED = "/credentials.json";
 
     /** List of scopes API */
     static final List<String> SCOPES = Arrays.asList(
