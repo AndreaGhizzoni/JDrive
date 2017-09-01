@@ -55,14 +55,17 @@ public class Launcher
             System.exit(0);
         }
 
+        Long currentPID = Util.getProcessID();
+        Constants.CURRENT_PID = currentPID;
+        setPidToThreadContext();
+        Long lockerPID = -1L;
         try{
-            Constants.CURRENT_PID = new Locker("JDriveApplication").checkLock();
-            setPidToThreadContext();
+            lockerPID = new Locker("JDriveApplication").checkLock();
         }catch (IOException ioe){
             fatalAndQuit(ioe.getMessage(), ioe);
         }
 
-        boolean isAlreadyRunning = ( Constants.CURRENT_PID != Util.getProcessID() );
+        boolean isAlreadyRunning =  !currentPID.equals(lockerPID);
         if( isAlreadyRunning ){
             if( statusFlag ){
                 statusJDrive();
@@ -176,6 +179,7 @@ public class Launcher
 
     private static void stopJDrive(){
         try {
+            log.info("stop flag set: proceeding with JDrive closing procedure.");
             ActionClient.sendQuitRequest();
         } catch (IOException e) {
             log.error( e.getMessage(), e );
