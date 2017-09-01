@@ -9,8 +9,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
-import static it.hackcaffebabe.jdrive.action.Constants.SERVER_PORT;
-import static it.hackcaffebabe.jdrive.action.Constants.getLocalhost;
+import static it.hackcaffebabe.jdrive.action.Constants.*;
 
 /**
  * ActionServer manage simple actions based on line of text received from
@@ -27,6 +26,16 @@ public class ActionServer implements Runnable
         return "";
     };
 
+    public ActionServer() throws IOException {
+        log.debug("Try to create a action socket to port: " + SERVER_PORT);
+        this.serverSocket = new ServerSocket(
+            SERVER_PORT,
+            IGNORE_MAX_PENDING_CONNECTION,
+            getLocalhost()
+        );
+        log.debug("Server Socket created at port "+serverSocket.getLocalPort());
+    }
+
     /**
      * This method adds a new action indexed with string key.
      * @param withMessage {@link java.lang.String} of action
@@ -40,20 +49,16 @@ public class ActionServer implements Runnable
     @Override
     public void run() {
         log.info("Starting Action Server...");
-        try {
-            log.debug("Try to create a action socket to port: " + SERVER_PORT);
-            serverSocket = new ServerSocket( SERVER_PORT, 0, getLocalhost() );
-            log.debug("Server Socket created at port "+serverSocket.getLocalPort());
-
-            Socket clientSocket;
-            boolean keepRunning = true;
-            while( keepRunning ){
+        boolean keepRunning = true;
+        while( keepRunning ){
+            try {
                 log.info("Listening for clients...");
-                clientSocket = serverSocket.accept();
+                Socket clientSocket = serverSocket.accept();
+                clientSocket.setSoTimeout( INPUT_STREAM_READ_TIMEOUT_MS );
                 log.debug(
-                    "Client connected:" +
-                    " ip: " + clientSocket.getLocalAddress() +
-                    " port: " + clientSocket.getLocalPort()
+                    "Client connected: " +
+                    "ip: " + clientSocket.getLocalAddress() + " " +
+                    "port: " + clientSocket.getLocalPort()
                 );
 
                 BufferedReader inFromClient = new BufferedReader(
@@ -66,18 +71,17 @@ public class ActionServer implements Runnable
                 keepRunning = manageClientMessage( inFromClient, outToClient );
 
                 clientSocket.close();
+            } catch (Exception e) {
+                log.error( e.getMessage(), e );
             }
-        } catch (Exception e) {
-            log.error( e.getMessage() );
-        } finally {
-            this.stop();
         }
+        this.stop();
     }
 
     private boolean manageClientMessage( BufferedReader inFromClient,
                                          BufferedWriter outToClient )
             throws Exception {
-        log.info("Waiting for message from client...");
+        log.info("Waiting messages from client...");
 
         String msgFromClient;
         while( (msgFromClient = inFromClient.readLine()) != null ){
@@ -102,8 +106,8 @@ public class ActionServer implements Runnable
             if( this.serverSocket != null )
                 this.serverSocket.close();
             log.info("Action Server stopped correctly.");
-        } catch (IOException e) {
-            log.error( e.getMessage() );
+        } catch (Exception e) {
+            log.error( e.getMessage(), e );
         }
     }
 }
