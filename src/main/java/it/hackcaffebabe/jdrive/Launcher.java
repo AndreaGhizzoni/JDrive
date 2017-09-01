@@ -13,6 +13,7 @@ import it.hackcaffebabe.jdrive.remote.google.UpLoader;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,14 +55,14 @@ public class Launcher
             System.exit(0);
         }
 
-        long pid = -1;
         try{
-            pid = new Locker("JDriveApplication").checkLock();
+            Constants.CURRENT_PID = new Locker("JDriveApplication").checkLock();
+            setPidToThreadContext();
         }catch (IOException ioe){
             fatalAndQuit(ioe.getMessage(), ioe);
         }
 
-        boolean isAlreadyRunning = ( pid != Util.getProcessID() );
+        boolean isAlreadyRunning = ( Constants.CURRENT_PID != Util.getProcessID() );
         if( isAlreadyRunning ){
             if( statusFlag ){
                 statusJDrive();
@@ -82,6 +83,10 @@ public class Launcher
 //==============================================================================
 //  UTILITY METHODS
 //==============================================================================
+    public static void setPidToThreadContext() {
+        ThreadContext.put("pid", String.valueOf(Constants.CURRENT_PID));
+    }
+
     // more options @ https://goo.gl/4zOb8V
     private static void populateOptionsAndCLIParser( String... args ){
          try{
@@ -173,7 +178,7 @@ public class Launcher
         try {
             ActionClient.sendQuitRequest();
         } catch (IOException e) {
-            log.error( e.getMessage() );
+            log.error( e.getMessage(), e );
         }
     }
 
@@ -182,7 +187,7 @@ public class Launcher
             String currentStatus = ActionClient.sendStatusRequest();
             System.out.println( currentStatus );
         } catch (IOException e) {
-            log.error( e.getMessage() );
+            log.error( e.getMessage(), e);
         }
     }
 
