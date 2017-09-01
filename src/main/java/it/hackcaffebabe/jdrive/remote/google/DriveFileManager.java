@@ -172,12 +172,12 @@ public class DriveFileManager
             FileContent mediaContent = new FileContent( mimeType, updatedFile );
             update = driveService.files()
                     .update( remoteFile.getId(), fileMetadata, mediaContent );
-        }
 
-        update.getMediaHttpUploader()
-            .setDirectUploadEnabled( false )
-            .setChunkSize( MediaHttpUploader.MINIMUM_CHUNK_SIZE )
-            .setProgressListener( new FileUploadProgressListener() );
+            update.getMediaHttpUploader()
+                .setDirectUploadEnabled( false )
+                .setChunkSize( MediaHttpUploader.MINIMUM_CHUNK_SIZE )
+                .setProgressListener( new FileUploadProgressListener() );
+        }
 
         File updatedRemoteFile = update
             .setFields("id,modifiedTime,name,parents,trashed,mimeType")
