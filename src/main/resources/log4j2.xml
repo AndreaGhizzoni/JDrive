@@ -11,8 +11,9 @@
 <Configuration strict="true">
     <!-- List of properties -->
     <Properties>
-        <Property name="logFileName">jdrive.log</Property>
-        <Property name="logFilePath">log/${logFileName}</Property>
+        <Property name="logFileName">jdrive_${sys:date}.log</Property>
+        <Property name="logFolder">log</Property>
+        <Property name="logFilePath">${logFolder}/${logFileName}</Property>
         <Property name="pattern">
             %date{yyyy-MM-dd HH:mm:ss} | %-5level | %5X{pid} | %thread | %class{1} - %message%n
         </Property>

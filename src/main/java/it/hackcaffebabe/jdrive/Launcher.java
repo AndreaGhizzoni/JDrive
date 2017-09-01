@@ -10,15 +10,19 @@ import it.hackcaffebabe.jdrive.fs.watcher.events.*;
 import it.hackcaffebabe.jdrive.action.ActionServer;
 import it.hackcaffebabe.jdrive.action.Message;
 import it.hackcaffebabe.jdrive.remote.google.UpLoader;
+import it.hackcaffebabe.jdrive.util.DateUtils;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -26,12 +30,13 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class Launcher
 {
-    private static Logger log = LogManager.getLogger();
+    private static Logger log;
 
     private static CommandLine CLI_PARSER;
     private static Options FLAGS = new Options();
 
     public static void main( String... args ){
+        setLog4jVariablesAndInitialize();
         populateOptionsAndCLIParser(args);
 
         boolean startFlag = CLI_PARSER.hasOption("start");
@@ -86,6 +91,14 @@ public class Launcher
 //==============================================================================
 //  UTILITY METHODS
 //==============================================================================
+    private static void setLog4jVariablesAndInitialize(){
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        System.setProperty("date", date);
+
+        ((LoggerContext)LogManager.getContext(false)).reconfigure();
+        log = LogManager.getLogger();
+    }
+
     public static void setPidToThreadContext() {
         ThreadContext.put("pid", String.valueOf(Constants.CURRENT_PID));
     }
