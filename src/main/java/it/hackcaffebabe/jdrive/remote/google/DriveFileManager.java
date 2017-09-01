@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.*;
 
 /**
@@ -130,7 +129,7 @@ public class DriveFileManager
         create.getMediaHttpUploader()
             .setDirectUploadEnabled( false )
             .setChunkSize( MediaHttpUploader.MINIMUM_CHUNK_SIZE )
-            .setProgressListener( new FileUploadProgressListener() );
+            .setProgressListener( new FileProgressListener() );
 
         File fileUploaded = create
             .setFields("id,modifiedTime,name,parents,trashed,mimeType")
@@ -176,7 +175,7 @@ public class DriveFileManager
             update.getMediaHttpUploader()
                 .setDirectUploadEnabled( false )
                 .setChunkSize( MediaHttpUploader.MINIMUM_CHUNK_SIZE )
-                .setProgressListener( new FileUploadProgressListener() );
+                .setProgressListener( new FileProgressListener() );
         }
 
         File updatedRemoteFile = update
@@ -283,50 +282,62 @@ public class DriveFileManager
         log.debug(l);
     }
 
-    private class FileUploadProgressListener implements
-            MediaHttpUploaderProgressListener {
+    private class FileProgressListener
+            implements MediaHttpUploaderProgressListener,
+                       MediaHttpDownloaderProgressListener {
         @Override
-        public void progressChanged(MediaHttpUploader mediaHttpUploader)
+        public void progressChanged(MediaHttpUploader uploader)
                 throws IOException {
-            if (mediaHttpUploader == null) return;
-            switch (mediaHttpUploader.getUploadState()) {
+
+            if (uploader == null) return;
+            switch (uploader.getUploadState()) {
                 case INITIATION_STARTED:
-                    log.debug("init upload started");
+                    log.debug("Upload initialization started");
                     break;
                 case INITIATION_COMPLETE:
-                    log.debug("init upload complete");
+                    log.debug("Upload initialization complete");
                     break;
                 case MEDIA_IN_PROGRESS:
-                    double percent = mediaHttpUploader.getProgress() * 100;
-                    NumberFormat formatter = new DecimalFormat("#00.00");
-                    log.debug("Upload: "+formatter.format(percent) +" %");
+                    log.debug("Upload: "+formatProgress(uploader));
                     break;
                 case MEDIA_COMPLETE:
                     log.debug("Upload complete");
                     break;
             }
         }
-    }
 
-    private class FileDownloadProgressListener implements
-            MediaHttpDownloaderProgressListener {
         @Override
-        public void progressChanged(MediaHttpDownloader downloader) throws IOException {
+        public void progressChanged(MediaHttpDownloader downloader)
+                throws IOException {
+
             if (downloader == null) return;
             switch (downloader.getDownloadState()){
                 case NOT_STARTED:
                     log.debug("Download not stared");
                     break;
                 case MEDIA_IN_PROGRESS:
-                    double percent =  downloader.getProgress();
-                    NumberFormat formatter = new DecimalFormat("#00.00");
-                    log.debug("Download: "+formatter.format(percent)+" %");
+                    log.debug("Download: "+formatProgress(downloader));
                     break;
                 case MEDIA_COMPLETE:
                     log.debug("Download complete");
                     break;
             }
+        }
 
+        private String formatProgress( MediaHttpDownloader downloader ) throws IOException {
+            return  String.valueOf(downloader.getNumBytesDownloaded()) +
+                    " bytes | ~" +
+                    formatPercentage(downloader.getProgress());
+        }
+
+        private String formatProgress( MediaHttpUploader uploader ) throws IOException {
+            return  String.valueOf(uploader.getNumBytesUploaded()) +
+                    " bytes | ~" +
+                    formatPercentage(uploader.getProgress());
+        }
+
+        private String formatPercentage( double percentage ){
+            return new DecimalFormat("#00.00").format( percentage*100 ) +" %";
         }
     }
 }
