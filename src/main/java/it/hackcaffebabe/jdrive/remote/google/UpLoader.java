@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.remote.google;
 
+import static it.hackcaffebabe.jdrive.Launcher.setPidToThreadContext;
 import com.google.api.services.drive.model.File;
 import it.hackcaffebabe.jdrive.fs.watcher.events.Create;
 import it.hackcaffebabe.jdrive.fs.watcher.events.Delete;
@@ -28,6 +29,7 @@ public class UpLoader  implements Runnable
 
     @Override
     public void run() {
+        setPidToThreadContext();
         log.info("Uploaded started.");
 
         try {

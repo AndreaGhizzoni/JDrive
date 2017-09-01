@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.fs.watcher;
 
+import static it.hackcaffebabe.jdrive.Launcher.setPidToThreadContext;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.fs.watcher.events.Error;
@@ -108,6 +109,8 @@ public final class Watcher implements Runnable
 //==============================================================================
     @Override
     public void run() {
+        setPidToThreadContext();
+
         try {
             if( this.dispatchingQueue == null )
                 throw new InterruptedException("Dispatch Queue missing.");

@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.action;
 
+import static it.hackcaffebabe.jdrive.Launcher.setPidToThreadContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,7 +49,9 @@ public class ActionServer implements Runnable
 
     @Override
     public void run() {
+        setPidToThreadContext();
         log.info("Starting Action Server...");
+
         boolean keepRunning = true;
         while( keepRunning ){
             try {
