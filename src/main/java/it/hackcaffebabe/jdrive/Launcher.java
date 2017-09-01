@@ -92,7 +92,10 @@ public class Launcher
 //  UTILITY METHODS
 //==============================================================================
     private static void setLog4jVariablesAndInitialize(){
-        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String date = DateUtils.formatTimestamp(
+            System.currentTimeMillis(),
+            "yyyy-MM-dd"
+        );
         System.setProperty("date", date);
 
         ((LoggerContext)LogManager.getContext(false)).reconfigure();
