@@ -3,7 +3,7 @@ package it.hackcaffebabe.jdrive.remote.google;
 import java.util.HashMap;
 
 /**
- * TODO ADD DOC
+ * This class provide a standard way to map remote and local files.
  */
 public class MIMEType
 {
@@ -68,6 +68,12 @@ public class MIMEType
         put( "folder", GOOGLE_FOLDER);
     }};
 
+    /**
+     * This method convert a remote or local mime type into a remote or local
+     * mime type.
+     * @param mimeType {@link java.lang.String} mime type to convert.
+     * @return {@link java.lang.String} the converted mime type.
+     */
     public static String convert( String mimeType ) {
         mimeType = mimeType.toLowerCase();
         return conversion.getOrDefault( mimeType, GOOGLE_OCTET_STREAM );
