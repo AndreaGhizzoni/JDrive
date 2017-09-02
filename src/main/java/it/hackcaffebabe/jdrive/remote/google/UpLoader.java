@@ -13,14 +13,22 @@ import org.apache.logging.log4j.Logger;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * TODO add doc
+ * UpLoader is a runnable components that is responsible to take
+ * {@link it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent} and execute it
+ * remotely.
  */
-public class UpLoader  implements Runnable
+public class UpLoader implements Runnable
 {
     private static final Logger log = LogManager.getLogger();
     private LinkedBlockingQueue<WatcherEvent> eventsQueue;
     private DriveFileManager driveFileManager;
 
+    /**
+     * Instance a new UpLoader with a queue to take the events.
+     * @param eventsQueue {@link java.util.concurrent.LinkedBlockingQueue} queue
+     *        to take events from.
+     * @throws Exception if something went wrong.
+     */
     public UpLoader( LinkedBlockingQueue<WatcherEvent> eventsQueue ) throws Exception {
         this.eventsQueue = eventsQueue;
         this.driveFileManager = DriveFileManager.getInstance();
