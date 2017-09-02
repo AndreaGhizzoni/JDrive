@@ -54,9 +54,11 @@ public class PathsUtil
     }
 
     /**
-     * TODO add doc
-     * @param file
-     * @return
+     * This method return the file extension. If file is a directory returns
+     * empty string.
+     * @param file {@link java.io.File} to get extension
+     * @return {@link java.lang.String} the file extension or empty string if
+     *                                  file is a directory
      */
     public static String getFileExtension( File file ) {
         String fileName = file.getName();
