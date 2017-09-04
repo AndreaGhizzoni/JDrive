@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * TODO add doc
@@ -17,7 +18,7 @@ public class RemoteToLocalFiles
     private static final Logger log = LogManager.getLogger();
     private static RemoteToLocalFiles instance;
 
-    private HashMap<File, AccessiblePath> remoteToLocalFiles = new HashMap<>();
+    private static final ConcurrentHashMap<File, AccessiblePath> remoteToLocalFiles = new ConcurrentHashMap<>();
 
     public static RemoteToLocalFiles getInstance(){
         if( instance == null ){
@@ -72,7 +73,7 @@ public class RemoteToLocalFiles
     private synchronized Map.Entry<File, AccessiblePath> lookupOf( Path localFilePath ) {
         return remoteToLocalFiles.entrySet()
             .stream()
-            .filter( entry -> entry.getValue() != null && entry.getValue().getPath().toAbsolutePath().equals(localFilePath) )
+            .filter( entry -> entry.getValue().getPath() != null && entry.getValue().getPath().equals(localFilePath) )
             .findAny()
             .orElse(null);
     }
