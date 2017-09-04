@@ -17,7 +17,7 @@ public class RemoteToLocalFiles
     private static final Logger log = LogManager.getLogger();
     private static RemoteToLocalFiles instance;
 
-    private HashMap<File, Path> remoteToLocalFiles = new HashMap<>();
+    private HashMap<File, AccessiblePath> remoteToLocalFiles = new HashMap<>();
 
     public static RemoteToLocalFiles getInstance(){
         if( instance == null ){
@@ -28,20 +28,30 @@ public class RemoteToLocalFiles
 
     private RemoteToLocalFiles(){}
 
+    public synchronized boolean isAccessible( Path localFilePath ){
+        Map.Entry<File, AccessiblePath> entry = lookupOf( localFilePath );
+        return entry != null && entry.getValue().isAccessible();
+    }
+
     public synchronized void put( File remoteFile, Path localFilePath ) {
-        remoteToLocalFiles.put( remoteFile, localFilePath );
-        log.debug("Added to map: [ "+remoteFile.getName()+", "
-                +localFilePath+" ]");
+        put( remoteFile, localFilePath, true );
     }
 
     public synchronized void putAll( HashMap<File, Path> map ){
-        map.forEach( this::put );
+        for( Map.Entry<File, Path> entry: map.entrySet() ){
+            put( entry.getKey(), entry.getValue(), true );
+        }
+    }
+
+    public synchronized void put( File remoteFile, Path localFilePath, boolean accessible ){
+        AccessiblePath accessiblePath = new AccessiblePath( localFilePath, accessible );
+        remoteToLocalFiles.put( remoteFile, accessiblePath );
+        log.debug("Added to map: [ "+remoteFile.getName()+", "+accessiblePath+" ]");
     }
 
     public synchronized void remove( File remoteFile ) {
-        Path removedPath = remoteToLocalFiles.remove( remoteFile );
-        log.debug("Removed from map: [ "+remoteFile.getName()+", "
-                +removedPath+" ]");
+        AccessiblePath removedPath = remoteToLocalFiles.remove( remoteFile );
+        log.debug("Removed from map: [ "+remoteFile.getName()+", " +removedPath+" ]");
     }
 
     public synchronized File get( Path localFilePath ) throws IOException {
@@ -55,13 +65,41 @@ public class RemoteToLocalFiles
     }
 
     public synchronized File getIfExists( Path localFilePath ) {
-        Map.Entry<File, Path> mapEntry = remoteToLocalFiles.entrySet()
-            .stream()
-            .filter( entry -> entry.getValue() != null && entry.getValue().toAbsolutePath().equals(localFilePath) )
-            .findAny()
-            .orElse(null);
-
+        Map.Entry<File, AccessiblePath> mapEntry = lookupOf( localFilePath );
         return mapEntry == null ? null : mapEntry.getKey();
     }
 
+    private synchronized Map.Entry<File, AccessiblePath> lookupOf( Path localFilePath ) {
+        return remoteToLocalFiles.entrySet()
+            .stream()
+            .filter( entry -> entry.getValue() != null && entry.getValue().getPath().toAbsolutePath().equals(localFilePath) )
+            .findAny()
+            .orElse(null);
+    }
+
+//==============================================================================
+//  INNER CLASS
+//==============================================================================
+    public class AccessiblePath {
+        private Path path;
+        private boolean accessible;
+
+        public AccessiblePath(Path path, boolean accessible ){
+            this.path = path;
+            this.accessible = accessible;
+        }
+
+        public Path getPath() { return this.path;  }
+
+        public boolean isAccessible() { return this.accessible; }
+
+        public String toString() {
+            String format = "{path: %s, accessible: %s}";
+            return String.format(
+                format,
+                this.path,
+                String.valueOf(this.accessible)
+            );
+        }
+    }
 }
