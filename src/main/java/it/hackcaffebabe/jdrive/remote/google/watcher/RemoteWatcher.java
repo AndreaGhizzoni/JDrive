@@ -44,11 +44,10 @@ public class RemoteWatcher implements Runnable
         remoteToLocalFiles = RemoteToLocalFiles.getInstance();
         driveFileManager = DriveFileManager.getInstance();
 
-        Path jdriveLocalBasePath = Paths.get(
+        Path jdriveLocalPath = Paths.get(
             (String) Configurator.getInstance().get( Keys.WATCHED_BASE_PATH )
         );
-        File jdriveRemoteFolder = getJDriveRemoteFolderOrCreate( jdriveLocalBasePath );
-        remoteToLocalFiles.put( jdriveRemoteFolder, jdriveLocalBasePath );
+        File jdriveRemoteFolder = getJDriveRemoteFolderOrCreate( jdriveLocalPath );
         log.info("JDrive remote folder found.");
 
         remoteToLocalFiles.putAll( recursivelyGetFrom( jdriveRemoteFolder.getId() ) );
@@ -72,14 +71,17 @@ public class RemoteWatcher implements Runnable
         String queryPattern = "mimeType = '%s' and not trashed and "+
                               "'root' in parents and name = 'Google Drive'";
         String query = String.format( queryPattern, MIMEType.GOOGLE_FOLDER );
-
         List<File> result = doQuery( query );
-        if( result.isEmpty() ){
-            return driveFileManager.createRemoteFolderFrom( jdriveLocalBasePath );
-        }else if( result.size() > 1 ){
-            throw new IOException( "Multiple JDrive remote folder found." );
-        }
 
+        if( result.size() > 1 )
+            throw new IOException( "Multiple JDrive remote folder found." );
+
+        if( result.isEmpty() ){
+            result.add( driveFileManager.createRemoteFolderFrom(
+                jdriveLocalBasePath
+            ));
+        }
+        remoteToLocalFiles.put( result.get(0), jdriveLocalBasePath );
         return result.get(0);
     }
 
