@@ -107,7 +107,7 @@ public class RemoteWatcher implements Runnable
     private List<File> doQuery( String query ) throws IOException {
         Drive.Files.List request = driveService.files().list()
             .setQ( query )
-            .setFields("files(id, name, parents, mimeType, kind, size, modifiedTime)")
+            .setFields("files(id,name,parents,mimeType,kind,size,modifiedTime,trashed)")
             .setSpaces("drive");
 
         List<File> result = new ArrayList<>();

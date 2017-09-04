@@ -70,7 +70,7 @@ public class DriveFileManager
         fileMetadata.setParents( Collections.singletonList(parentRemoteFileId) );
         File remoteFolder = driveService.files()
             .create( fileMetadata )
-            .setFields("id,modifiedTime,name,parents,trashed,mimeType")
+            .setFields("id,modifiedTime,name,parents,trashed,mimeType,size,kind")
             .execute();
         log.debug("Remote folder has been created with id="+remoteFolder.getId());
         remoteToLocalFiles.put( remoteFolder, folderPath );
