@@ -26,12 +26,20 @@ import java.util.List;
 public class RemoteWatcher implements Runnable
 {
     private static final Logger log = LogManager.getLogger();
+    private static RemoteWatcher instance;
 
     private Drive driveService;
     private RemoteToLocalFiles remoteToLocalFiles;
     private DriveFileManager driveFileManager;
 
-    public RemoteWatcher() throws GeneralSecurityException, IOException {
+    public static RemoteWatcher getInstance() throws GeneralSecurityException,
+                                                     IOException {
+        if( instance == null )
+            instance = new RemoteWatcher();
+        return instance;
+    }
+
+    private RemoteWatcher() throws GeneralSecurityException, IOException {
         driveService = GoogleAuthenticator.getInstance().getDriveService();
         remoteToLocalFiles = RemoteToLocalFiles.getInstance();
         driveFileManager = DriveFileManager.getInstance();

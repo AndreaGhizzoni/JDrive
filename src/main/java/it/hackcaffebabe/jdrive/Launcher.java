@@ -132,7 +132,7 @@ public class Launcher
         Status.WATCHER = "JDrive logged in.";
 
         try{
-            final RemoteWatcher remoteWatcher = new RemoteWatcher();
+            final RemoteWatcher remoteWatcher = RemoteWatcher.getInstance();
 
             final Watcher watcher = Watcher.getInstance();
             LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
