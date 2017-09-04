@@ -18,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -41,13 +42,13 @@ public class DriveFileManager
         (String)Configurator.getInstance().get( Keys.WATCHED_BASE_PATH )
     );
 
-    public static DriveFileManager getInstance() throws Exception {
+    public static DriveFileManager getInstance() throws GeneralSecurityException, IOException {
         if( instance == null )
             instance = new DriveFileManager();
         return instance;
     }
 
-    private DriveFileManager() throws Exception {
+    private DriveFileManager() throws GeneralSecurityException, IOException {
         driveService = GoogleAuthenticator.getInstance().getDriveService();
         remoteToLocalFiles = RemoteToLocalFiles.getInstance();
 
