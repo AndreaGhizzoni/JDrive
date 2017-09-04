@@ -219,7 +219,6 @@ public class DriveFileManager
         log.debug("Trash remote file with name="+file.getName()+" ok");
     }
 
-
     private File getJDriveRemoteFolderOrCreate() throws IOException {
         String queryPattern = "mimeType = '%s' and not trashed and "+
                               "'root' in parents and name = 'Google Drive'";
@@ -298,7 +297,12 @@ public class DriveFileManager
                     log.debug("Upload initialization complete");
                     break;
                 case MEDIA_IN_PROGRESS:
-                    log.debug("Upload: "+formatProgress(uploader));
+                    log.debug("Upload: "+
+                        formatProgress(
+                            uploader.getNumBytesUploaded(),
+                            uploader.getProgress()
+                        )
+                    );
                     break;
                 case MEDIA_COMPLETE:
                     log.debug("Upload complete");
@@ -316,7 +320,12 @@ public class DriveFileManager
                     log.debug("Download not stared");
                     break;
                 case MEDIA_IN_PROGRESS:
-                    log.debug("Download: "+formatProgress(downloader));
+                    log.debug("Download: "+
+                        formatProgress(
+                            downloader.getNumBytesDownloaded(),
+                            downloader.getProgress()
+                        )
+                    );
                     break;
                 case MEDIA_COMPLETE:
                     log.debug("Download complete");
@@ -324,16 +333,9 @@ public class DriveFileManager
             }
         }
 
-        private String formatProgress( MediaHttpDownloader downloader ) throws IOException {
-            return  String.valueOf(downloader.getNumBytesDownloaded()) +
-                    " bytes | ~" +
-                    formatPercentage(downloader.getProgress());
-        }
-
-        private String formatProgress( MediaHttpUploader uploader ) throws IOException {
-            return  String.valueOf(uploader.getNumBytesUploaded()) +
-                    " bytes | ~" +
-                    formatPercentage(uploader.getProgress());
+        private String formatProgress( long bytes, double progress ){
+            return  String.valueOf( bytes ) + " bytes | ~" +
+                    formatPercentage( progress );
         }
 
         private String formatPercentage( double percentage ){
