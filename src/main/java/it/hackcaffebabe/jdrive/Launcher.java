@@ -10,6 +10,7 @@ import it.hackcaffebabe.jdrive.fs.watcher.events.*;
 import it.hackcaffebabe.jdrive.action.ActionServer;
 import it.hackcaffebabe.jdrive.action.Message;
 import it.hackcaffebabe.jdrive.remote.google.UpLoader;
+import it.hackcaffebabe.jdrive.remote.google.watcher.RemoteWatcher;
 import it.hackcaffebabe.jdrive.util.DateUtils;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
@@ -131,6 +132,8 @@ public class Launcher
         Status.WATCHER = "JDrive logged in.";
 
         try{
+            final RemoteWatcher remoteWatcher = new RemoteWatcher();
+
             final Watcher watcher = Watcher.getInstance();
             LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
             watcher.setDispatchingQueue(lbq);
