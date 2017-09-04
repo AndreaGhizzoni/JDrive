@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This data structure holds a map which use remote files as keys and local file
@@ -18,7 +19,7 @@ public class RemoteToLocalFiles
     private static final Logger log = LogManager.getLogger();
     private static RemoteToLocalFiles instance;
 
-    private HashMap<File, Path> remoteToLocalFiles = new HashMap<>();
+    private static final ConcurrentHashMap<File, AccessiblePath> remoteToLocalFiles = new ConcurrentHashMap<>();
 
     /**
      * @return {@link it.hackcaffebabe.jdrive.remote.google.RemoteToLocalFiles}
@@ -33,15 +34,13 @@ public class RemoteToLocalFiles
 
     private RemoteToLocalFiles(){}
 
-    /**
-     * This method put a new remote-local file tuple into the map.
-     * @param remoteFile {@link File} a remote file.
-     * @param localFilePath {@link Path} a local file path.
-     */
+    public synchronized boolean isAccessible( Path localFilePath ){
+        Map.Entry<File, AccessiblePath> entry = lookupOf( localFilePath );
+        return entry != null && entry.getValue().isAccessible();
+    }
+
     public synchronized void put( File remoteFile, Path localFilePath ) {
-        remoteToLocalFiles.put( remoteFile, localFilePath );
-        log.debug("Added to map: [ "+remoteFile.getName()+", "
-                +localFilePath+" ]");
+        put( remoteFile, localFilePath, true );
     }
 
     /**
@@ -49,7 +48,15 @@ public class RemoteToLocalFiles
      * @param map {@link java.util.Map} of remote-local files.
      */
     public synchronized void putAll( HashMap<File, Path> map ){
-        map.forEach( this::put );
+        for( Map.Entry<File, Path> entry: map.entrySet() ){
+            put( entry.getKey(), entry.getValue(), true );
+        }
+    }
+
+    public synchronized void put( File remoteFile, Path localFilePath, boolean accessible ){
+        AccessiblePath accessiblePath = new AccessiblePath( localFilePath, accessible );
+        remoteToLocalFiles.put( remoteFile, accessiblePath );
+        log.debug("Added to map: [ "+remoteFile.getName()+", "+accessiblePath+" ]");
     }
 
     /**
@@ -57,9 +64,8 @@ public class RemoteToLocalFiles
      * @param remoteFile {@link File} the key to the map to remove.
      */
     public synchronized void remove( File remoteFile ) {
-        Path removedPath = remoteToLocalFiles.remove( remoteFile );
-        log.debug("Removed from map: [ "+remoteFile.getName()+", "
-                +removedPath+" ]");
+        AccessiblePath removedPath = remoteToLocalFiles.remove( remoteFile );
+        log.debug("Removed from map: [ "+remoteFile.getName()+", " +removedPath+" ]");
     }
 
     /**
@@ -91,12 +97,41 @@ public class RemoteToLocalFiles
      * @return {@link File} the remote file.
      */
     public synchronized File getIfExists( Path localFilePath ) {
-        Map.Entry<File, Path> mapEntry = remoteToLocalFiles.entrySet()
+        Map.Entry<File, AccessiblePath> mapEntry = lookupOf( localFilePath );
+        return mapEntry == null ? null : mapEntry.getKey();
+    }
+
+    private synchronized Map.Entry<File, AccessiblePath> lookupOf( Path localFilePath ) {
+        return remoteToLocalFiles.entrySet()
             .stream()
-            .filter( entry -> entry.getValue() != null && entry.getValue().toAbsolutePath().equals(localFilePath) )
+            .filter( entry -> entry.getValue().getPath() != null && entry.getValue().getPath().equals(localFilePath) )
             .findAny()
             .orElse(null);
+    }
 
-        return mapEntry == null ? null : mapEntry.getKey();
+//==============================================================================
+//  INNER CLASS
+//==============================================================================
+    public class AccessiblePath {
+        private Path path;
+        private boolean accessible;
+
+        public AccessiblePath(Path path, boolean accessible ){
+            this.path = path;
+            this.accessible = accessible;
+        }
+
+        public Path getPath() { return this.path;  }
+
+        public boolean isAccessible() { return this.accessible; }
+
+        public String toString() {
+            String format = "{path: %s, accessible: %s}";
+            return String.format(
+                format,
+                this.path,
+                String.valueOf(this.accessible)
+            );
+        }
     }
 }
