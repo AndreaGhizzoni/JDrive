@@ -39,18 +39,16 @@ public class RemoteToLocalFiles
         return entry != null && entry.getValue().isAccessible();
     }
 
-    public synchronized void put( File remoteFile, Path localFilePath ) {
-        put( remoteFile, localFilePath, true );
-    }
-
     /**
      * This method calls put function on each element of given map.
      * @param map {@link java.util.Map} of remote-local files.
      */
     public synchronized void putAll( HashMap<File, Path> map ){
-        for( Map.Entry<File, Path> entry: map.entrySet() ){
-            put( entry.getKey(), entry.getValue(), true );
-        }
+        map.forEach( this::put );
+    }
+
+    public synchronized void put( File remoteFile, Path localFilePath ) {
+        put( remoteFile, localFilePath, true );
     }
 
     public synchronized void put( File remoteFile, Path localFilePath, boolean accessible ){
