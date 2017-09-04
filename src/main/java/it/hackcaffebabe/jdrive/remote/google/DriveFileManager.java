@@ -11,6 +11,7 @@ import com.google.api.services.drive.model.FileList;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.remote.google.auth.GoogleAuthenticator;
+import it.hackcaffebabe.jdrive.remote.google.watcher.RemoteWatcher;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,15 +53,9 @@ public class DriveFileManager
         driveService = GoogleAuthenticator.getInstance().getDriveService();
         remoteToLocalFiles = RemoteToLocalFiles.getInstance();
 
-        File jdriveRemoteFolder = getJDriveRemoteFolderOrCreate();
-        log.info("JDrive remote folder found.");
-
-        remoteToLocalFiles.putAll( recursivelyListFrom( jdriveRemoteFolder.getId() ) );
-        remoteToLocalFiles.put( jdriveRemoteFolder, jdriveLocalBasePath );
-        log.info("Mapping remote and local file complete.");
     }
 
-    private File createRemoteFolderFrom( Path localFolder ) throws IOException {
+    public File createRemoteFolderFrom( Path localFolder ) throws IOException {
         if( localFolder.equals(jdriveLocalBasePath) ){
             return createRemoteFolder( jdriveLocalBasePath, "root" );
         }
@@ -218,59 +213,6 @@ public class DriveFileManager
         driveService.files().update( file.getId(), newContent ).execute();
         remoteToLocalFiles.remove( file );
         log.debug("Trash remote file with name="+file.getName()+" ok");
-    }
-
-    private File getJDriveRemoteFolderOrCreate() throws IOException {
-        String queryPattern = "mimeType = '%s' and not trashed and "+
-                              "'root' in parents and name = 'Google Drive'";
-        String query = String.format( queryPattern, MIMEType.GOOGLE_FOLDER);
-
-        List<File> result = doQuery( query );
-
-        if( result.isEmpty() ){
-            return createRemoteFolderFrom( jdriveLocalBasePath );
-        }else if( result.size() > 1 ){
-            throw new IOException( "Multiple JDrive remote folder found." );
-        }
-
-        return result.get(0);
-    }
-
-    private HashMap<File, Path> recursivelyListFrom( String remoteParentsId ) throws IOException {
-        String q = String.format("not trashed and '%s' in parents", remoteParentsId );
-        HashMap<File, Path> folderContent = new HashMap<>();
-        doQuery( q ).forEach(
-            file -> {
-                logFile( file );
-                folderContent.put( file, null );
-                try {
-                    if( file.getMimeType().equals(MIMEType.GOOGLE_FOLDER) ){
-                        folderContent.putAll( recursivelyListFrom(file.getId()) );
-                    }
-                } catch (IOException e) {
-                    log.error(e.getMessage(), e);
-                }
-            }
-        );
-        return folderContent;
-    }
-
-    private List<File> doQuery( String query ) throws IOException {
-        Drive.Files.List request = driveService.files().list()
-            .setQ( query )
-            .setFields("files(id, name, parents, mimeType, kind, size, modifiedTime)")
-            .setSpaces("drive");
-
-        List<File> result = new ArrayList<>();
-        do {
-            FileList files = request.execute();
-            result.addAll(files.getFiles());
-
-            request.setPageToken(files.getNextPageToken());
-        } while (request.getPageToken() != null &&
-                request.getPageToken().length() > 0);
-
-        return result;
     }
 
     public static void logFile( File file ) {
