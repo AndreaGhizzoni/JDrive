@@ -61,8 +61,7 @@ public class Launcher
             System.exit(0);
         }
 
-        Long currentPID = Util.getProcessID();
-        Constants.CURRENT_PID = currentPID;
+        Constants.CURRENT_PID = Util.getProcessID();
         setPidToThreadContext();
         Long lockerPID = -1L;
         try{
@@ -71,7 +70,7 @@ public class Launcher
             fatalAndQuit(ioe.getMessage(), ioe);
         }
 
-        boolean isAlreadyRunning =  !currentPID.equals(lockerPID);
+        boolean isAlreadyRunning =  !Constants.CURRENT_PID.equals(lockerPID);
         if( isAlreadyRunning ){
             if( statusFlag ){
                 statusJDrive();
