@@ -20,6 +20,7 @@ allprojects {
 
 dependencies {
     compile 'com.github.AndreaGhizzoni:Application-Util:v0.2.0'
+    compile 'com.github.oshi:oshi-core:3.4.3'
 
     compile 'org.apache.logging.log4j:log4j-api:2.8.2'
     compile 'org.apache.logging.log4j:log4j-core:2.8.2'
