@@ -17,5 +17,5 @@ public class Constants
     /** Path to application configuration file */
     public static final String APP_PROPERTIES_FILE = APP_HOME + SEP + "jdrive.conf";
 
-    public static volatile long CURRENT_PID = -1L;
+    public static volatile Long CURRENT_PID = -1L;
 }
