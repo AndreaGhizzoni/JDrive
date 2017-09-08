@@ -14,6 +14,8 @@
         <Property name="logFileName">jdrive_${sys:date}.log</Property>
         <Property name="logFolder">log</Property>
         <Property name="logFilePath">${logFolder}/${logFileName}</Property>
+        <Property name="specsFileName">jdrive_${sys:date}.specs</Property>
+        <Property name="specsFilePath">${logFolder}/${specsFileName}</Property>
         <Property name="pattern">
             %date{yyyy-MM-dd HH:mm:ss} | %-5level | %5X{pid} | %thread | %class{1} - %message%n
         </Property>
@@ -30,6 +32,10 @@
         <File name="File" fileName="${logFilePath}" immediateFlush="true" append="true">
             <PatternLayout pattern="${pattern}"/>
         </File>
+
+        <File name="SpecsFile" fileName="${specsFilePath}" immediateFlush="true" append="false">
+            <PatternLayout pattern="%message%n"/>
+        </File>
     </Appenders>
 
     <!-- List of Logger to retrieve via LogManager.getLogger() -->
@@ -43,6 +49,10 @@
              the parent/ancestor loggers (RootLogger) -->
         <Logger name="it.hackcaffebabe.jdrive" level="ALL" additivity="true">
             <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="it.hackcaffebabe.jdrive.SystemInfo" level="ALL" additivity="false">
+            <AppenderRef ref="SpecsFile"/>
         </Logger>
     </Loggers>
 
