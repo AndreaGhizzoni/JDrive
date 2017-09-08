@@ -43,8 +43,9 @@ public class Launcher
         boolean statusFlag = CLI_PARSER.hasOption("status");
         boolean helpFlag = CLI_PARSER.hasOption("help");
         boolean versionFlag = CLI_PARSER.hasOption("version");
+        boolean specsFlag = CLI_PARSER.hasOption("specs");
         boolean noFlag = !(startFlag || stopFlag || statusFlag || helpFlag ||
-                         versionFlag);
+                         versionFlag || specsFlag);
 
         if( helpFlag || noFlag ) {
             System.out.println( "JDrive version: " + Constants.VERSION );
@@ -54,13 +55,17 @@ public class Launcher
             );
         }
 
+        Constants.CURRENT_PID = Util.getProcessID();
+        setPidToThreadContext();
+        if( specsFlag ){
+            SystemInfo.doLog();
+        }
+
         if( versionFlag ){
             System.out.println( Constants.VERSION );
             System.exit(0);
         }
 
-        Constants.CURRENT_PID = Util.getProcessID();
-        setPidToThreadContext();
         Long lockerPID = -1L;
         try{
             lockerPID = new Locker("JDriveApplication").checkLock();
@@ -68,7 +73,7 @@ public class Launcher
             fatalAndQuit(ioe.getMessage(), ioe);
         }
 
-        boolean isAlreadyRunning =  !Constants.CURRENT_PID.equals(lockerPID);
+        boolean isAlreadyRunning = !Constants.CURRENT_PID.equals(lockerPID);
         if( isAlreadyRunning ){
             if( statusFlag ){
                 statusJDrive();
@@ -112,6 +117,7 @@ public class Launcher
              FLAGS.addOption("stop", false, "stop JDrive");
              FLAGS.addOption("help", false, "print argument usage");
              FLAGS.addOption("version", false, "print current version");
+             FLAGS.addOption("specs", false, "log current specs");
              CLI_PARSER = new DefaultParser().parse(FLAGS, args);
          }catch (ParseException pe){
              fatalAndQuit(pe.getMessage(), pe);
