@@ -203,7 +203,6 @@ public class SystemInfo
                     readwrite ? disk.getTransferTime() : "?"));
             HWPartition[] partitions = disk.getPartitions();
             if (partitions == null) {
-                // TODO Remove when all OS's implemented
                 continue;
             }
             for (HWPartition part : partitions) {
