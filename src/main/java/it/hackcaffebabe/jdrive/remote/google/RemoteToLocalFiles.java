@@ -156,5 +156,20 @@ public class RemoteToLocalFiles
                 String.valueOf(this.accessible)
             );
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            AccessiblePath that = (AccessiblePath) o;
+
+            return path != null ? path.equals(that.path) : that.path == null;
+        }
+
+        @Override
+        public int hashCode() {
+            return path != null ? path.hashCode() : 0;
+        }
     }
 }
