@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,6 +50,12 @@ public class RemoteWatcher implements Runnable
         );
         File jdriveRemoteFolder = getJDriveRemoteFolderOrCreate( jdriveLocalPath );
         log.info("JDrive remote folder found.");
+
+        // TESTING PURPOSE
+        recursivelyListFullPathsFrom(
+            jdriveRemoteFolder,
+            jdriveRemoteFolder.getName()
+        ).forEach( log::debug );
 
         remoteToLocalFiles.putAll( recursivelyGetFrom( jdriveRemoteFolder.getId() ) );
         log.info("Mapping remote and local file complete.");
@@ -83,6 +90,30 @@ public class RemoteWatcher implements Runnable
         }
         remoteToLocalFiles.put( result.get(0), jdriveLocalBasePath );
         return result.get(0);
+    }
+
+    private List<String> recursivelyListFullPathsFrom( File remoteFolder, String partialPath ) throws IOException {
+        ArrayList<String> pathsList = new ArrayList<>();
+        pathsList.add( partialPath );
+
+        if( remoteFolder.getMimeType().equals(MIMEType.GOOGLE_FOLDER) ) {
+            String q = String.format("not trashed and '%s' in parents", remoteFolder.getId());
+            doQuery(q).forEach(
+                file -> {
+                    try {
+                        pathsList.addAll(
+                            recursivelyListFullPathsFrom(
+                                file,
+                                partialPath.concat( "/"+file.getName() )
+                            )
+                        );
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+            );
+        }
+        return pathsList;
     }
 
     private HashMap<File, Path> recursivelyGetFrom( String remoteParentsId ) throws IOException {
