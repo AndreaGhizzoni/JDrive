@@ -10,6 +10,9 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.text.DecimalFormat;
 
+/**
+ * This class check and log the status of every upload and download
+ */
 class FileProgressListener implements MediaHttpUploaderProgressListener,
                                       MediaHttpDownloaderProgressListener {
 
