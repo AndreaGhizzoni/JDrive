@@ -40,14 +40,14 @@ public class Mapper
     }
 
     public synchronized void put( String path ) {
-        put( path , Optional.ofNullable( null ) );
+        put( path , null );
     }
 
-    public synchronized void put( String path, Optional<File> remoteFile ) {
-        put( path, true, remoteFile );
+    public synchronized void put( String path, File remote ){
+        put( path, true, Optional.ofNullable(remote) );
     }
 
-    public synchronized void putAll( Map<String, Optional<File>> map ) {
+    public synchronized void putAll( Map<String, File> map ) {
         map.forEach( this::put );
     }
 
