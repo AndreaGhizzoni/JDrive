@@ -68,6 +68,7 @@ public class Mapper
         AccessiblePath accessiblePath = new AccessiblePath( path, true );
         Optional<File> optFile = localToRemote.get( accessiblePath );
 
+        logEntry("Get", accessiblePath, optFile );
         return optFile == null ? null : optFile.get();
     }
 
@@ -92,6 +93,15 @@ public class Mapper
             .map( entry -> entry.getKey())
             .findAny()
             .orElse(null);
+
+        if( accessiblePath != null ) {
+            remove( accessiblePath.getPath() );
+        }else{
+            log.debug(String.format(
+                "Noting to do: remote file %s not found with any associated key.",
+                remoteFile.getName()
+            ));
+        }
     }
 
     public synchronized boolean isAccessible( Path path ) {
@@ -107,6 +117,14 @@ public class Mapper
 
         if( accPath == null ) return false;
         else return accPath.accessible;
+    }
+
+    private synchronized void logEntry( String action, AccessiblePath accessiblePath,
+                                        Optional<File> optfile ) {
+        logEntry(
+            action, accessiblePath.getPath(), accessiblePath.isAccessible(),
+            optfile
+        );
     }
 
     private synchronized void logEntry( String action, String path,
