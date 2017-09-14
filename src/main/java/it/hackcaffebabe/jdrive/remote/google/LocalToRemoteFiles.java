@@ -40,22 +40,22 @@ public class LocalToRemoteFiles
     }
 
     public synchronized void put( String path ) {
-        put( path , null );
+        put( path , Optional.ofNullable( null ) );
     }
 
-    public synchronized void put( String path, File remoteFile ) {
-
+    public synchronized void put( String path, Optional<File> remoteFile ) {
+        put( path, true, remoteFile );
     }
 
-    public synchronized void putAll( Map<String, File> map ) {
-
+    public synchronized void putAll( Map<String, Optional<File>> map ) {
+        map.forEach( this::put );
     }
 
     public synchronized void putAll( List<String> paths ) {
-
+        paths.forEach( this::put );
     }
 
-    public synchronized void put( String path, boolean accessible, File remote ){
+    public synchronized void put( String path, boolean accessible, Optional<File> remote ){
 
     }
 
