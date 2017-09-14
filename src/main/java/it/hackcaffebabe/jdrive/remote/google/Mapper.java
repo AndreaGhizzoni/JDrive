@@ -15,10 +15,10 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * TODO add doc
  */
-public class LocalToRemoteFiles
+public class Mapper
 {
     private static final Logger log = LogManager.getLogger();
-    private static LocalToRemoteFiles instance;
+    private static Mapper instance;
 
     private final ConcurrentHashMap<AccessiblePath, Optional<File>> localToRemote =
                                                      new ConcurrentHashMap<>();
@@ -27,13 +27,13 @@ public class LocalToRemoteFiles
      * TODO add doc
      * @return
      */
-    public static LocalToRemoteFiles getInstance() {
+    public static Mapper getInstance() {
         if( instance == null )
-            instance = new LocalToRemoteFiles();
+            instance = new Mapper();
         return instance;
     }
 
-    private LocalToRemoteFiles(){}
+    private Mapper(){}
 
     public synchronized void put( Path path ) {
         put( path.toAbsolutePath() );
