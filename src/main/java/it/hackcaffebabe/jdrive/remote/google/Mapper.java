@@ -87,12 +87,19 @@ public class Mapper
 
     }
 
-    public synchronized boolean isAccessible( String path ) {
-        return false;
+    public synchronized boolean isAccessible( Path path ) {
+        return isAccessible( path.toString() );
     }
 
-    public synchronized boolean isAccessible( Path path ) {
-        return false;
+    public synchronized boolean isAccessible( String path ) {
+        AccessiblePath accPath = localToRemote.keySet()
+            .stream()
+            .filter( accessiblePath -> accessiblePath.getPath().equals(path) )
+            .findAny()
+            .orElse(null);
+
+        if( accPath == null ) return false;
+        else return accPath.accessible;
     }
 
 //==============================================================================
