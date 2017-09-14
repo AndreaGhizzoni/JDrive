@@ -73,7 +73,26 @@ public class Mapper
     }
 
     public synchronized String lookup( File remote ){
-        return null;
+        Optional<AccessiblePath> optAccessiblePath = look( remote );
+
+        logEntry(
+            "Lookup",
+            optAccessiblePath.map( accPath -> accPath.getPath() ).orElse("null"),
+            optAccessiblePath.map( accPath -> accPath.isAccessible() ).orElse(false),
+            Optional.ofNullable(remote)
+        );
+        return optAccessiblePath.isPresent() ? optAccessiblePath.get().getPath() : null;
+    }
+
+    private synchronized Optional<AccessiblePath> look( File remote ){
+        return localToRemote.entrySet()
+            .stream()
+            .filter( entry -> {
+                Optional<File> optFile = entry.getValue();
+                return optFile.isPresent() && optFile.get().equals( remote );
+            })
+            .map( entry -> entry.getKey() )
+            .findAny();
     }
 
     public synchronized void remove( String path ) {
@@ -84,18 +103,10 @@ public class Mapper
     }
 
     public synchronized void remove( File remoteFile ) {
-        AccessiblePath accessiblePath = localToRemote.entrySet()
-            .stream()
-            .filter( entry -> {
-                Optional<File> remote = entry.getValue();
-                return remote.isPresent() && remote.get().equals( remoteFile );
-            })
-            .map( entry -> entry.getKey())
-            .findAny()
-            .orElse(null);
+        Optional<AccessiblePath> optAccessiblePath = look( remoteFile );
 
-        if( accessiblePath != null ) {
-            remove( accessiblePath.getPath() );
+        if( optAccessiblePath.isPresent() ) {
+            remove( optAccessiblePath.get().getPath() );
         }else{
             log.debug(String.format(
                 "Noting to do: remote file %s not found with any associated key.",
@@ -109,14 +120,12 @@ public class Mapper
     }
 
     public synchronized boolean isAccessible( String path ) {
-        AccessiblePath accPath = localToRemote.keySet()
+        return localToRemote.keySet()
             .stream()
             .filter( accessiblePath -> accessiblePath.getPath().equals(path) )
             .findAny()
-            .orElse(null);
-
-        if( accPath == null ) return false;
-        else return accPath.accessible;
+            .map( accessiblePath -> accessiblePath.isAccessible() )
+            .orElse(false);
     }
 
     private synchronized void logEntry( String action, AccessiblePath accessiblePath,
@@ -131,7 +140,7 @@ public class Mapper
                                         boolean accessible, Optional<File> file ) {
         log.debug( String.format(
             "%s [ path: %s, accessible: %s, remote: %s ]",
-            action, path, true, file.map( f -> f.getName() ).orElse("null") )
+            action, path, accessible, file.map( f -> f.getName() ).orElse("null") )
         );
     }
 
