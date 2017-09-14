@@ -36,7 +36,7 @@ public class Mapper
     private Mapper(){}
 
     public synchronized void put( Path path ) {
-        put( path.toAbsolutePath() );
+        put( path.toString() );
     }
 
     public synchronized void put( String path ) {
