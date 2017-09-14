@@ -57,10 +57,7 @@ public class Mapper
 
     public synchronized void put( String path, boolean accessible, Optional<File> remote ){
         localToRemote.put( new AccessiblePath(path, accessible), remote );
-        log.debug( String.format(
-            "Put [ path: %s, accessible: %s, remote: %s ]",
-            path, accessible, remote.map( f -> f.getName() ).orElse("null")
-        ));
+        logEntry("Put", path, accessible, remote);
     }
 
     public synchronized File get( Path path ) {
@@ -80,11 +77,22 @@ public class Mapper
     }
 
     public synchronized void remove( String path ) {
-
+        Optional<File> remoteFile = localToRemote.remove(
+            new AccessiblePath( path, true )
+        );
+        logEntry("Removed", path, true, remoteFile);
     }
 
     public synchronized void remove( File remoteFile ) {
-
+        AccessiblePath accessiblePath = localToRemote.entrySet()
+            .stream()
+            .filter( entry -> {
+                Optional<File> remote = entry.getValue();
+                return remote.isPresent() && remote.get().equals( remoteFile );
+            })
+            .map( entry -> entry.getKey())
+            .findAny()
+            .orElse(null);
     }
 
     public synchronized boolean isAccessible( Path path ) {
@@ -100,6 +108,14 @@ public class Mapper
 
         if( accPath == null ) return false;
         else return accPath.accessible;
+    }
+
+    private synchronized void logEntry( String action, String path,
+                                        boolean accessible, Optional<File> file ) {
+        log.debug( String.format(
+            "%s [ path: %s, accessible: %s, remote: %s ]",
+            action, path, true, file.map( f -> f.getName() ).orElse("null") )
+        );
     }
 
 //==============================================================================
