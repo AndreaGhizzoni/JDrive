@@ -56,7 +56,11 @@ public class Mapper
     }
 
     public synchronized void put( String path, boolean accessible, Optional<File> remote ){
-
+        localToRemote.put( new AccessiblePath(path, accessible), remote );
+        log.debug( String.format(
+            "Put [ path: %s, accessible: %s, remote: %s ]",
+            path, accessible, remote.map( f -> f.getName() ).orElse("null")
+        ));
     }
 
     public synchronized File get( Path path ) throws IOException {
