@@ -66,10 +66,9 @@ public class Mapper
 
     public synchronized File get( String path ) {
         AccessiblePath accessiblePath = new AccessiblePath( path, true );
-        if( !localToRemote.contains(accessiblePath) ){
-            return null;
-        }
-        return localToRemote.get( accessiblePath ).get();
+        Optional<File> optFile = localToRemote.get( accessiblePath );
+
+        return optFile == null ? null : optFile.get();
     }
 
     public synchronized String lookup( File remote ){
