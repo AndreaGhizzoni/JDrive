@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.remote.google;
 
+import com.google.api.services.drive.model.File;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,7 +36,11 @@ public class MapperTest
                 mapper.get( path )
             );
 
-            mapper.remove( path.toString() );
+            File remoteFile = mapper.remove( path.toString() );
+            Assert.assertNull(
+                "Returned file from simple path must be null",
+                remoteFile
+            );
             Assert.assertFalse(
                 "Removing path must resulting in accessible == false",
                 mapper.isAccessible( path )
