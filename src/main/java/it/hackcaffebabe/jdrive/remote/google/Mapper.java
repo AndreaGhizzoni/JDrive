@@ -69,7 +69,7 @@ public class Mapper
         Optional<File> optFile = localToRemote.get( accessiblePath );
 
         logEntry("Get", accessiblePath, optFile );
-        return optFile == null ? null : optFile.get();
+        return optFile == null ? null : optFile.orElse(null);
     }
 
     public synchronized String lookup( File remote ){
