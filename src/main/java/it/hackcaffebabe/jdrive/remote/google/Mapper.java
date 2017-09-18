@@ -65,7 +65,7 @@ public class Mapper
     }
 
     public synchronized File get( String path ) {
-        AccessiblePath accessiblePath = new AccessiblePath( path, true );
+        AccessiblePath accessiblePath = new AccessiblePath( path );
         Optional<File> optFile = localToRemote.get( accessiblePath );
 
         logEntry("Get", accessiblePath, optFile );
@@ -97,7 +97,7 @@ public class Mapper
 
     public synchronized void remove( String path ) {
         Optional<File> remoteFile = localToRemote.remove(
-            new AccessiblePath( path, true )
+            new AccessiblePath( path )
         );
         logEntry("Removed", path, true, remoteFile);
     }
@@ -155,6 +155,10 @@ public class Mapper
     public class AccessiblePath {
         private String path;
         private boolean accessible;
+
+        public AccessiblePath( String path ){
+            this( path, true );
+        }
 
         public AccessiblePath( String path, boolean accessible ){
             this.path = path;
