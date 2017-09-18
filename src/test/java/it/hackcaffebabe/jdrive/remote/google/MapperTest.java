@@ -8,12 +8,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Test class for {@link it.hackcaffebabe.jdrive.remote.google.MapperV2}
+ * Test class for {@link Mapper}
  */
-public class MapperV2Test
+public class MapperTest
 {
     public class TestObj{
         private Path path;
@@ -48,7 +47,7 @@ public class MapperV2Test
             add( new TestObj(Paths.get(""), false, null) );
         }};
 
-        MapperV2 mapper = new MapperV2();
+        Mapper mapper = new Mapper();
         tableTest.forEach( testObj -> {
             mapper.put(
                 testObj.path.toString(),

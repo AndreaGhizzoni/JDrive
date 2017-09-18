@@ -14,13 +14,13 @@ import java.util.Optional;
 /**
  * TODO add doc
  */
-public class MapperV2
+public class Mapper
 {
     private static final Logger log = LogManager.getLogger();
 
     private HashMap<AccessiblePath, File> map = new HashMap<>();
 
-    public MapperV2(){}
+    public Mapper(){}
 
     public void put( Path path ) {
         put( path.toString() );
