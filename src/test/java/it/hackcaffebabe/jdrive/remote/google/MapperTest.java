@@ -8,46 +8,97 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Test class for {@link it.hackcaffebabe.jdrive.remote.google.Mapper}
  */
 public class MapperTest
 {
+    public class TestObj{
+        private Path path;
+        private boolean accessible;
+        private Optional<File> optRemoteFile;
+
+        public TestObj(Path p, boolean accessible, File remoteFile){
+            this.path = p;
+            this.accessible = accessible;
+            this.optRemoteFile = Optional.ofNullable( remoteFile );
+        }
+    }
     @Test
     public void test_PutGetRemovePathOnly(){
-        List<Path> paths = new ArrayList<Path>(){{
-            add(Paths.get("/tmp/file1"));
-            add(Paths.get("/tmp"));
-            add(Paths.get("/not_a_folder"));
+        List<TestObj> tableTest = new ArrayList<TestObj>(){{
+            add( new TestObj(Paths.get("/tmp/file1.txt"), true, null) );
+            add( new TestObj(Paths.get("/tmp"), true, null) );
+            add( new TestObj(Paths.get("/not_a_folder"), true, null) );
+            add( new TestObj(Paths.get("tmp/file1.txt"), true, null) );
+            add( new TestObj(Paths.get("tmp"), true, null) );
+            add( new TestObj(Paths.get("not-a-folder"), true, null) );
+
+            add( new TestObj(Paths.get("/tmp/file1.txt"), false, null) );
+            add( new TestObj(Paths.get("/tmp"), false, null) );
+            add( new TestObj(Paths.get("/not_a_folder"), false, null) );
+            add( new TestObj(Paths.get("tmp/file1.txt"), false, null) );
+            add( new TestObj(Paths.get("tmp"), false, null) );
+            add( new TestObj(Paths.get("not_a_folder"), false, null) );
+
+            add( new TestObj(Paths.get(""), true, null) );
+            add( new TestObj(Paths.get(""), false, null) );
         }};
 
         Mapper mapper = Mapper.getInstance();
-        paths.forEach( path -> {
-            mapper.put( path );
-            Assert.assertTrue(
-                "Putting a single path without any restriction must be "+
-                    "accessible == true",
-                mapper.isAccessible( path )
+        tableTest.forEach( testObj -> {
+            mapper.put(
+                testObj.path.toString(),
+                testObj.accessible,
+                testObj.optRemoteFile
             );
-            Assert.assertNull(
-                "Putting a single path without any remote file, must get "+
-                    "a null object from get()",
-                mapper.get( path )
+            Assert.assertEquals(
+                "After putting a path with accessible="+testObj.accessible+
+                    " I expect that mapper.isAccessible returns true",
+                testObj.accessible,
+                mapper.isAccessible( testObj.path )
             );
 
-            File remoteFile = mapper.remove( path.toString() );
+            File actualRemoteFile = mapper.get( testObj.path );
+            if( testObj.optRemoteFile.isPresent() ){
+                Assert.assertEquals(
+                    "After get a remote file from path="+testObj.path+" I expect" +
+                        " that is equals to remote file previously put",
+                    testObj.optRemoteFile.get(),
+                    actualRemoteFile
+                );
+            }else {
+                Assert.assertNull(
+                    "After putting null as remote file associated with " +
+                        "path="+testObj.path+" I expect that get returns null",
+                    actualRemoteFile
+                );
+            }
+
+            File remoteFile = mapper.remove( testObj.path.toString() );
+            if( testObj.optRemoteFile.isPresent() ){
+                Assert.assertEquals(
+                    "After removing a path I expect that the associated remote " +
+                        "file is equals to remote file previously put",
+                    testObj.optRemoteFile.get(),
+                    remoteFile
+                );
+            }else {
+                Assert.assertNull(
+                    "After removing a path associated with null remote file "+
+                        "I expect that remove method returns null",
+                    remoteFile
+                );
+            }
             Assert.assertNull(
-                "Returned file from simple path must be null",
-                remoteFile
+                "Once removed a path I expect a null file from get()",
+                mapper.get( testObj.path )
             );
             Assert.assertFalse(
-                "Removing path must resulting in accessible == false",
-                mapper.isAccessible( path )
-            );
-            Assert.assertNull(
-                "Removing path must resulting in a null object from get()",
-                mapper.get( path )
+                "Once removed a path I expect that isAccessible return false",
+                mapper.isAccessible( testObj.path )
             );
         });
     }
