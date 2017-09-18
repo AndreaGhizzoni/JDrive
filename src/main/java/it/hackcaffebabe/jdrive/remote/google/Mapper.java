@@ -140,8 +140,9 @@ public class Mapper
                                         boolean accessible, Optional<File> file ) {
         log.debug( String.format(
             "%s [ path: %s, accessible: %s, remote: %s ]",
-            action, path, accessible, file.map( f -> f.getName() ).orElse("null") )
-        );
+            action, path, accessible,
+            file == null ? "null" : file.map( f -> f.getName() ).orElse("null")
+        ));
     }
 
 //==============================================================================
