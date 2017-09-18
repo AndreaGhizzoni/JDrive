@@ -80,7 +80,7 @@ public class Mapper
         AccessiblePath accessiblePath = new AccessiblePath( path );
         Optional<File> optFile = localToRemote.get( accessiblePath );
         if( optFile == null ) {
-            log.debug(String.format("Remote file from %s not found", path));
+            log.debug(String.format("Remote file from path=%s not found", path));
             return null;
         }else {
             logEntry("Get ok", accessiblePath, optFile);
