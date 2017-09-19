@@ -29,7 +29,9 @@ import static java.nio.file.StandardWatchEventKinds.*;
  * <pre>{@code
  * Paths.createApplicationHomeDirectory();
  * Configurator.setup( cfgPath )
- * Thread t = new Thread( Watcher.getInstance() );
+ * Watcher w = Watcher.getInstance();
+ * w.init();
+ * Thread t = new Thread( w );
  * t.start();
  * }</pre>
  */
