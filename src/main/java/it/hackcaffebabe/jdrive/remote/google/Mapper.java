@@ -20,7 +20,7 @@ public class Mapper
     private static final Logger log = LogManager.getLogger();
 
     private HashMap<AccessiblePath, File> map = new HashMap<>();
-    private Sanitizer pathSanitizer = new PathSanitizer();
+    private PathSanitizer pathSanitizer = new PathSanitizer();
 
     public Mapper(){}
 
@@ -92,7 +92,7 @@ public class Mapper
                 optAccessiblePath.get(),
                 remoteFile
             );
-            return optAccessiblePath.get().getPath();
+            return pathSanitizer.restore( optAccessiblePath.get().getPath() );
         }else{
             log.debug(String.format(
                 "Path associated with remote file %s not found",
@@ -137,7 +137,7 @@ public class Mapper
         if( optAccessiblePath.isPresent() ) {
             String associatedPath = optAccessiblePath.get().getPath();
             remove( associatedPath );
-            return associatedPath;
+            return pathSanitizer.restore(associatedPath);
         }else{
             log.debug(String.format(
                 "Noting to do: remote file %s not found with any associated path.",
@@ -245,6 +245,13 @@ public class Mapper
                 log.debug("Noting to sanitize: path not start with base");
                 return toSanitize;
             }
+        }
+
+        public String restore(String sanitized) {
+            log.debug("Try to restore path="+sanitized);
+            String restored = base+sanitized;
+            log.debug("Restored path="+restored);
+            return restored;
         }
     }
 }
