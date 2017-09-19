@@ -231,6 +231,10 @@ public class Mapper
      * TODO add doc
      */
     public class PathSanitizer implements Sanitizer {
+        // TODO problem listed below:
+        //      I can not assume that the base of sanitizer is always `$HOME/`
+        //      based on the default `$HOME/Google\ Drive`, because user can
+        //      change this setting.
         final String base = PathsUtil.USER_HOME+PathsUtil.SEP;
         final Logger log = LogManager.getLogger();
 
