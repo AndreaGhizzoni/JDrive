@@ -98,7 +98,9 @@ public class WatcherTest
 
     private Watcher buildWatcherOrFail(){
         try {
-           return Watcher.getInstance();
+           Watcher w = Watcher.getInstance();
+           w.init();
+           return w;
         } catch (IOException e) {
             Assert.fail("Fail to retrieve the Watcher. "+e.getMessage());
         }
