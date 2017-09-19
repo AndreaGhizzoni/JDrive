@@ -2,7 +2,6 @@ package it.hackcaffebabe.jdrive.fs.watcher;
 
 import static it.hackcaffebabe.jdrive.Launcher.setPidToThreadContext;
 
-import com.sun.javafx.scene.shape.PathUtils;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.fs.watcher.events.Error;
