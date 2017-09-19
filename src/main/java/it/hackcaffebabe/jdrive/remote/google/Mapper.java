@@ -2,6 +2,7 @@ package it.hackcaffebabe.jdrive.remote.google;
 
 
 import com.google.api.services.drive.model.File;
+import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,6 +20,7 @@ public class Mapper
     private static final Logger log = LogManager.getLogger();
 
     private HashMap<AccessiblePath, File> map = new HashMap<>();
+    private Sanitizer pathSanitizer = new PathSanitizer();
 
     public Mapper(){}
 
@@ -43,7 +45,11 @@ public class Mapper
     }
 
     public void put( String path, boolean accessible, File remote ){
-        AccessiblePath accessiblePath = new AccessiblePath( path, accessible );
+        String sanitizedPath = pathSanitizer.sanitize( path );
+        AccessiblePath accessiblePath = new AccessiblePath(
+            sanitizedPath,
+            accessible
+        );
         logEntry("Try to Put", accessiblePath, remote);
         File previousFile = map.put( accessiblePath, remote );
         if( previousFile == null ) {
@@ -60,11 +66,12 @@ public class Mapper
     }
 
     public File get( String path ) {
-        log.debug("Try to get remote file associated to path="+path);
-        AccessiblePath accessiblePath = new AccessiblePath( path );
+        String sanitizedPath = pathSanitizer.sanitize( path );
+        log.debug("Try to get remote file associated to path="+sanitizedPath);
+        AccessiblePath accessiblePath = new AccessiblePath( sanitizedPath );
         File file = map.get( accessiblePath );
         if( file == null ) {
-            log.debug(String.format("Remote file from path=%s not found", path));
+            log.debug(String.format("Remote file from path=%s not found", sanitizedPath));
             return null;
         }else {
             logEntry("Get ok", accessiblePath, file);
@@ -107,14 +114,15 @@ public class Mapper
     }
 
     public File remove( String path ) {
-        log.debug("Try to remove remote file associated with path: "+path);
-        File remoteFileRemoved = map.remove( new AccessiblePath(path) );
+        String sanitizedPath = pathSanitizer.sanitize( path );
+        log.debug("Try to remove remote file associated with path: "+sanitizedPath);
+        File remoteFileRemoved = map.remove( new AccessiblePath(sanitizedPath) );
 
         if( remoteFileRemoved == null ){
-            log.debug("Remote file associated with path="+path+" not found");
+            log.debug("Remote file associated with path="+sanitizedPath+" not found");
             return null;
         }else{
-            logEntry("Removed", path, true, remoteFileRemoved);
+            logEntry("Removed", sanitizedPath, true, remoteFileRemoved);
             return remoteFileRemoved;
         }
     }
@@ -144,9 +152,10 @@ public class Mapper
     }
 
     public boolean isAccessible( String path ) {
+        String sanitizedPath = pathSanitizer.sanitize( path );
         return map.keySet()
             .stream()
-            .filter( accessiblePath -> accessiblePath.getPath().equals(path) )
+            .filter( accessiblePath -> accessiblePath.getPath().equals(sanitizedPath) )
             .findAny()
             .map( AccessiblePath::isAccessible )
             .orElse(false);
@@ -215,6 +224,27 @@ public class Mapper
         @Override
         public int hashCode() {
             return path != null ? path.hashCode() : 0;
+        }
+    }
+
+    /**
+     * TODO add doc
+     */
+    public class PathSanitizer implements Sanitizer {
+        final String base = PathsUtil.USER_HOME+PathsUtil.SEP;
+        final Logger log = LogManager.getLogger();
+
+        @Override
+        public String sanitize(String toSanitize) {
+            log.debug("Try to sanitize path="+toSanitize);
+            if( toSanitize.startsWith(base) ){
+                String sanitized = toSanitize.replaceFirst(base, "");
+                log.debug("Path sanitized="+sanitized);
+                return sanitized;
+            }else{
+                log.debug("Noting to sanitize: path not start with base");
+                return toSanitize;
+            }
         }
     }
 }
