@@ -1,10 +1,13 @@
 package it.hackcaffebabe.jdrive.fs.watcher;
 
 import static it.hackcaffebabe.jdrive.Launcher.setPidToThreadContext;
+
+import com.sun.javafx.scene.shape.PathUtils;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.fs.watcher.events.Error;
 import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
+import it.hackcaffebabe.jdrive.remote.google.Mapper;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,6 +43,7 @@ public final class Watcher implements Runnable
 
     private WatchService watcher;
     private Map<WatchKey, Path> directories = new HashMap<>();
+    private Mapper mapper;
 
     private LinkedBlockingQueue<WatcherEvent> dispatchingQueue;
 
@@ -62,6 +66,7 @@ public final class Watcher implements Runnable
         log.info("Watch Service retrieved correctly from FileSystem.");
 
         createBasePathIfNotExists();
+        registerDirectories( this.watcherBasePath );
     }
 
     private void createBasePathIfNotExists() throws IOException {
@@ -104,6 +109,12 @@ public final class Watcher implements Runnable
         this.dispatchingQueue = queue;
     }
 
+    /**
+     * TODO add doc
+     * @return
+     */
+    public synchronized Mapper getMapper(){ return this.mapper; }
+
 //==============================================================================
 //  OVERRIDE
 //==============================================================================
@@ -115,7 +126,7 @@ public final class Watcher implements Runnable
             if( this.dispatchingQueue == null )
                 throw new InterruptedException("Dispatch Queue missing.");
 
-            registerDirectories( this.watcherBasePath );
+//            registerDirectories( this.watcherBasePath );
 
             WatchKey detectedWatchKey;
             while( true ){
@@ -162,6 +173,7 @@ public final class Watcher implements Runnable
         WatchServiceAdder watchServiceAdder = new WatchServiceAdder();
         Files.walkFileTree( start, watchServiceAdder );
         this.directories.putAll( watchServiceAdder.visitedPathsByWatcher );
+        this.mapper = watchServiceAdder.mapper;
     }
 
     private void dispatchPollEventsFrom( WatchKey eventWatchKey )
@@ -193,13 +205,17 @@ public final class Watcher implements Runnable
 //==============================================================================
 //  INNER CLASS
 //==============================================================================
+    // TODO rewrite this class description
     /* class that walk down a given path and set the watcher for all the
      * folders to rise a event when event listed below occur. */
     private class WatchServiceAdder extends SimpleFileVisitor<Path> {
         final WatchEvent.Kind[] kindEvents = {
                 ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
         };
+        final Path base = Paths.get(PathsUtil.USER_HOME+PathsUtil.SEP);
+
         Map<WatchKey, Path> visitedPathsByWatcher = new HashMap<>();
+        Mapper mapper = new Mapper();
 
         @Override
         public FileVisitResult preVisitDirectory( Path dir,
@@ -208,17 +224,19 @@ public final class Watcher implements Runnable
             WatchKey watchKey = dir.register( watcher, kindEvents );
             visitedPathsByWatcher.put( watchKey, dir );
             log.debug( String.format("Path %s saved by watcher.", dir) );
+
+            mapper.put( base.relativize(dir) );
             return FileVisitResult.CONTINUE;
         }
 
         @Override
-        public FileVisitResult visitFile( Path file, BasicFileAttributes attr) {
-
+        public FileVisitResult visitFile( Path file, BasicFileAttributes attr ) {
+            mapper.put( base.relativize(file) );
             return FileVisitResult.CONTINUE;
         }
 
         @Override
-        public FileVisitResult visitFileFailed( Path file, IOException exc) {
+        public FileVisitResult visitFileFailed( Path file, IOException exc ) {
             log.error(exc.getMessage(), exc);
             return FileVisitResult.CONTINUE;
         }
