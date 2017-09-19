@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.remote.google;
+package it.hackcaffebabe.jdrive.mapping;
 
 public interface Sanitizer {
     String sanitize(String toSanitize);

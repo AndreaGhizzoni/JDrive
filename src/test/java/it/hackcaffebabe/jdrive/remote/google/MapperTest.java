@@ -1,6 +1,7 @@
 package it.hackcaffebabe.jdrive.remote.google;
 
 import com.google.api.services.drive.model.File;
+import it.hackcaffebabe.jdrive.mapping.Mapper;
 import org.junit.Assert;
 import org.junit.Test;
 

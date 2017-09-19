@@ -6,7 +6,7 @@ import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.local.watcher.events.Error;
 import it.hackcaffebabe.jdrive.local.watcher.events.WatcherEvent;
-import it.hackcaffebabe.jdrive.remote.google.Mapper;
+import it.hackcaffebabe.jdrive.mapping.Mapper;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

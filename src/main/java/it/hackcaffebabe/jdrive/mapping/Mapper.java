@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.remote.google;
+package it.hackcaffebabe.jdrive.mapping;
 
 
 import com.google.api.services.drive.model.File;
