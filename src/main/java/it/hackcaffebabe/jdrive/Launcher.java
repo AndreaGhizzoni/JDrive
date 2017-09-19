@@ -138,6 +138,8 @@ public class Launcher
             final RemoteWatcher remoteWatcher = RemoteWatcher.getInstance();
 
             final Watcher watcher = Watcher.getInstance();
+            watcher.init();
+
             LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
             watcher.setDispatchingQueue(lbq);
 

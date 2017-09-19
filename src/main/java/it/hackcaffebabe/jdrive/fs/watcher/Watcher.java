@@ -50,9 +50,8 @@ public final class Watcher implements Runnable
     /**
      * Retrieve the instance of Watcher with the default base path.
      * @return {@link Watcher} instance.
-     * @throws IOException if creation of watcher fail.
      */
-    public static Watcher getInstance() throws IOException {
+    public static Watcher getInstance() {
         log.info("Try to get a Watcher instance...");
         if( instance == null ) {
             instance = new Watcher();
@@ -60,7 +59,13 @@ public final class Watcher implements Runnable
         return instance;
     }
 
-    private Watcher() throws IOException{
+    private Watcher(){}
+
+    /**
+     * TODO add doc
+     * @throws IOException
+     */
+    public void init() throws IOException {
         log.info("Try to get WatchService from FileSystem...");
         this.watcher = FileSystems.getDefault().newWatchService();
         log.info("Watch Service retrieved correctly from FileSystem.");
