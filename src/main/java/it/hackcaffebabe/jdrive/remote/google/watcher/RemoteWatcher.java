@@ -17,7 +17,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -33,14 +32,19 @@ public class RemoteWatcher implements Runnable
     private RemoteToLocalFiles remoteToLocalFiles;
     private DriveFileManager driveFileManager;
 
-    public static RemoteWatcher getInstance() throws GeneralSecurityException,
-                                                     IOException {
+    /**
+     * TODO add doc
+     * @return
+     */
+    public static RemoteWatcher getInstance() {
         if( instance == null )
             instance = new RemoteWatcher();
         return instance;
     }
 
-    private RemoteWatcher() throws GeneralSecurityException, IOException {
+    private RemoteWatcher() {}
+
+    public void init() throws GeneralSecurityException, IOException {
         driveService = GoogleAuthenticator.getInstance().getDriveService();
         remoteToLocalFiles = RemoteToLocalFiles.getInstance();
         driveFileManager = DriveFileManager.getInstance();

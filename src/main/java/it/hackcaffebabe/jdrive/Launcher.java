@@ -136,6 +136,7 @@ public class Launcher
 
         try{
             final RemoteWatcher remoteWatcher = RemoteWatcher.getInstance();
+            remoteWatcher.init();
 
             final Watcher watcher = Watcher.getInstance();
             watcher.init();
