@@ -5,6 +5,7 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
+import it.hackcaffebabe.jdrive.mapping.MappedFileSystem;
 import it.hackcaffebabe.jdrive.remote.google.DriveFileManager;
 import it.hackcaffebabe.jdrive.remote.google.MIMEType;
 import it.hackcaffebabe.jdrive.remote.google.RemoteToLocalFiles;
@@ -30,6 +31,7 @@ public class RemoteWatcher implements Runnable
 
     private Drive driveService;
     private RemoteToLocalFiles remoteToLocalFiles;
+    private MappedFileSystem mappedFileSystem;
     private DriveFileManager driveFileManager;
 
     /**
@@ -47,6 +49,7 @@ public class RemoteWatcher implements Runnable
     public void init() throws GeneralSecurityException, IOException {
         driveService = GoogleAuthenticator.getInstance().getDriveService();
         remoteToLocalFiles = RemoteToLocalFiles.getInstance();
+        mappedFileSystem = MappedFileSystem.getInstance();
         driveFileManager = DriveFileManager.getInstance();
 
         Path jdriveLocalPath = Paths.get(
@@ -56,6 +59,10 @@ public class RemoteWatcher implements Runnable
         log.info("JDrive remote folder found.");
 
         // TESTING PURPOSE
+//        recursivelyListFullPathsFrom(
+//            jdriveRemoteFolder,
+//            jdriveRemoteFolder.getName()
+//        ).forEach( log::debug );
         recursivelyListFullPathsFrom(
             jdriveRemoteFolder,
             jdriveRemoteFolder.getName()
@@ -96,29 +103,50 @@ public class RemoteWatcher implements Runnable
         return result.get(0);
     }
 
-    private List<String> recursivelyListFullPathsFrom( File remoteFolder, String partialPath ) throws IOException {
-        ArrayList<String> pathsList = new ArrayList<>();
-        pathsList.add( partialPath );
+    private HashMap<String, File> recursivelyListFullPathsFrom( File remoteFolder, String partialPath ) throws IOException {
+        HashMap<String, File> pathsMap = new HashMap<>();
+        pathsMap.put( partialPath, remoteFolder );
 
         if( remoteFolder.getMimeType().equals(MIMEType.GOOGLE_FOLDER) ) {
             String q = String.format("not trashed and '%s' in parents", remoteFolder.getId());
             doQuery(q).forEach(
                 file -> {
                     try {
-                        pathsList.addAll(
+                        pathsMap.putAll(
                             recursivelyListFullPathsFrom(
-                                file,
-                                partialPath.concat( "/"+file.getName() )
+                                file, partialPath.concat("/"+file.getName())
                             )
                         );
-                    } catch (IOException e) {
-                        log.error(e.getMessage(), e);
-                    }
+                    } catch (IOException e) { log.error(e.getMessage(), e); }
                 }
             );
         }
-        return pathsList;
+        return pathsMap;
     }
+
+//    private List<String> recursivelyListFullPathsFrom( File remoteFolder, String partialPath ) throws IOException {
+//        ArrayList<String> pathsList = new ArrayList<>();
+//        pathsList.add( partialPath );
+//
+//        if( remoteFolder.getMimeType().equals(MIMEType.GOOGLE_FOLDER) ) {
+//            String q = String.format("not trashed and '%s' in parents", remoteFolder.getId());
+//            doQuery(q).forEach(
+//                file -> {
+//                    try {
+//                        pathsList.addAll(
+//                            recursivelyListFullPathsFrom(
+//                                file,
+//                                partialPath.concat( "/"+file.getName() )
+//                            )
+//                        );
+//                    } catch (IOException e) {
+//                        log.error(e.getMessage(), e);
+//                    }
+//                }
+//            );
+//        }
+//        return pathsList;
+//    }
 
     private HashMap<File, Path> recursivelyGetFrom( String remoteParentsId ) throws IOException {
         String q = String.format("not trashed and '%s' in parents", remoteParentsId );
