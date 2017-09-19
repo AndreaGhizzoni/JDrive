@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.remote.google.watcher;
+package it.hackcaffebabe.jdrive.remote.watcher;
 
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;

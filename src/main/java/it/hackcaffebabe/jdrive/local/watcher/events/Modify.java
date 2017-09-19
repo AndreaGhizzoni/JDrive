@@ -1,6 +1,4 @@
-package it.hackcaffebabe.jdrive.fs.watcher.events;
-
-import it.hackcaffebabe.jdrive.util.DateUtils;
+package it.hackcaffebabe.jdrive.local.watcher.events;
 
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;

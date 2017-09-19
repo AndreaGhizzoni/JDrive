@@ -2,11 +2,11 @@ package it.hackcaffebabe.jdrive.remote.google;
 
 import static it.hackcaffebabe.jdrive.Launcher.setPidToThreadContext;
 import com.google.api.services.drive.model.File;
-import it.hackcaffebabe.jdrive.fs.watcher.events.Create;
-import it.hackcaffebabe.jdrive.fs.watcher.events.Delete;
-import it.hackcaffebabe.jdrive.fs.watcher.events.Modify;
-import it.hackcaffebabe.jdrive.fs.watcher.events.Error;
-import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
+import it.hackcaffebabe.jdrive.local.watcher.events.Create;
+import it.hackcaffebabe.jdrive.local.watcher.events.Delete;
+import it.hackcaffebabe.jdrive.local.watcher.events.Modify;
+import it.hackcaffebabe.jdrive.local.watcher.events.Error;
+import it.hackcaffebabe.jdrive.local.watcher.events.WatcherEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,7 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * UpLoader is a runnable components that is responsible to take
- * {@link it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent} and execute it
+ * {@link WatcherEvent} and execute it
  * remotely.
  */
 public class UpLoader implements Runnable

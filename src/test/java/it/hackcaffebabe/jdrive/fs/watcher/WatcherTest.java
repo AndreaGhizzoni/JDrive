@@ -3,7 +3,8 @@ package it.hackcaffebabe.jdrive.fs.watcher;
 import it.hackcaffebabe.jdrive.Constants;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
-import it.hackcaffebabe.jdrive.fs.watcher.events.WatcherEvent;
+import it.hackcaffebabe.jdrive.local.watcher.events.WatcherEvent;
+import it.hackcaffebabe.jdrive.local.watcher.Watcher;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.junit.After;
 import org.junit.Assert;
@@ -19,7 +20,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Test case for {@link it.hackcaffebabe.jdrive.fs.watcher.Watcher}
+ * Test case for {@link Watcher}
  */
 public class WatcherTest
 {

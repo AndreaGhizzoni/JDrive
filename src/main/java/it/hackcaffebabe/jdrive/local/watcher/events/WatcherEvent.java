@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.fs.watcher.events;
+package it.hackcaffebabe.jdrive.local.watcher.events;
 
 import it.hackcaffebabe.jdrive.util.DateUtils;
 
