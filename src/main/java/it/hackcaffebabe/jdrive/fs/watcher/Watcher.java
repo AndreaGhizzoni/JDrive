@@ -210,5 +210,17 @@ public final class Watcher implements Runnable
             log.debug( String.format("Path %s saved by watcher.", dir) );
             return FileVisitResult.CONTINUE;
         }
+
+        @Override
+        public FileVisitResult visitFile( Path file, BasicFileAttributes attr) {
+
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFileFailed( Path file, IOException exc) {
+            log.error(exc.getMessage(), exc);
+            return FileVisitResult.CONTINUE;
+        }
     }
 }
