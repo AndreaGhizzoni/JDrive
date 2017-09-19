@@ -26,25 +26,22 @@ public class MapperTest
         }
     }
 
+    private static String SEP = System.getProperty("file.separator");
+    private static String BASE = System.getProperty("user.home")+SEP;
+    private static String BASE_G = BASE+SEP+"Google Drive"+SEP;
+
     @Test
     public void test_PutGetRemovePathOnly(){
         List<TestObj> tableTest = new ArrayList<TestObj>(){{
-            add( new TestObj(Paths.get("/tmp/file1.txt"), true, null) );
-            add( new TestObj(Paths.get("/tmp"), true, null) );
-            add( new TestObj(Paths.get("/not_a_folder"), true, null) );
-            add( new TestObj(Paths.get("tmp/file1.txt"), true, null) );
-            add( new TestObj(Paths.get("tmp"), true, null) );
-            add( new TestObj(Paths.get("not-a-folder"), true, null) );
+            add( new TestObj(Paths.get(BASE_G), true, null) );
+            add( new TestObj(Paths.get(BASE_G+"tmp"), true, null) );
+            add( new TestObj(Paths.get(BASE_G+"not_a_folder"), true, null) );
+            add( new TestObj(Paths.get(BASE_G+"tmp"+SEP+"file1.txt"), true, null) );
 
-            add( new TestObj(Paths.get("/tmp/file1.txt"), false, null) );
-            add( new TestObj(Paths.get("/tmp"), false, null) );
-            add( new TestObj(Paths.get("/not_a_folder"), false, null) );
-            add( new TestObj(Paths.get("tmp/file1.txt"), false, null) );
-            add( new TestObj(Paths.get("tmp"), false, null) );
-            add( new TestObj(Paths.get("not_a_folder"), false, null) );
-
-            add( new TestObj(Paths.get(""), true, null) );
-            add( new TestObj(Paths.get(""), false, null) );
+            add( new TestObj(Paths.get(BASE_G), false, null) );
+            add( new TestObj(Paths.get(BASE_G+"tmp"), false, null) );
+            add( new TestObj(Paths.get(BASE_G+"not_a_folder"), false, null) );
+            add( new TestObj(Paths.get(BASE_G+"tmp"+SEP+"file1.txt"), false, null) );
         }};
 
         Mapper mapper = new Mapper();
