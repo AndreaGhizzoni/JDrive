@@ -218,7 +218,6 @@ public final class Watcher implements Runnable
         final WatchEvent.Kind[] kindEvents = {
                 ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
         };
-        final Path base = Paths.get(PathsUtil.USER_HOME+PathsUtil.SEP);
 
         Map<WatchKey, Path> visitedPathsByWatcher = new HashMap<>();
         Mapper mapper = new Mapper();
@@ -231,13 +230,13 @@ public final class Watcher implements Runnable
             visitedPathsByWatcher.put( watchKey, dir );
             log.debug( String.format("Path %s saved by watcher.", dir) );
 
-            mapper.put( base.relativize(dir) );
+            mapper.put( dir );
             return FileVisitResult.CONTINUE;
         }
 
         @Override
         public FileVisitResult visitFile( Path file, BasicFileAttributes attr ) {
-            mapper.put( base.relativize(file) );
+            mapper.put( file );
             return FileVisitResult.CONTINUE;
         }
 
