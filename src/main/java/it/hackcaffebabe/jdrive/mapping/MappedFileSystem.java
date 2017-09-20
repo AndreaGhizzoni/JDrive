@@ -38,6 +38,14 @@ public class MappedFileSystem
         map.put( localPath.toString(), remoteFile );
     }
 
+    public synchronized void put( String localPathString, File remoteFile ) {
+        log.debug(String.format(
+            "Try to store path=%s with remote file=%s",
+            localPathString, remoteFile == null ? "null" : remoteFile.getName()
+        ));
+        map.put( localPathString, remoteFile );
+    }
+
     public synchronized File get( Path localPath ) {
         log.debug("Try to read remote file from path="+localPath);
         return map.get( localPath );
