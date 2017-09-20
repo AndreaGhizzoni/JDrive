@@ -2,6 +2,9 @@ package it.hackcaffebabe.jdrive.mapping;
 
 
 import com.google.api.services.drive.model.File;
+import it.hackcaffebabe.jdrive.Constants;
+import it.hackcaffebabe.jdrive.cfg.Configurator;
+import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -231,15 +234,19 @@ public class Mapper
      * TODO add doc
      */
     public class PathSanitizer implements Sanitizer {
-        // TODO problem listed below:
-        //      I can not assume that the base of sanitizer is always `$HOME/`
-        //      based on the default `$HOME/Google\ Drive`, because user can
-        //      change this setting.
-        final String base = PathsUtil.USER_HOME+PathsUtil.SEP;
-        final Logger log = LogManager.getLogger();
+        private String base;
+        private final Logger log = LogManager.getLogger();
+
+        PathSanitizer(){
+            String watchedDir = (String) Configurator.getInstance()
+                                                    .get(Keys.WATCHED_BASE_PATH);
+            base = watchedDir.replaceFirst(
+                Constants.APP_DEFAULT_WATCHED_DIR_NAME, ""
+            );
+        }
 
         @Override
-        public String sanitize(String toSanitize) {
+        public String sanitize( String toSanitize ) {
             log.debug("Try to sanitize path="+toSanitize);
             if( toSanitize.startsWith(base) ){
                 String sanitized = toSanitize.replaceFirst(base, "");
@@ -251,7 +258,7 @@ public class Mapper
             }
         }
 
-        public String restore(String sanitized) {
+        String restore( String sanitized ) {
             log.debug("Try to restore path="+sanitized);
             String restored = base+sanitized;
             log.debug("Restored path="+restored);
