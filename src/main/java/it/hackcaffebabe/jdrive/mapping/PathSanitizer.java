@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * TODO add doc
  */
-public class PathSanitizer implements Sanitizer {
+class PathSanitizer implements Sanitizer {
     private String base;
     private final Logger log = LogManager.getLogger();
 
