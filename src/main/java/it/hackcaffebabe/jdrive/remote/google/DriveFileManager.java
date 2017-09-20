@@ -6,6 +6,7 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
+import it.hackcaffebabe.jdrive.mapping.MappedFileSystem;
 import it.hackcaffebabe.jdrive.remote.google.auth.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
@@ -31,7 +32,8 @@ public class DriveFileManager
     private static DriveFileManager instance;
 
     private Drive driveService;
-    private RemoteToLocalFiles remoteToLocalFiles;
+//    private RemoteToLocalFiles remoteToLocalFiles;
+    private MappedFileSystem mappedFileSystem;
 
     private Path jdriveLocalBasePath = Paths.get(
         (String)Configurator.getInstance().get( Keys.WATCHED_BASE_PATH )
@@ -45,8 +47,8 @@ public class DriveFileManager
 
     private DriveFileManager() throws GeneralSecurityException, IOException {
         driveService = GoogleAuthenticator.getInstance().getDriveService();
-        remoteToLocalFiles = RemoteToLocalFiles.getInstance();
-
+//        remoteToLocalFiles = RemoteToLocalFiles.getInstance();
+        mappedFileSystem = MappedFileSystem.getInstance();
     }
 
     public File createRemoteFolderFrom( Path localFolder ) throws IOException {
@@ -54,7 +56,8 @@ public class DriveFileManager
             return createRemoteFolder( jdriveLocalBasePath, "root" );
         }
 
-        File remoteParentFile = remoteToLocalFiles.getIfExists( localFolder.getParent() );
+//        File remoteParentFile = remoteToLocalFiles.getIfExists( localFolder.getParent() );
+        File remoteParentFile = mappedFileSystem.get( localFolder.getParent() );
         if( remoteParentFile != null ){
             return createRemoteFolder( localFolder, remoteParentFile.getId() );
         }else {
@@ -73,7 +76,8 @@ public class DriveFileManager
             .setFields("id,modifiedTime,name,parents,trashed,mimeType,size,kind")
             .execute();
         log.debug("Remote folder has been created with id="+remoteFolder.getId());
-        remoteToLocalFiles.put( remoteFolder, folderPath );
+//        remoteToLocalFiles.put( remoteFolder, folderPath );
+        mappedFileSystem.put( folderPath, remoteFolder );
         return remoteFolder;
     }
 
@@ -84,7 +88,8 @@ public class DriveFileManager
         if ( localFilePath.toFile().isDirectory() )
             return createRemoteFolderFrom( localFilePath );
 
-        File remoteParentFile = remoteToLocalFiles.getIfExists( localFilePath.getParent() );
+//        File remoteParentFile = remoteToLocalFiles.getIfExists( localFilePath.getParent() );
+        File remoteParentFile = mappedFileSystem.get( localFilePath.getParent() );
         if( remoteParentFile == null ) {
             remoteParentFile = createRemoteFolderFrom( localFilePath.getParent() );
         }
@@ -125,7 +130,8 @@ public class DriveFileManager
             .setFields("id,modifiedTime,name,parents,trashed,mimeType")
             .execute();
 
-        remoteToLocalFiles.put( fileUploaded, localFilePath );
+//        remoteToLocalFiles.put( fileUploaded, localFilePath );
+        mappedFileSystem.put( localFilePath, fileUploaded );
 
         log.debug("Upload of "+localFile.getAbsolutePath()+" ok.");
         return fileUploaded;
@@ -135,7 +141,8 @@ public class DriveFileManager
         if( updatedFile == null )
             throw new IllegalArgumentException("Updated file path can not be null");
 
-        File remoteFile = remoteToLocalFiles.get( updatedFile );
+//        File remoteFile = remoteToLocalFiles.get( updatedFile );
+        File remoteFile = mappedFileSystem.get( updatedFile );
         return updateRemoteFile( remoteFile, updatedFile.toFile() );
     }
 
@@ -180,14 +187,16 @@ public class DriveFileManager
         if( localFile == null )
             throw new IllegalArgumentException("Local file path to delete can not be null");
 
-        File remoteFile = remoteToLocalFiles.get( localFile );
+//        File remoteFile = remoteToLocalFiles.get( localFile );
+        File remoteFile = mappedFileSystem.get( localFile );
         deleteRemoteFile( remoteFile );
     }
 
     private void deleteRemoteFile( File file ) throws IOException {
         log.info("Try to delete remote file with name="+file.getName() );
         driveService.files().delete( file.getId() ).execute();
-        remoteToLocalFiles.remove( file );
+//        remoteToLocalFiles.remove( file );
+        mappedFileSystem.remove( file );
         log.debug("Delete of remote file with name="+file.getName()+" ok");
     }
 
@@ -197,7 +206,8 @@ public class DriveFileManager
         if( !localFile.toFile().exists() )
             throw new IOException("Local file to trash does not exists");
 
-        File remoteFile = remoteToLocalFiles.get( localFile );
+//        File remoteFile = remoteToLocalFiles.get( localFile );
+        File remoteFile = mappedFileSystem.get( localFile );
         trashRemoteFile( remoteFile );
     }
 
@@ -205,7 +215,8 @@ public class DriveFileManager
         log.info("Try to trash remote file with name="+file.getName());
         File newContent = new File().setTrashed(true);
         driveService.files().update( file.getId(), newContent ).execute();
-        remoteToLocalFiles.remove( file );
+//        remoteToLocalFiles.remove( file );
+        mappedFileSystem.remove( file );
         log.debug("Trash remote file with name="+file.getName()+" ok");
     }
 
