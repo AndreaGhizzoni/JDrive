@@ -8,7 +8,6 @@ import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.mapping.MappedFileSystem;
 import it.hackcaffebabe.jdrive.remote.google.DriveFileManager;
 import it.hackcaffebabe.jdrive.remote.google.MIMEType;
-//import it.hackcaffebabe.jdrive.remote.google.RemoteToLocalFiles;
 import it.hackcaffebabe.jdrive.remote.google.auth.GoogleAuthenticator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,7 +29,6 @@ public class RemoteWatcher implements Runnable
     private static RemoteWatcher instance;
 
     private Drive driveService;
-//    private RemoteToLocalFiles remoteToLocalFiles;
     private MappedFileSystem mappedFileSystem;
     private DriveFileManager driveFileManager;
 
@@ -48,7 +46,6 @@ public class RemoteWatcher implements Runnable
 
     public void init() throws GeneralSecurityException, IOException {
         driveService = GoogleAuthenticator.getInstance().getDriveService();
-//        remoteToLocalFiles = RemoteToLocalFiles.getInstance();
         mappedFileSystem = MappedFileSystem.getInstance();
         driveFileManager = DriveFileManager.getInstance();
 
@@ -58,17 +55,11 @@ public class RemoteWatcher implements Runnable
         File jdriveRemoteFolder = getJDriveRemoteFolderOrCreate( jdriveLocalPath );
         log.info("JDrive remote folder found.");
 
-        // TESTING PURPOSE
-//        recursivelyListFullPathsFrom(
-//            jdriveRemoteFolder,
-//            jdriveRemoteFolder.getName()
-//        ).forEach( log::debug );
         recursivelyListFullPathsFrom(
             jdriveRemoteFolder,
             jdriveRemoteFolder.getName()
         ).forEach( mappedFileSystem::put );
 
-//        remoteToLocalFiles.putAll( recursivelyGetFrom( jdriveRemoteFolder.getId() ) );
         log.info("Mapping remote and local file complete.");
     }
 
@@ -99,7 +90,6 @@ public class RemoteWatcher implements Runnable
                 jdriveLocalBasePath
             ));
         }
-//        remoteToLocalFiles.put( result.get(0), jdriveLocalBasePath );
         mappedFileSystem.put( jdriveLocalBasePath, result.get(0) );
         return result.get(0);
     }
@@ -124,49 +114,6 @@ public class RemoteWatcher implements Runnable
         }
         return pathsMap;
     }
-
-//    private List<String> recursivelyListFullPathsFrom( File remoteFolder, String partialPath ) throws IOException {
-//        ArrayList<String> pathsList = new ArrayList<>();
-//        pathsList.add( partialPath );
-//
-//        if( remoteFolder.getMimeType().equals(MIMEType.GOOGLE_FOLDER) ) {
-//            String q = String.format("not trashed and '%s' in parents", remoteFolder.getId());
-//            doQuery(q).forEach(
-//                file -> {
-//                    try {
-//                        pathsList.addAll(
-//                            recursivelyListFullPathsFrom(
-//                                file,
-//                                partialPath.concat( "/"+file.getName() )
-//                            )
-//                        );
-//                    } catch (IOException e) {
-//                        log.error(e.getMessage(), e);
-//                    }
-//                }
-//            );
-//        }
-//        return pathsList;
-//    }
-
-//    private HashMap<File, Path> recursivelyGetFrom( String remoteParentsId ) throws IOException {
-//        String q = String.format("not trashed and '%s' in parents", remoteParentsId );
-//        HashMap<File, Path> folderContent = new HashMap<>();
-//        doQuery( q ).forEach(
-//            file -> {
-//                DriveFileManager.logFile( file );
-//                folderContent.put( file, null );
-//                try {
-//                    if( file.getMimeType().equals(MIMEType.GOOGLE_FOLDER) ){
-//                        folderContent.putAll( recursivelyGetFrom(file.getId()) );
-//                    }
-//                } catch (IOException e) {
-//                    log.error(e.getMessage(), e);
-//                }
-//            }
-//        );
-//        return folderContent;
-//    }
 
     private List<File> doQuery( String query ) throws IOException {
         Drive.Files.List request = driveService.files().list()
