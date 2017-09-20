@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.cfg;
 
+import it.hackcaffebabe.jdrive.Constants;
 import it.hackcaffebabe.jdrive.util.PathsUtil;
 
 import java.util.HashMap;
@@ -15,7 +16,7 @@ public class Default
         {
             put(
                 Keys.WATCHED_BASE_PATH,
-                PathsUtil.USER_HOME + PathsUtil.SEP + "Google Drive"
+                PathsUtil.USER_HOME + PathsUtil.SEP + Constants.APP_DEFAULT_WATCHED_DIR_NAME
             );
         }
     };
