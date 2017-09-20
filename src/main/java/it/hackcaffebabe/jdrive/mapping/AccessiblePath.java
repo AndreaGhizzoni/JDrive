@@ -4,7 +4,7 @@ package it.hackcaffebabe.jdrive.mapping;
  * Wrapper class that contains a file path and a flag that tells other
  * threads if that path can be accessed.
  */
-public class AccessiblePath {
+class AccessiblePath {
     private String path;
     private boolean accessible;
 
