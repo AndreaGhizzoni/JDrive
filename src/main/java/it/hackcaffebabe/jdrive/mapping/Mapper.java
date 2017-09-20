@@ -1,11 +1,9 @@
 package it.hackcaffebabe.jdrive.mapping;
 
-
 import com.google.api.services.drive.model.File;
 import it.hackcaffebabe.jdrive.Constants;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
-import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
