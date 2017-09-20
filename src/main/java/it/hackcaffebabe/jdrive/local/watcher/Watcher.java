@@ -72,7 +72,7 @@ public final class Watcher implements Runnable
         log.info("Watch Service retrieved correctly from FileSystem.");
 
         createBasePathIfNotExists();
-        registerDirectories( this.watcherBasePath );
+        registerDirectoriesAndMap( this.watcherBasePath );
     }
 
     private void createBasePathIfNotExists() throws IOException {
@@ -132,8 +132,6 @@ public final class Watcher implements Runnable
             if( this.dispatchingQueue == null )
                 throw new InterruptedException("Dispatch Queue missing.");
 
-//            registerDirectories( this.watcherBasePath );
-
             WatchKey detectedWatchKey;
             while( true ){
                 // get the next event rise by File System as WatchKey
@@ -176,10 +174,18 @@ public final class Watcher implements Runnable
     /* method to walk down a path given recursively and meanwhile watcher
      * register all the directories. */
     private void registerDirectories( Path start ) throws IOException {
-        WatchServiceAdder watchServiceAdder = new WatchServiceAdder();
-        Files.walkFileTree( start, watchServiceAdder );
-        this.directories.putAll( watchServiceAdder.visitedPathsByWatcher );
-        this.mapper = watchServiceAdder.mapper;
+        WatcherFolderAdder watcherFolderAdder = new WatcherFolderAdder();
+        Files.walkFileTree( start, watcherFolderAdder );
+        this.directories.putAll( watcherFolderAdder.visitedPathsByWatcher );
+    }
+
+    /* method that walks down a path recursively while watcher records all
+    *  directories and creates a Mapper object */
+    private void registerDirectoriesAndMap( Path start ) throws IOException {
+        WatcherAddedAndMapper watcherAddedAndMapper = new WatcherAddedAndMapper();
+        Files.walkFileTree( start, watcherAddedAndMapper );
+        this.directories.putAll( watcherAddedAndMapper.visitedPathsByWatcher );
+        this.mapper = watcherAddedAndMapper.mapper;
     }
 
     private void dispatchPollEventsFrom( WatchKey eventWatchKey )
@@ -211,10 +217,9 @@ public final class Watcher implements Runnable
 //==============================================================================
 //  INNER CLASS
 //==============================================================================
-    // TODO rewrite this class description
-    /* class that walk down a given path and set the watcher for all the
-     * folders to rise a event when event listed below occur. */
-    private class WatchServiceAdder extends SimpleFileVisitor<Path> {
+    /* class that walks down a path recursively while watcher records all
+    *  directories and creates a Mapper object */
+    private class WatcherAddedAndMapper extends SimpleFileVisitor<Path> {
         final WatchEvent.Kind[] kindEvents = {
                 ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
         };
@@ -225,7 +230,7 @@ public final class Watcher implements Runnable
         @Override
         public FileVisitResult preVisitDirectory( Path dir,
                                                   BasicFileAttributes attrs )
-                throws IOException {
+                                                  throws IOException {
             WatchKey watchKey = dir.register( watcher, kindEvents );
             visitedPathsByWatcher.put( watchKey, dir );
             log.debug( String.format("Path %s saved by watcher.", dir) );
@@ -237,6 +242,36 @@ public final class Watcher implements Runnable
         @Override
         public FileVisitResult visitFile( Path file, BasicFileAttributes attr ) {
             mapper.put( file );
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFileFailed( Path file, IOException exc ) {
+            log.error(exc.getMessage(), exc);
+            return FileVisitResult.CONTINUE;
+        }
+    }
+
+    /* class that walk down a given path and set the watcher for all the
+     * folders in order to rise a event when event listed below occur. */
+    private class WatcherFolderAdder extends SimpleFileVisitor<Path> {
+        final WatchEvent.Kind[] kindEvents = {
+                ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY
+        };
+        Map<WatchKey, Path> visitedPathsByWatcher = new HashMap<>();
+
+        @Override
+        public FileVisitResult preVisitDirectory( Path dir,
+                                                  BasicFileAttributes attrs )
+                                                  throws IOException {
+            WatchKey watchKey = dir.register(watcher, kindEvents);
+            visitedPathsByWatcher.put( watchKey, dir );
+            log.debug( String.format("Path %s saved by watcher.", dir) );
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFile( Path file, BasicFileAttributes attr ) {
             return FileVisitResult.CONTINUE;
         }
 
