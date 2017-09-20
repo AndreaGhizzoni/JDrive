@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.fs.watcher;
+package it.hackcaffebabe.jdrive.remote.google.watcher;
 
 import it.hackcaffebabe.jdrive.Constants;
 import it.hackcaffebabe.jdrive.cfg.Configurator;

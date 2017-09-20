@@ -1,4 +1,4 @@
-package it.hackcaffebabe.jdrive.remote.google;
+package it.hackcaffebabe.jdrive.mapping;
 
 import com.google.api.services.drive.model.File;
 import it.hackcaffebabe.jdrive.mapping.Mapper;
@@ -54,7 +54,7 @@ public class MapperTest
             );
             Assert.assertEquals(
                 "After putting a path with accessible="+testObj.accessible+
-                    " I expect that mapper.isAccessible returns true",
+                    " I expect that mapping.isAccessible returns true",
                 testObj.accessible,
                 mapper.isAccessible( testObj.path )
             );
