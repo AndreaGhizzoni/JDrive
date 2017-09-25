@@ -5,6 +5,7 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
+import it.hackcaffebabe.jdrive.mapping.MappedFileSystem;
 import it.hackcaffebabe.jdrive.mapping.Mapper;
 import it.hackcaffebabe.jdrive.remote.google.DriveFileManager;
 import it.hackcaffebabe.jdrive.remote.google.MIMEType;
@@ -109,7 +110,10 @@ public class RemoteWatcher
                 jdriveLocalBasePath
             ));
         }
-//        mappedFileSystem.put( jdriveLocalBasePath, result.get(0) );
+
+        // TODO FOR TESTING PURPOSE
+        MappedFileSystem.getInstance().put( jdriveLocalBasePath, result.get(0) );
+
         mapper.put( jdriveLocalBasePath.toString(), result.get(0) );
         return result.get(0);
     }
