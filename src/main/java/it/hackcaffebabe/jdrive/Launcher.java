@@ -1,9 +1,14 @@
 package it.hackcaffebabe.jdrive;
 
+import com.google.api.services.drive.model.File;
+import com.google.common.collect.Sets;
 import it.hackcaffebabe.applicationutil.Locker;
 import it.hackcaffebabe.applicationutil.Util;
 import it.hackcaffebabe.jdrive.action.ActionClient;
 import it.hackcaffebabe.jdrive.local.watcher.events.WatcherEvent;
+import it.hackcaffebabe.jdrive.mapping.AccessiblePath;
+import it.hackcaffebabe.jdrive.mapping.MappedFileSystem;
+import it.hackcaffebabe.jdrive.mapping.Mapper;
 import it.hackcaffebabe.jdrive.remote.google.auth.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.local.watcher.Watcher;
@@ -22,6 +27,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -124,6 +131,39 @@ public class Launcher
          }
     }
 
+    private static void testMapDifference( Mapper local, Mapper remote ){
+        log.debug("Start doing differences between local and remote map...");
+
+//        MappedFileSystem mappedFileSystem = MappedFileSystem.getInstance();
+        Map<AccessiblePath, File> localImmutableMap = local.getImmutableMap();
+        Map<AccessiblePath, File> remoteImmutableMap = remote.getImmutableMap();
+
+        Set<AccessiblePath> localKeys = localImmutableMap.keySet();
+        log.debug("--> local keys");
+        log.debug(localKeys.toString());
+        Set<AccessiblePath> remoteKeys = remoteImmutableMap.keySet();
+        log.debug("--> remote keys");
+        log.debug(remoteKeys.toString());
+
+        Set<AccessiblePath> common = Sets.intersection( localKeys, remoteKeys );
+        log.debug("--> common keys");
+        log.debug(common.toString());
+//        common.forEach(
+//            accessiblePath -> mappedFileSystem.put(
+//                accessiblePath.getPath(),
+//                remote.get( accessiblePath.getPath() )
+//            )
+//        );
+
+        Set<AccessiblePath> onlyLocal = Sets.difference( localKeys, remoteKeys );
+        log.debug("--> only local keys");
+        log.debug(onlyLocal.toString());
+
+        Set<AccessiblePath> onlyRemote = Sets.difference( remoteKeys, localKeys );
+        log.debug("--> only remote keys");
+        log.debug(onlyRemote.toString());
+    }
+
     private static void startJDrive(){
         log.info("Starting JDrive application.");
         Status.WATCHER = "Starting JDrive application. ";
@@ -136,10 +176,12 @@ public class Launcher
 
         try{
             final RemoteWatcher remoteWatcher = RemoteWatcher.getInstance();
-            remoteWatcher.init();
+            Mapper remoteMap = remoteWatcher.init();
 
             final Watcher watcher = Watcher.getInstance();
-            watcher.init();
+            Mapper localMap = watcher.init();
+
+            testMapDifference(localMap, remoteMap);
 
             LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
             watcher.setDispatchingQueue(lbq);
