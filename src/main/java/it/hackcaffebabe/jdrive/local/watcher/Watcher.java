@@ -66,13 +66,14 @@ public final class Watcher implements Runnable
      * TODO add doc
      * @throws IOException
      */
-    public void init() throws IOException {
+    public Mapper init() throws IOException {
         log.info("Try to get WatchService from FileSystem...");
         this.watcher = FileSystems.getDefault().newWatchService();
         log.info("Watch Service retrieved correctly from FileSystem.");
 
         createBasePathIfNotExists();
         registerDirectoriesAndMap( this.watcherBasePath );
+        return this.mapper;
     }
 
     private void createBasePathIfNotExists() throws IOException {
@@ -115,11 +116,11 @@ public final class Watcher implements Runnable
         this.dispatchingQueue = queue;
     }
 
-    /**
-     * TODO add doc
-     * @return
-     */
-    public synchronized Mapper getMapper(){ return this.mapper; }
+//    /**
+//     * TODO add doc
+//     * @return
+//     */
+//    public synchronized Mapper getMapper(){ return this.mapper; }
 
 //==============================================================================
 //  OVERRIDE

@@ -6,6 +6,7 @@ import com.google.api.services.drive.model.FileList;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
 import it.hackcaffebabe.jdrive.mapping.MappedFileSystem;
+import it.hackcaffebabe.jdrive.mapping.Mapper;
 import it.hackcaffebabe.jdrive.remote.google.DriveFileManager;
 import it.hackcaffebabe.jdrive.remote.google.MIMEType;
 import it.hackcaffebabe.jdrive.remote.google.auth.GoogleAuthenticator;
@@ -29,7 +30,8 @@ public class RemoteWatcher implements Runnable
     private static RemoteWatcher instance;
 
     private Drive driveService;
-    private MappedFileSystem mappedFileSystem;
+//    private MappedFileSystem mappedFileSystem;
+    private Mapper mapper;
     private DriveFileManager driveFileManager;
 
     /**
@@ -44,9 +46,10 @@ public class RemoteWatcher implements Runnable
 
     private RemoteWatcher() {}
 
-    public void init() throws GeneralSecurityException, IOException {
+    public Mapper init() throws GeneralSecurityException, IOException {
         driveService = GoogleAuthenticator.getInstance().getDriveService();
-        mappedFileSystem = MappedFileSystem.getInstance();
+//        mappedFileSystem = MappedFileSystem.getInstance();
+        mapper = new Mapper();
         driveFileManager = DriveFileManager.getInstance();
 
         Path jdriveLocalPath = Paths.get(
@@ -58,9 +61,10 @@ public class RemoteWatcher implements Runnable
         recursivelyListFullPathsFrom(
             jdriveRemoteFolder,
             jdriveRemoteFolder.getName()
-        ).forEach( mappedFileSystem::put );
+        ).forEach( mapper::put );
 
         log.info("Mapping remote and local file complete.");
+        return mapper;
     }
 
     @Override
@@ -90,7 +94,8 @@ public class RemoteWatcher implements Runnable
                 jdriveLocalBasePath
             ));
         }
-        mappedFileSystem.put( jdriveLocalBasePath, result.get(0) );
+//        mappedFileSystem.put( jdriveLocalBasePath, result.get(0) );
+        mapper.put( jdriveLocalBasePath.toString(), result.get(0) );
         return result.get(0);
     }
 
