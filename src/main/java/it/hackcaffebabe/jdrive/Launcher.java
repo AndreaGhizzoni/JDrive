@@ -183,8 +183,16 @@ public class Launcher
 
             testMapDifference(localMap, remoteMap);
 
-            LinkedBlockingQueue<WatcherEvent> lbq = new LinkedBlockingQueue<>();
-            watcher.setDispatchingQueue(lbq);
+            LinkedBlockingQueue<WatcherEvent> uploadQueue = new LinkedBlockingQueue<>();
+            watcher.setDispatchingQueue(uploadQueue);
+
+            LinkedBlockingQueue<String> downloadQueue = new LinkedBlockingQueue<>();
+            remoteWatcher.setDispatchingQueue( downloadQueue );
+
+            new Thread( watcher, "Watcher" ).start();
+            remoteWatcher.start();
+
+            new Thread( new UpLoader(uploadQueue), "Uploader" ).start();
 
             ActionServer actionServer = new ActionServer();
             actionServer.addAction(
@@ -192,6 +200,7 @@ public class Launcher
                 () -> {
                     log.info("JDrive closing procedure...");
                     watcher.startClosingProcedure();
+                    remoteWatcher.startClosingProcedure();
                     return "JDrive closing procedure done.";
                 }
             );
@@ -203,13 +212,11 @@ public class Launcher
                 }
             );
 
-            new Thread( actionServer, "ActionServer" ).start();
-            new Thread( watcher, "Watcher" ).start();
-            Thread upLoaderThread = new Thread( new UpLoader(lbq), "Uploader" );
-            upLoaderThread.start();
-            upLoaderThread.join();
-            log.debug("Uploader has been closed, shutting down.");
+            Thread actionServerThread = new Thread( actionServer, "ActionServer" );
+            actionServerThread.start();
 
+            actionServerThread.join();
+            log.debug("ActionServer has been closed, shutting down application.");
         }catch( Exception ex ){
             fatalAndQuit(ex.getMessage(), ex);
         }
