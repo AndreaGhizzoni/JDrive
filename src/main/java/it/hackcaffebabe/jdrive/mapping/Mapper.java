@@ -5,10 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * TODO add doc
@@ -75,6 +72,10 @@ public class Mapper
             logEntry("Get ok", accessiblePath, file);
             return file;
         }
+    }
+
+    public Map<AccessiblePath, File> getImmutableMap(){
+        return Collections.unmodifiableMap( map );
     }
 
     public String lookup( File remoteFile ){
