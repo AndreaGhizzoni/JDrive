@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * TODO add doc
  */
-public class RemoteWatcher implements Runnable
+public class RemoteWatcher
 {
     private static final Logger log = LogManager.getLogger();
     private static RemoteWatcher instance;
@@ -33,6 +33,22 @@ public class RemoteWatcher implements Runnable
 //    private MappedFileSystem mappedFileSystem;
     private Mapper mapper;
     private DriveFileManager driveFileManager;
+
+    private Thread thread = new Thread( new Runnable() {
+        private final Logger log = LogManager.getLogger();
+        @Override
+        public void run() {
+//            while( !Thread.interrupted() ) {
+                // actualRemoteFiles = recursivelyGetFrom JDrive remote folder
+                // check the differences: actualRemoteFiles and RemoteToLocal.
+
+                // if some difference has been found
+                //     dispatch each difference through some queue...
+                // else
+                //     sleep for some time
+//            }
+        }
+    }, "RemoteWatcher");
 
     /**
      * TODO add doc
@@ -65,19 +81,6 @@ public class RemoteWatcher implements Runnable
 
         log.info("Mapping remote and local file complete.");
         return mapper;
-    }
-
-    @Override
-    public void run() {
-        // while(keepRunning) {
-            // actualRemoteFiles = recursivelyGetFrom JDrive remote folder
-            // check the differences: actualRemoteFiles and RemoteToLocal.
-
-            // if some difference has been found
-            //     dispatch each difference through some queue...
-            // else
-            //     sleep for some time
-        //}
     }
 
     private File getJDriveRemoteFolderOrCreate( Path jdriveLocalBasePath ) throws IOException {
@@ -138,5 +141,11 @@ public class RemoteWatcher implements Runnable
         return result;
     }
 
-    // TODO add closing procedure that will be performed by ActionServer
+    public void start(){
+        this.thread.start();
+    }
+
+    public void startClosingProcedure(){
+        this.thread.interrupt();
+    }
 }
