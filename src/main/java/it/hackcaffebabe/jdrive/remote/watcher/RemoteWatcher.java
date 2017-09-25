@@ -5,7 +5,6 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
-import it.hackcaffebabe.jdrive.mapping.MappedFileSystem;
 import it.hackcaffebabe.jdrive.mapping.Mapper;
 import it.hackcaffebabe.jdrive.remote.google.DriveFileManager;
 import it.hackcaffebabe.jdrive.remote.google.MIMEType;
@@ -20,6 +19,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * TODO add doc
@@ -34,19 +34,31 @@ public class RemoteWatcher
     private Mapper mapper;
     private DriveFileManager driveFileManager;
 
+    private LinkedBlockingQueue<String> dispatchingQueue;
+
     private Thread thread = new Thread( new Runnable() {
         private final Logger log = LogManager.getLogger();
         @Override
         public void run() {
-//            while( !Thread.interrupted() ) {
-                // actualRemoteFiles = recursivelyGetFrom JDrive remote folder
-                // check the differences: actualRemoteFiles and RemoteToLocal.
+            try {
+                if( dispatchingQueue == null )
+                    throw new InterruptedException("Dispaching Queue missing");
 
-                // if some difference has been found
-                //     dispatch each difference through some queue...
-                // else
-                //     sleep for some time
-//            }
+                log.info("RemoteWatcher is started.");
+                //while( !Thread.interrupted() ) {
+                    // actualRemoteFiles = recursivelyGetFrom JDrive remote folder
+                    // check the differences: actualRemoteFiles and RemoteToLocal.
+
+                    // if some difference has been found
+                    //     dispatch each difference through some queue...
+                    // else
+                    //     sleep for some time
+                //}
+            }catch ( InterruptedException interEx ){
+                log.error(interEx.getMessage()+". Exit.");
+            }finally {
+                log.info("RemoteWatcher closed.");
+            }
         }
     }, "RemoteWatcher");
 
@@ -141,11 +153,16 @@ public class RemoteWatcher
         return result;
     }
 
+    public void setDispatchingQueue( LinkedBlockingQueue<String> queue ){
+        this.dispatchingQueue = queue;
+    }
+
     public void start(){
         this.thread.start();
     }
 
     public void startClosingProcedure(){
+        log.info("RemoteWatcher closing procedure initialized...");
         this.thread.interrupt();
     }
 }
