@@ -26,24 +26,29 @@ public class MappedFileSystem
     private MappedFileSystem() {}
 
     public synchronized void put( Path localPath ) {
-        log.debug("Try to store path="+localPath+" with no remote file");
-        map.put( localPath );
+        put( localPath, null );
     }
 
     public synchronized void put( Path localPath, File remoteFile ) {
-        log.debug(String.format(
-            "Try to store path=%s with remote file=%s",
-            localPath.toString(), remoteFile == null ? "null" : remoteFile.getName()
-        ));
-        map.put( localPath.toString(), remoteFile );
+        put( localPath.toString(), remoteFile );
     }
 
     public synchronized void put( String localPathString, File remoteFile ) {
+        put( localPathString, remoteFile, true );
+    }
+
+    public synchronized void put( Path localPath, File remoteFile, boolean accessible ){
+        put( localPath.toString(), remoteFile, accessible );
+    }
+
+    public synchronized void put( String localPathString, File remoteFile, boolean accessible ){
         log.debug(String.format(
-            "Try to store path=%s with remote file=%s",
-            localPathString, remoteFile == null ? "null" : remoteFile.getName()
+            "Try to store path=%s with remote file=%s and accessible=%s",
+            localPathString,
+            remoteFile == null ? "null" : remoteFile.getName(),
+            accessible
         ));
-        map.put( localPathString, remoteFile );
+        map.put( localPathString, accessible, remoteFile );
     }
 
     public synchronized File get( Path localPath ) {
