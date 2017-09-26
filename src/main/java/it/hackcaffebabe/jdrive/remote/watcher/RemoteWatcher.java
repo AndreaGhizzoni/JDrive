@@ -7,6 +7,7 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
+import it.hackcaffebabe.jdrive.events.Event;
 import it.hackcaffebabe.jdrive.mapping.MappedFileSystem;
 import it.hackcaffebabe.jdrive.mapping.Mapper;
 import it.hackcaffebabe.jdrive.remote.google.DriveFileManager;
@@ -37,7 +38,7 @@ public class RemoteWatcher
     private Mapper mapper;
     private DriveFileManager driveFileManager;
 
-    private LinkedBlockingQueue<String> dispatchingQueue;
+    private LinkedBlockingQueue<Event> dispatchingQueue;
 
     private Thread thread = new Thread( new Runnable() {
         private final Logger log = LogManager.getLogger();
@@ -161,7 +162,7 @@ public class RemoteWatcher
         return result;
     }
 
-    public void setDispatchingQueue( LinkedBlockingQueue<String> queue ){
+    public void setDispatchingQueue( LinkedBlockingQueue<Event> queue ){
         this.dispatchingQueue = queue;
     }
 

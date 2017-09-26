@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import it.hackcaffebabe.applicationutil.Locker;
 import it.hackcaffebabe.applicationutil.Util;
 import it.hackcaffebabe.jdrive.action.ActionClient;
+import it.hackcaffebabe.jdrive.events.Event;
 import it.hackcaffebabe.jdrive.local.watcher.events.WatcherEvent;
 import it.hackcaffebabe.jdrive.mapping.AccessiblePath;
 import it.hackcaffebabe.jdrive.mapping.MappedFileSystem;
@@ -186,7 +187,7 @@ public class Launcher
             LinkedBlockingQueue<WatcherEvent> uploadQueue = new LinkedBlockingQueue<>();
             watcher.setDispatchingQueue(uploadQueue);
 
-            LinkedBlockingQueue<String> downloadQueue = new LinkedBlockingQueue<>();
+            LinkedBlockingQueue<Event> downloadQueue = new LinkedBlockingQueue<>();
             remoteWatcher.setDispatchingQueue( downloadQueue );
 
             new Thread( watcher, "Watcher" ).start();
