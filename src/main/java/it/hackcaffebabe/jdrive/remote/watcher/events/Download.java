@@ -19,6 +19,10 @@ public class Download extends Event
         this.setRemoteFile( remoteFile );
     }
 
+    public File getRemoteFile() { return this.remoteFile; }
+
+    public Path getLocalPath() { return this.localPath; }
+
     private void setRemoteFile( File remoteFile ){
         this.remoteFile = remoteFile;
     }
