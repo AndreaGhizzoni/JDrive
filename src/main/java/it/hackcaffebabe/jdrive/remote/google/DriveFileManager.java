@@ -228,7 +228,7 @@ public class DriveFileManager
 
             String remoteFileMimeType = remoteFile.getMimeType();
             String conversion = MIMEType.convert( remoteFileMimeType );
-            log.debug(remoteFile +" > converted to > "+ conversion);
+            log.debug(remoteFileMimeType +" > converted to > "+ conversion);
 
             Drive.Files files = driveService.files();
             if( conversion.isEmpty() ){
@@ -248,6 +248,7 @@ public class DriveFileManager
             }
 
             log.info("Download ok.");
+            mappedFileSystem.put( destination, remoteFile, false );
         }
     }
 
