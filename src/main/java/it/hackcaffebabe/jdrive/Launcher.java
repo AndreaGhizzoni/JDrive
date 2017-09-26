@@ -10,6 +10,7 @@ import it.hackcaffebabe.jdrive.local.watcher.events.WatcherEvent;
 import it.hackcaffebabe.jdrive.mapping.AccessiblePath;
 import it.hackcaffebabe.jdrive.mapping.MappedFileSystem;
 import it.hackcaffebabe.jdrive.mapping.Mapper;
+import it.hackcaffebabe.jdrive.remote.google.Downloader;
 import it.hackcaffebabe.jdrive.remote.google.auth.GoogleAuthenticator;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.local.watcher.Watcher;
@@ -190,10 +191,12 @@ public class Launcher
             LinkedBlockingQueue<Event> downloadQueue = new LinkedBlockingQueue<>();
             remoteWatcher.setDispatchingQueue( downloadQueue );
 
+            new Thread( new UpLoader(uploadQueue), "Uploader" ).start();
+            new Thread( new Downloader(downloadQueue), "Downloader" ).start();
+
             new Thread( watcher, "Watcher" ).start();
             remoteWatcher.start();
 
-            new Thread( new UpLoader(uploadQueue), "Uploader" ).start();
 
             ActionServer actionServer = new ActionServer();
             actionServer.addAction(
