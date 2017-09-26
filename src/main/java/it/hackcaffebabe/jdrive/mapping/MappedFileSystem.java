@@ -42,40 +42,26 @@ public class MappedFileSystem
     }
 
     public synchronized void put( String localPathString, File remoteFile, boolean accessible ){
-        log.debug(String.format(
-            "Try to store path=%s with remote file=%s and accessible=%s",
-            localPathString,
-            remoteFile == null ? "null" : remoteFile.getName(),
-            accessible
-        ));
         map.put( localPathString, accessible, remoteFile );
     }
 
     public synchronized File get( Path localPath ) {
-        log.debug("Try to read remote file from path="+localPath);
         return map.get( localPath );
     }
 
     public synchronized String lookup( File remoteFile ) {
-        log.debug("Try to read local path from remote file="+remoteFile.getName());
         return map.lookup( remoteFile );
     }
 
     public synchronized File remove( Path path ) {
-        log.debug("Try to delete path="+path);
         return map.remove( path.toString() );
     }
 
     public synchronized String remove( File remoteFile ) {
-        log.debug(String.format(
-            "Try to delete path from remote file=%s",
-            remoteFile == null ? "null" : remoteFile.getName()
-        ));
         return map.remove( remoteFile );
     }
 
     public synchronized boolean isAccessible( Path localPath ) {
-        log.debug("Try to read if path="+localPath+" is accessible");
         return map.isAccessible( localPath );
     }
 }
