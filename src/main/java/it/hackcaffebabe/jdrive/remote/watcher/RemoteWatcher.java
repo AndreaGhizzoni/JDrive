@@ -1,5 +1,7 @@
 package it.hackcaffebabe.jdrive.remote.watcher;
 
+import static it.hackcaffebabe.jdrive.Launcher.setPidToThreadContext;
+
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
@@ -41,6 +43,8 @@ public class RemoteWatcher
         private final Logger log = LogManager.getLogger();
         @Override
         public void run() {
+            setPidToThreadContext();
+
             try {
                 if( dispatchingQueue == null )
                     throw new InterruptedException("Dispaching Queue missing");
