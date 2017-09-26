@@ -64,4 +64,8 @@ public class MappedFileSystem
     public synchronized boolean isAccessible( Path localPath ) {
         return map.isAccessible( localPath );
     }
+
+    public synchronized boolean exists( Path localPath ) {
+        return map.exists( localPath );
+    }
 }
