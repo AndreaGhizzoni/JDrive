@@ -12,7 +12,10 @@ import it.hackcaffebabe.jdrive.util.PathsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
@@ -207,6 +210,45 @@ public class DriveFileManager
         driveService.files().update( file.getId(), newContent ).execute();
         mappedFileSystem.remove( file );
         log.debug("Trash remote file with name="+file.getName()+" ok");
+    }
+
+    public void download( File remoteFile, Path destination ) throws IOException {
+        // TODO check parameters null and stuff
+        log.info(String.format(
+            "Try to download remote file=%s into %s",
+            remoteFile.toString(), destination)
+        );
+
+        if( remoteFile.getMimeType().equals(MIMEType.GOOGLE_FOLDER) ){
+            log.debug("Try to download a folder > create new folder");
+            Files.createDirectories( destination );
+        }else{
+            log.debug("Try to download regular file > destination="+destination);
+            OutputStream outputStream = new FileOutputStream( destination.toFile() );
+
+            String remoteFileMimeType = remoteFile.getMimeType();
+            String conversion = MIMEType.convert( remoteFileMimeType );
+            log.debug(remoteFile +" > converted to > "+ conversion);
+
+            Drive.Files files = driveService.files();
+            if( conversion.isEmpty() ){
+                Drive.Files.Get request = files.get( remoteFile.getId() );
+                request.getMediaHttpDownloader().setProgressListener(
+                    new FileProgressListener()
+                );
+                request.executeMediaAndDownloadTo(outputStream);
+            }else{
+                Drive.Files.Export request = files.export(
+                    remoteFile.getId(), conversion
+                );
+                request.getMediaHttpDownloader().setProgressListener(
+                    new FileProgressListener()
+                );
+                request.executeMediaAndDownloadTo(outputStream);
+            }
+
+            log.info("Download ok.");
+        }
     }
 
     public static void logFile( File file ) {
