@@ -1,5 +1,6 @@
 package it.hackcaffebabe.jdrive.local.watcher.events;
 
+import it.hackcaffebabe.jdrive.events.Event;
 import it.hackcaffebabe.jdrive.util.DateUtils;
 
 import java.nio.file.Path;
@@ -11,16 +12,13 @@ import java.nio.file.WatchEvent;
  * Watcher. WatcherEvent's subclasses map the existing WatchEvent.Kind constants
  * into custom data objects.
  */
-public abstract class WatcherEvent
+public abstract class WatcherEvent extends Event
 {
-    private Path file = null;
-    private long timestamp = -1L;
-    private String message = null;
+    private Path path = null;
 
-    WatcherEvent( Path file, String message   ) {
-        this.setPath( file );
-        this.setMessage( message );
-        this.setNowAsTimestamp();
+    WatcherEvent( Path path, String message ) {
+        super( message );
+        this.setPath( path );
     }
 
     /**
@@ -53,49 +51,19 @@ public abstract class WatcherEvent
     /**
      * @return {@link java.nio.file.Path} of the file associated at the event.
      */
-    public Path getFile(){ return this.file; }
-
-    /**
-     * @return long the timestamp of associated event.
-     */
-    public long getTimestamp(){ return this.timestamp; }
-
-    /**
-     * @return {@link java.lang.String} a human readable message of associated
-     *         event
-     */
-    public String getMessage(){ return this.message; }
+    public Path getFile(){ return this.path; }
 
     public void setPath( Path path ) {
         if( path != null ){
-            this.file = path.toAbsolutePath();
-        }
-    }
-
-    private void setNowAsTimestamp(){
-        this.timestamp = System.currentTimeMillis();
-    }
-
-    private void setMessage( String msg ) {
-        if( msg != null && !msg.isEmpty() ){
-            this.message = msg;
+            this.path = path.toAbsolutePath();
         }
     }
 
     @Override
     public String toString(){
+        String superString = super.toString();
         String p = this.getFile() == null ? "null" : this.getFile().toString();
-        String l = this.getTimestamp() == 0L ?
-                "0" : DateUtils.formatTimestamp( this.getTimestamp() );
-        String m = this.getMessage() == null ? "null" : this.getMessage();
-
-        StringBuilder b = new StringBuilder();
-        b.append("{");
-        b.append(" \"kind\": ").append("\"").append( "%s" ).append("\",");
-        b.append(" \"path\": ").append("\"").append( p ).append("\",");
-        b.append(" \"timestamp\": ").append("\"").append( l ).append("\",");
-        b.append(" \"message\": ").append("\"").append( m ).append("\"");
-        b.append("}");
-        return b.toString();
+        String b = String.format( " \"path\": \"%s\"", p );
+        return String.format( superString, "%s", b );
     }
 }
