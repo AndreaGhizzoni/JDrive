@@ -17,13 +17,15 @@ public class Downloader implements Runnable
 {
     private static final Logger log = LogManager.getLogger();
     private LinkedBlockingQueue<Event> eventsQueue;
+    private DriveFileManager driveFileManager;
 
     /**
      * TODO add doc
      * @param eventsQueue
      */
-    public Downloader( LinkedBlockingQueue<Event> eventsQueue ) {
+    public Downloader( LinkedBlockingQueue<Event> eventsQueue ) throws Exception {
         this.eventsQueue = eventsQueue;
+        this.driveFileManager = DriveFileManager.getInstance();
         log.info("Downloader ready to start.");
     }
 
@@ -38,8 +40,17 @@ public class Downloader implements Runnable
             while ( keepRunning ){
                 detectEvent = this.eventsQueue.take();
                 if( detectEvent instanceof Download ){
-                    log.debug( ((Download)detectEvent).toString() );
+                    Download downloadEvent = (Download) detectEvent;
+                    log.debug( downloadEvent.toString() );
 
+                    try{
+                        this.driveFileManager.download(
+                            downloadEvent.getRemoteFile(),
+                            downloadEvent.getLocalPath()
+                        );
+                    }catch (Exception e){
+                        log.error(e.getMessage(), e);
+                    }
                 }else if( detectEvent instanceof Error ){
                     log.debug( ((Error)detectEvent).toString() );
                     keepRunning = false;
