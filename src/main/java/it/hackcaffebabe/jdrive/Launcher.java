@@ -140,7 +140,7 @@ public class Launcher
                                            LinkedBlockingQueue<Event> downloadQueue ){
         log.debug("Start doing differences between local and remote map...");
 
-//        MappedFileSystem mappedFileSystem = MappedFileSystem.getInstance();
+        MappedFileSystem mappedFileSystem = MappedFileSystem.getInstance();
         Map<AccessiblePath, File> localImmutableMap = local.getImmutableMap();
         Map<AccessiblePath, File> remoteImmutableMap = remote.getImmutableMap();
 
@@ -154,12 +154,12 @@ public class Launcher
         Set<AccessiblePath> common = Sets.intersection( localKeys, remoteKeys );
         log.debug("--> common keys");
         log.debug(common.toString());
-//        common.forEach(
-//            accessiblePath -> mappedFileSystem.put(
-//                accessiblePath.getPath(),
-//                remote.get( accessiblePath.getPath() )
-//            )
-//        );
+        common.forEach(
+            accessiblePath -> mappedFileSystem.put(
+                accessiblePath.getPath(),
+                remote.get( accessiblePath.getPath() )
+            )
+        );
 
         Set<AccessiblePath> onlyLocal = Sets.difference( localKeys, remoteKeys );
         log.debug("--> only local keys");
@@ -209,12 +209,11 @@ public class Launcher
 
             testMapDifference(localMap, remoteMap, downloadQueue);
 
-//            new Thread( new UpLoader(uploadQueue), "Uploader" ).start();
+            new Thread( new UpLoader(uploadQueue), "Uploader" ).start();
             new Thread( new Downloader(downloadQueue), "Downloader" ).start();
 
-//            new Thread( watcher, "Watcher" ).start();
+            new Thread( watcher, "Watcher" ).start();
             remoteWatcher.start();
-
 
             ActionServer actionServer = new ActionServer();
             actionServer.addAction(

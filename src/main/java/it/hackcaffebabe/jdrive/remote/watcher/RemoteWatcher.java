@@ -128,9 +128,6 @@ public class RemoteWatcher
             ));
         }
 
-        // TODO FOR TESTING PURPOSE
-        MappedFileSystem.getInstance().put( jdriveLocalBasePath, result.get(0) );
-
         mapper.put( jdriveLocalBasePath.toString(), result.get(0) );
         return result.get(0);
     }
