@@ -66,7 +66,7 @@ public class RemoteWatcher
                 Thread.sleep(1000 * 60);
             }catch (IOException ioex ){
                 log.error(ioex.getMessage()+". Exit.");
-            }catch ( InterruptedException ignored){
+            }catch ( InterruptedException ignored ){
             }finally {
                 log.info("RemoteWatcher closed.");
                 if( dispatchingQueue != null ){
