@@ -18,6 +18,7 @@ import it.hackcaffebabe.jdrive.action.ActionServer;
 import it.hackcaffebabe.jdrive.action.Message;
 import it.hackcaffebabe.jdrive.remote.google.UpLoader;
 import it.hackcaffebabe.jdrive.remote.watcher.RemoteWatcher;
+import it.hackcaffebabe.jdrive.remote.watcher.events.Download;
 import it.hackcaffebabe.jdrive.util.DateUtils;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
@@ -27,6 +28,7 @@ import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.Map;
@@ -133,7 +135,9 @@ public class Launcher
          }
     }
 
-    private static void testMapDifference( Mapper local, Mapper remote ){
+    private static void testMapDifference( Mapper local,
+                                           Mapper remote,
+                                           LinkedBlockingQueue<Event> downloadQueue ){
         log.debug("Start doing differences between local and remote map...");
 
 //        MappedFileSystem mappedFileSystem = MappedFileSystem.getInstance();
@@ -164,6 +168,20 @@ public class Launcher
         Set<AccessiblePath> onlyRemote = Sets.difference( remoteKeys, localKeys );
         log.debug("--> only remote keys");
         log.debug(onlyRemote.toString());
+        onlyRemote.forEach(
+            accessiblePath -> {
+                File remoteFileToDownload = remote.get( accessiblePath.getPath() );
+                Path localFile = Paths.get(remote.lookup( remoteFileToDownload ) );
+
+                try{
+                    downloadQueue.put(
+                        new Download(remoteFileToDownload, localFile, "TODO change me")
+                    );
+                }catch (Exception e){
+                    log.error(e.getMessage(), e);
+                }
+            }
+        );
     }
 
     private static void startJDrive(){
@@ -183,18 +201,18 @@ public class Launcher
             final Watcher watcher = Watcher.getInstance();
             Mapper localMap = watcher.init();
 
-            testMapDifference(localMap, remoteMap);
-
             LinkedBlockingQueue<WatcherEvent> uploadQueue = new LinkedBlockingQueue<>();
             watcher.setDispatchingQueue(uploadQueue);
 
             LinkedBlockingQueue<Event> downloadQueue = new LinkedBlockingQueue<>();
             remoteWatcher.setDispatchingQueue( downloadQueue );
 
-            new Thread( new UpLoader(uploadQueue), "Uploader" ).start();
+            testMapDifference(localMap, remoteMap, downloadQueue);
+
+//            new Thread( new UpLoader(uploadQueue), "Uploader" ).start();
             new Thread( new Downloader(downloadQueue), "Downloader" ).start();
 
-            new Thread( watcher, "Watcher" ).start();
+//            new Thread( watcher, "Watcher" ).start();
             remoteWatcher.start();
 
 
