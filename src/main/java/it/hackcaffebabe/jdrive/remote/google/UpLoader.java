@@ -7,9 +7,11 @@ import it.hackcaffebabe.jdrive.local.watcher.events.Delete;
 import it.hackcaffebabe.jdrive.local.watcher.events.Modify;
 import it.hackcaffebabe.jdrive.local.watcher.events.Error;
 import it.hackcaffebabe.jdrive.local.watcher.events.WatcherEvent;
+import it.hackcaffebabe.jdrive.mapping.MappedFileSystem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Path;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -22,6 +24,7 @@ public class UpLoader implements Runnable
     private static final Logger log = LogManager.getLogger();
     private LinkedBlockingQueue<WatcherEvent> eventsQueue;
     private DriveFileManager driveFileManager;
+    private MappedFileSystem mappedFileSystem;
 
     /**
      * Instance a new UpLoader with a queue to take the events.
@@ -32,6 +35,7 @@ public class UpLoader implements Runnable
     public UpLoader( LinkedBlockingQueue<WatcherEvent> eventsQueue ) throws Exception {
         this.eventsQueue = eventsQueue;
         this.driveFileManager = DriveFileManager.getInstance();
+        this.mappedFileSystem = MappedFileSystem.getInstance();
         log.info("Uploader ready to start.");
     }
 
@@ -48,32 +52,41 @@ public class UpLoader implements Runnable
                 if (detectedEvent instanceof Create) {
                     log.debug(((Create) detectedEvent).toString());
 
-                    try {
-                        File uploaded = driveFileManager.uploadFile(
-                            detectedEvent.getFile()
-                        );
-                        DriveFileManager.logFile(uploaded);
-                    } catch (Exception e) {
-                        log.error(e.getMessage(), e);
+                    Path localFile = detectedEvent.getFile();
+                    if( mappedFileSystem.isAccessible( localFile )) {
+                        try {
+                            File uploaded = driveFileManager.uploadFile(
+                                detectedEvent.getFile()
+                            );
+                            DriveFileManager.logFile(uploaded);
+                        } catch (Exception e) {
+                            log.error(e.getMessage(), e);
+                        }
                     }
                 } else if (detectedEvent instanceof Modify) {
                     log.debug(((Modify) detectedEvent).toString());
 
-                    try {
-                        File updatedRemoteFile = driveFileManager.updateRemoteFile(
-                            detectedEvent.getFile()
-                        );
-                        DriveFileManager.logFile(updatedRemoteFile);
-                    } catch (Exception e) {
-                        log.error(e.getMessage(), e);
+                    Path localFile = detectedEvent.getFile();
+                    if( mappedFileSystem.isAccessible( localFile )) {
+                        try {
+                            File updatedRemoteFile = driveFileManager.updateRemoteFile(
+                                detectedEvent.getFile()
+                            );
+                            DriveFileManager.logFile(updatedRemoteFile);
+                        } catch (Exception e) {
+                            log.error(e.getMessage(), e);
+                        }
                     }
                 } else if (detectedEvent instanceof Delete) {
                     log.debug(((Delete) detectedEvent).toString());
 
-                    try {
-                        driveFileManager.deleteRemoteFileFrom( detectedEvent.getFile() );
-                    } catch (Exception e) {
-                        log.error(e.getMessage(), e);
+                    Path localFile = detectedEvent.getFile();
+                    if( mappedFileSystem.isAccessible( localFile )) {
+                        try {
+                            driveFileManager.deleteRemoteFileFrom(detectedEvent.getFile());
+                        } catch (Exception e) {
+                            log.error(e.getMessage(), e);
+                        }
                     }
                 } else if (detectedEvent instanceof Error) {
                     log.debug(((Error) detectedEvent).toString());
