@@ -23,21 +23,17 @@ class PathSanitizer implements Sanitizer {
 
     @Override
     public String sanitize( String toSanitize ) {
-        log.debug("Try to sanitize path="+toSanitize);
+        String sanitized = toSanitize;
         if( toSanitize.startsWith(base) ){
-            String sanitized = toSanitize.replaceFirst(base, "");
-            log.debug("Path sanitized="+sanitized);
-            return sanitized;
-        }else{
-            log.debug("Noting to sanitize: path not start with base");
-            return toSanitize;
+            sanitized = toSanitize.replaceFirst(base, "");
         }
+        log.debug("from="+toSanitize+" to="+sanitized);
+        return sanitized;
     }
 
     String restore( String sanitized ) {
-        log.debug("Try to restore path="+sanitized);
         String restored = base+sanitized;
-        log.debug("Restored path="+restored);
+        log.debug("from="+sanitized+" to="+restored);
         return restored;
     }
 }
