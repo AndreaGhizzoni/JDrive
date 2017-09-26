@@ -48,21 +48,25 @@ public class RemoteWatcher
             setPidToThreadContext();
 
             try {
-                if( dispatchingQueue == null )
-                    throw new InterruptedException("Dispaching Queue missing");
+                if (dispatchingQueue == null)
+                    throw new IOException("Dispaching Queue missing");
 
                 log.info("RemoteWatcher is started.");
                 //while( !Thread.interrupted() ) {
-                    // actualRemoteFiles = recursivelyGetFrom JDrive remote folder
-                    // check the differences: actualRemoteFiles and RemoteToLocal.
+                // actualRemoteFiles = recursivelyGetFrom JDrive remote folder
+                // check the differences: actualRemoteFiles and RemoteToLocal.
 
-                    // if some difference has been found
-                    //     dispatch each difference through some queue...
-                    // else
-                    //     sleep for some time
+                // if some difference has been found
+                //     dispatch each difference through some queue...
+                // else
+                //     sleep for some time
                 //}
-            }catch ( InterruptedException interEx ){
-                log.error(interEx.getMessage()+". Exit.");
+
+                // FOR TESTING PURPOSE
+                Thread.sleep(1000 * 60);
+            }catch (IOException ioex ){
+                log.error(ioex.getMessage()+". Exit.");
+            }catch ( InterruptedException ignored){
             }finally {
                 log.info("RemoteWatcher closed.");
                 if( dispatchingQueue != null ){
