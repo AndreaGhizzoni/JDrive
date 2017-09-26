@@ -76,6 +76,6 @@ public class MIMEType
      */
     public static String convert( String mimeType ) {
         mimeType = mimeType.toLowerCase();
-        return conversion.getOrDefault( mimeType, GOOGLE_OCTET_STREAM );
+        return conversion.getOrDefault( mimeType, "" );
     }
 }
