@@ -160,6 +160,15 @@ public class Mapper
             .orElse(false);
     }
 
+    public boolean exists( Path path ) {
+        return exists( path.toString() );
+    }
+
+    public boolean exists( String path ) {
+        AccessiblePath accessiblePath = new AccessiblePath( path );
+        return map.containsKey( accessiblePath );
+    }
+
     private void logEntry( String action, AccessiblePath accessiblePath,
                                         File remoteFile ) {
         logEntry(
