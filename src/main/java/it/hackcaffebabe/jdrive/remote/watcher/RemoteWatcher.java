@@ -13,6 +13,7 @@ import it.hackcaffebabe.jdrive.mapping.Mapper;
 import it.hackcaffebabe.jdrive.remote.google.DriveFileManager;
 import it.hackcaffebabe.jdrive.remote.google.MIMEType;
 import it.hackcaffebabe.jdrive.remote.google.auth.GoogleAuthenticator;
+import it.hackcaffebabe.jdrive.remote.watcher.events.Error;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -64,6 +65,13 @@ public class RemoteWatcher
                 log.error(interEx.getMessage()+". Exit.");
             }finally {
                 log.info("RemoteWatcher closed.");
+                if( dispatchingQueue != null ){
+                    try {
+                        dispatchingQueue.put( new Error("Remote Watcher is closing.") );
+                    } catch (InterruptedException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
             }
         }
     }, "RemoteWatcher");
