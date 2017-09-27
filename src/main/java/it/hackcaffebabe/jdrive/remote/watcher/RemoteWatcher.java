@@ -35,7 +35,6 @@ public class RemoteWatcher
     private static RemoteWatcher instance;
 
     private Drive driveService;
-//    private MappedFileSystem mappedFileSystem;
     private Mapper mapper;
     private DriveFileManager driveFileManager;
 
@@ -94,7 +93,6 @@ public class RemoteWatcher
 
     public Mapper init() throws GeneralSecurityException, IOException {
         driveService = GoogleAuthenticator.getInstance().getDriveService();
-//        mappedFileSystem = MappedFileSystem.getInstance();
         mapper = new Mapper();
         driveFileManager = DriveFileManager.getInstance();
 
