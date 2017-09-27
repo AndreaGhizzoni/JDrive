@@ -42,7 +42,6 @@ public final class Configurator
      * @throws IllegalStateException if setup() method is not called first.
      */
     public static Configurator getInstance() throws IllegalStateException{
-        log.info("Configurator instance requested.");
         if( configuration == null )
             throw new IllegalStateException("Configurator need to be set up "+
                     "via Configurator.setup() method first.");
@@ -103,7 +102,9 @@ public final class Configurator
         return instance;
     }
 
-    private Configurator() {}
+    private Configurator() {
+        log.info("Configurator creation.");
+    }
 
     /**
      * Put a new value into the properties file. If this key already exists,
