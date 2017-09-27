@@ -250,13 +250,4 @@ public class DriveFileManager
             log.info("Download ok.");
         }
     }
-
-//    public static void logFile( File file ) {
-//        String l = String.format(
-//            ">>> %s %s %s %s %s",
-//            file.getName(), file.getId(), file.getMimeType(),
-//            file.getModifiedTime(), file.getParents()
-//        );
-//        log.debug(l);
-//    }
 }
