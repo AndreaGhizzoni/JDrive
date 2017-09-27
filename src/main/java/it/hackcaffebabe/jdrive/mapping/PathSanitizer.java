@@ -3,15 +3,12 @@ package it.hackcaffebabe.jdrive.mapping;
 import it.hackcaffebabe.jdrive.Constants;
 import it.hackcaffebabe.jdrive.cfg.Configurator;
 import it.hackcaffebabe.jdrive.cfg.Keys;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * TODO add doc
  */
 class PathSanitizer implements Sanitizer {
     private String base;
-    private final Logger log = LogManager.getLogger();
 
     PathSanitizer(){
         String watchedDir = (String) Configurator.getInstance()
@@ -27,13 +24,11 @@ class PathSanitizer implements Sanitizer {
         if( toSanitize.startsWith(base) ){
             sanitized = toSanitize.replaceFirst(base, "");
         }
-        log.debug("from="+toSanitize+" to="+sanitized);
         return sanitized;
     }
 
     String restore( String sanitized ) {
         String restored = base+sanitized;
-        log.debug("from="+sanitized+" to="+restored);
         return restored;
     }
 }
