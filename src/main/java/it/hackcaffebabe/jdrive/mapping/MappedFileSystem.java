@@ -17,13 +17,14 @@ public class MappedFileSystem
     private Mapper map = new Mapper();
 
     public static synchronized MappedFileSystem getInstance() {
-        log.debug("Mapped File System request instance...");
         if( instance == null )
             instance = new MappedFileSystem();
         return instance;
     }
 
-    private MappedFileSystem() {}
+    private MappedFileSystem() {
+        log.debug("Mapped File System creation.");
+    }
 
     public synchronized void put( Path localPath ) {
         put( localPath, null );
