@@ -124,8 +124,6 @@ public class RemoteWatcher
             result.add( driveFileManager.createRemoteFolderFrom(
                 jdriveLocalBasePath
             ));
-        }else {
-            mapper.put(jdriveLocalBasePath.toString(), result.get(0));
         }
         return result.get(0);
     }
