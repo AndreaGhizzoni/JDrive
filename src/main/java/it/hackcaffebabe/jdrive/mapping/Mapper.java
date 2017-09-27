@@ -157,7 +157,7 @@ public class Mapper
             .filter( accessiblePath -> accessiblePath.getPath().equals(sanitizedPath) )
             .findAny()
             .map( AccessiblePath::isAccessible )
-            .orElse(false);
+            .orElse(true);
     }
 
     public boolean exists( Path path ) {
