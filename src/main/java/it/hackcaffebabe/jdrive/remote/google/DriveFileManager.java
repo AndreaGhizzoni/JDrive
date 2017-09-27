@@ -248,7 +248,6 @@ public class DriveFileManager
             }
 
             log.info("Download ok.");
-            mappedFileSystem.put( destination, remoteFile, false );
         }
     }
 

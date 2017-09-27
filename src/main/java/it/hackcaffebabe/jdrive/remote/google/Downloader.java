@@ -3,6 +3,7 @@ package it.hackcaffebabe.jdrive.remote.google;
 import static it.hackcaffebabe.jdrive.Launcher.setPidToThreadContext;
 
 import it.hackcaffebabe.jdrive.events.Event;
+import it.hackcaffebabe.jdrive.mapping.MappedFileSystem;
 import it.hackcaffebabe.jdrive.remote.watcher.events.Download;
 import it.hackcaffebabe.jdrive.remote.watcher.events.Error;
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +19,7 @@ public class Downloader implements Runnable
     private static final Logger log = LogManager.getLogger();
     private LinkedBlockingQueue<Event> eventsQueue;
     private DriveFileManager driveFileManager;
+    private MappedFileSystem mappedFileSystem;
 
     /**
      * TODO add doc
@@ -26,6 +28,7 @@ public class Downloader implements Runnable
     public Downloader( LinkedBlockingQueue<Event> eventsQueue ) throws Exception {
         this.eventsQueue = eventsQueue;
         this.driveFileManager = DriveFileManager.getInstance();
+        this.mappedFileSystem = MappedFileSystem.getInstance();
         log.info("Downloader ready to start.");
     }
 
@@ -43,6 +46,11 @@ public class Downloader implements Runnable
                     Download downloadEvent = (Download) detectEvent;
                     log.debug( downloadEvent.toString() );
 
+                    mappedFileSystem.put(
+                        downloadEvent.getLocalPath(),
+                        downloadEvent.getRemoteFile(),
+                        false
+                    );
                     try{
                         this.driveFileManager.download(
                             downloadEvent.getRemoteFile(),
