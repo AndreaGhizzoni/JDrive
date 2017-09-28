@@ -69,7 +69,7 @@ public class DriveFileManager
         log.info("Try to create remote folder from "+folderPath);
         File fileMetadata = new File();
         fileMetadata.setName( folderPath.getFileName().toString() );
-        fileMetadata.setMimeType( MIMEType.GOOGLE_FOLDER);
+        fileMetadata.setMimeType( MIMEType.Remote.FOLDER.toString() );
         fileMetadata.setParents( Collections.singletonList(parentRemoteFileId) );
         File remoteFolder = driveService.files()
             .create( fileMetadata )
@@ -112,12 +112,12 @@ public class DriveFileManager
             .setName( localFile.getName() )
             .setParents( Collections.singletonList(remoteParentId) );
 
-        String mimeType = MIMEType.convert(
-            PathsUtil.getFileExtension(localFile)
-        );
+//        String mimeType = MIMEType.convert(
+//            PathsUtil.getFileExtension(localFile)
+//        );
 
         Drive.Files.Create create = driveService.files()
-            .create(fileMetadata, new FileContent(mimeType, localFile) );
+            .create(fileMetadata, new FileContent(null, localFile) );
 
         create.getMediaHttpUploader()
             .setDirectUploadEnabled( false )
@@ -158,10 +158,10 @@ public class DriveFileManager
         if( updatedFile.isDirectory() ){
             update = driveService.files().update( remoteFile.getId(), fileMetadata );
         }else{
-            String mimeType = MIMEType.convert(
-                PathsUtil.getFileExtension(updatedFile)
-            );
-            FileContent mediaContent = new FileContent( mimeType, updatedFile );
+//            String mimeType = MIMEType.convert(
+//                PathsUtil.getFileExtension(updatedFile)
+//            );
+            FileContent mediaContent = new FileContent( null, updatedFile );
             update = driveService.files()
                     .update( remoteFile.getId(), fileMetadata, mediaContent );
 
@@ -219,7 +219,7 @@ public class DriveFileManager
             remoteFile.toString(), destination)
         );
 
-        if( remoteFile.getMimeType().equals(MIMEType.GOOGLE_FOLDER) ){
+        if( remoteFile.getMimeType().equals(MIMEType.Remote.FOLDER.toString()) ){
             log.debug("Try to download a folder > create new folder");
             Files.createDirectories( destination );
         }else{
