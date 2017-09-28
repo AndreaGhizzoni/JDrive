@@ -114,7 +114,7 @@ public class RemoteWatcher
             throws IOException {
         String query = String.format(
             "mimeType = '%s' and not trashed and 'root' in parents and name = '%s'",
-            MIMEType.GOOGLE_FOLDER, jdriveLocalBasePath.getFileName()
+            MIMEType.Remote.FOLDER, jdriveLocalBasePath.getFileName()
         );
         List<File> result = doQuery( query );
 
@@ -135,7 +135,7 @@ public class RemoteWatcher
         HashMap<String, File> pathsMap = new HashMap<>();
         pathsMap.put( partialPath, remoteFolder );
 
-        if( remoteFolder.getMimeType().equals(MIMEType.GOOGLE_FOLDER) ) {
+        if( remoteFolder.getMimeType().equals(MIMEType.Remote.FOLDER.toString()) ) {
             String q = String.format("not trashed and '%s' in parents", remoteFolder.getId());
             doQuery(q).forEach(
                 file -> {
