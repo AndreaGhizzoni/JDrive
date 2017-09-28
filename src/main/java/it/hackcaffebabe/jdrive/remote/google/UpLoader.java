@@ -49,57 +49,46 @@ public class UpLoader implements Runnable
             WatcherEvent detectedEvent;
             while( keepRunning ) {
                 detectedEvent = eventsQueue.take();
-                if (detectedEvent instanceof Create) {
-                    Create createEvent = (Create) detectedEvent;
+
+                if( detectedEvent instanceof Error ) {
+                    log.debug(((Error) detectedEvent).toString());
+                    keepRunning = false;
+                }else{
                     Path localFile = detectedEvent.getFile();
-                    if( mappedFileSystem.isAccessible( localFile )) {
+                    if( !mappedFileSystem.isAccessible(localFile) ){
+                        log.debug(
+                            "Event detected BUT skip it becasue path="
+                            +localFile+" is not accessible."
+                        );
+                        continue;
+                    }
+
+                    if( detectedEvent instanceof Create ) {
+                        Create createEvent = (Create) detectedEvent;
                         log.debug(createEvent.toString());
                         try {
                             File uploaded = driveFileManager.uploadFile( localFile );
                         } catch (Exception e) {
                             log.error(e.getMessage(), e);
                         }
-                    }else{
-                        log.debug(
-                            "Create event detected BUT skip it becasue path="
-                            +localFile+" is not accessible."
-                        );
-                    }
-                } else if (detectedEvent instanceof Modify) {
-                    Modify modifyEvent = (Modify) detectedEvent;
-                    Path localFile = detectedEvent.getFile();
-                    if( mappedFileSystem.isAccessible( localFile )) {
+                    } else if( detectedEvent instanceof Modify ) {
+                        Modify modifyEvent = (Modify) detectedEvent;
                         log.debug(modifyEvent.toString());
                         try {
-                            File updatedRemoteFile = driveFileManager.updateRemoteFile( localFile );
+                            File updatedRemoteFile = driveFileManager
+                                    .updateRemoteFile( localFile );
                         } catch (Exception e) {
                             log.error(e.getMessage(), e);
                         }
-                    }else{
-                        log.debug(
-                            "Modify event detected BUT skip it becasue path="
-                            +localFile+" is not accessible."
-                        );
-                    }
-                } else if (detectedEvent instanceof Delete) {
-                    Delete deleteEvent = (Delete) detectedEvent;
-                    Path localFile = detectedEvent.getFile();
-                    if( mappedFileSystem.isAccessible( localFile )) {
+                    } else if( detectedEvent instanceof Delete ) {
+                        Delete deleteEvent = (Delete) detectedEvent;
                         log.debug(deleteEvent.toString());
                         try {
                             driveFileManager.deleteRemoteFileFrom( localFile );
                         } catch (Exception e) {
                             log.error(e.getMessage(), e);
                         }
-                    }else{
-                        log.debug(
-                            "Delete event detected BUT skip it becasue path="
-                            +localFile+" is not accessible."
-                        );
                     }
-                } else if (detectedEvent instanceof Error) {
-                    log.debug(((Error) detectedEvent).toString());
-                    keepRunning = false;
                 }
             }
 
