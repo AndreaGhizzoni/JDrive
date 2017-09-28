@@ -116,12 +116,6 @@ public final class Watcher implements Runnable
         this.dispatchingQueue = queue;
     }
 
-//    /**
-//     * TODO add doc
-//     * @return
-//     */
-//    public synchronized Mapper getMapper(){ return this.mapper; }
-
 //==============================================================================
 //  OVERRIDE
 //==============================================================================
