@@ -35,7 +35,6 @@ public class RemoteWatcher
     private static RemoteWatcher instance;
 
     private Drive driveService;
-    private Mapper mapper;
     private DriveFileManager driveFileManager;
 
     private LinkedBlockingQueue<Event> dispatchingQueue;
@@ -93,7 +92,6 @@ public class RemoteWatcher
 
     public Mapper init() throws GeneralSecurityException, IOException {
         driveService = GoogleAuthenticator.getInstance().getDriveService();
-        mapper = new Mapper();
         driveFileManager = DriveFileManager.getInstance();
 
         Path jdriveLocalPath = Paths.get(
@@ -102,16 +100,18 @@ public class RemoteWatcher
         File jdriveRemoteFolder = getJDriveRemoteFolderOrCreate( jdriveLocalPath );
         log.info("JDrive remote folder found.");
 
+        Mapper mapper = new Mapper();
         recursivelyListFullPathsFrom(
             jdriveRemoteFolder,
             jdriveRemoteFolder.getName()
         ).forEach( mapper::put );
-
         log.info("Mapping remote and local file complete.");
+
         return mapper;
     }
 
-    private File getJDriveRemoteFolderOrCreate( Path jdriveLocalBasePath ) throws IOException {
+    private File getJDriveRemoteFolderOrCreate( Path jdriveLocalBasePath )
+            throws IOException {
         String query = String.format(
             "mimeType = '%s' and not trashed and 'root' in parents and name = '%s'",
             MIMEType.GOOGLE_FOLDER, jdriveLocalBasePath.getFileName()
@@ -129,7 +129,9 @@ public class RemoteWatcher
         return result.get(0);
     }
 
-    private HashMap<String, File> recursivelyListFullPathsFrom( File remoteFolder, String partialPath ) throws IOException {
+    private HashMap<String, File> recursivelyListFullPathsFrom( File remoteFolder,
+                                                                String partialPath )
+            throws IOException {
         HashMap<String, File> pathsMap = new HashMap<>();
         pathsMap.put( partialPath, remoteFolder );
 
