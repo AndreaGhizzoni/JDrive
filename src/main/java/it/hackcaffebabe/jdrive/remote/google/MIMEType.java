@@ -36,16 +36,19 @@ public class MIMEType
     public static final String GOOGLE_MPEG = "audio/mpeg";
 
     private static HashMap<String, String> conversion = new HashMap<String, String>() {{
+        // remote to local conversion
         put( GOOGLE_DOCUMENT, GOOGLE_PDF );
         put( GOOGLE_SPREADSHEET, GOOGLE_PDF );
         put( GOOGLE_DRAWING, GOOGLE_PNG );
         put( GOOGLE_PRESENTATION, GOOGLE_PDF );
+        put( GOOGLE_PLAIN_TEXT, GOOGLE_PLAIN_TEXT );
+
+        // local to remote conversion
         put( "xls", GOOGLE_EXCEL );
         put( "xlsx", GOOGLE_EXCEL_2010 );
         put( "xml", GOOGLE_XML );
         put( "ods", GOOGLE_OPEN_DOC );
         put( "txt", GOOGLE_PLAIN_TEXT );
-        put( "", GOOGLE_PLAIN_TEXT );
         put( "csv", GOOGLE_PLAIN_TEXT );
         put( "tmpl", GOOGLE_PLAIN_TEXT );
         put( "pdf", GOOGLE_PDF );
@@ -69,8 +72,9 @@ public class MIMEType
     }};
 
     /**
-     * This method convert a remote or local mime type into a remote or local
-     * mime type.
+     * This method convert a remote mime type into a local mime type and vice versa.
+     * If this method returns empty string means that there is not such a conversion
+     * for given mime type.
      * @param mimeType {@link java.lang.String} mime type to convert.
      * @return {@link java.lang.String} the converted mime type.
      */
