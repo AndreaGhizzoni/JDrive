@@ -112,9 +112,10 @@ public class RemoteWatcher
     }
 
     private File getJDriveRemoteFolderOrCreate( Path jdriveLocalBasePath ) throws IOException {
-        String queryPattern = "mimeType = '%s' and not trashed and "+
-                              "'root' in parents and name = 'Google Drive'";
-        String query = String.format( queryPattern, MIMEType.GOOGLE_FOLDER );
+        String query = String.format(
+            "mimeType = '%s' and not trashed and 'root' in parents and name = '%s'",
+            MIMEType.GOOGLE_FOLDER, jdriveLocalBasePath.getFileName()
+        );
         List<File> result = doQuery( query );
 
         if( result.size() > 1 )
