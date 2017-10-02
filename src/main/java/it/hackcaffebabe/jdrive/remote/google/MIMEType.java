@@ -10,7 +10,6 @@ public class MIMEType
     public static enum Local {
         FOLDER( "folder" ),
 
-        // documents
         DOC( "doc" ), DOCX( "docx" ),
         XLS( "xls" ), XLSX( "xlsx" ),
         PPT( "ppt" ), PPTX( "pptx" )
@@ -41,7 +40,7 @@ public class MIMEType
         @Override public String toString() { return this.mimeType; }
     }
 
-    private static HashMap<String, String> conversion = new HashMap<String, String>();
+    private static HashMap<String, String> conversion = new HashMap<>();
 
     static {{
         //======================================================================
@@ -65,16 +64,16 @@ public class MIMEType
         put( Local.XLSX, Remote.SPREADSHEET );
         put( Local.PPT, Remote.PRESENTATION );
         put( Local.PPTX, Remote.PRESENTATION );
-    }};
+    }}
 
     private static void put( Enum a, Enum b ){
         conversion.put( a.toString(), b.toString() );
     }
 
     /**
-     * This method convert a remote mime type into a local mime type and vice versa.
-     * If this method returns empty string means that there is not such a conversion
-     * for given mime type.
+     * This method convert a remote mime type into a local mime type and vice
+     * versa. If this method returns empty string means that there is not such
+     * a conversion for given mime type.
      * @param mimeType {@link java.lang.String} mime type to convert.
      * @return {@link java.lang.String} the converted mime type.
      */
