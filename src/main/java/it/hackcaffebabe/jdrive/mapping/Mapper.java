@@ -69,6 +69,7 @@ public class Mapper
                 .stream()
                 .filter( entry -> entry.getKey().getPath().equals(sanitizedPath) )
                 .findAny();
+
         if( optional.isPresent() ){
             Map.Entry<AccessiblePath, File> entry = optional.get();
             logEntry("Get ok", entry.getKey(), entry.getValue());
@@ -91,15 +92,19 @@ public class Mapper
         String sanitizedPath = pathSanitizer.sanitize( path );
         log.debug("Try to toggle accessible of local file path="+sanitizedPath);
 
-        Optional<AccessiblePath> optional = map.keySet()
+        Optional<Map.Entry<AccessiblePath, File>> optional = map.entrySet()
             .stream()
-            .filter( accPath -> accPath.getPath().equals(sanitizedPath) )
+            .filter( entry -> entry.getKey().getPath().equals(sanitizedPath) )
             .findAny();
 
         if( optional.isPresent() ){
-            File remoteFile = get( sanitizedPath );
-            remove( sanitizedPath );
-            put( sanitizedPath, !optional.get().isAccessible(), remoteFile );
+            Map.Entry<AccessiblePath, File> entryToOverwrite = optional.get();
+            AccessiblePath accessiblePath = entryToOverwrite.getKey();
+
+            boolean newAccess = !accessiblePath.isAccessible();
+            String oldPath = accessiblePath.getPath();
+            File remoteFile = entryToOverwrite.getValue();
+            put( oldPath, newAccess, remoteFile );
         }
     }
 
