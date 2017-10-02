@@ -1,6 +1,7 @@
 package it.hackcaffebabe.jdrive.mapping;
 
 import com.google.api.services.drive.model.File;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -76,6 +77,24 @@ public class Mapper
 
     public Map<AccessiblePath, File> getImmutableMap(){
         return Collections.unmodifiableMap( map );
+    }
+
+    public void toggleAccessible( Path path ){
+        toggleAccessible( path.toString() );
+    }
+
+    public void toggleAccessible( String path ){
+        String sanitizedPath = pathSanitizer.sanitize( path );
+        Optional<Boolean> optional = map.keySet()
+            .stream()
+            .filter( accPath -> accPath.getPath().equals(sanitizedPath) )
+            .map( AccessiblePath::isAccessible )
+            .findAny();
+
+        if( optional.isPresent() ){
+            File remoteFile = get( sanitizedPath );
+            put( sanitizedPath, !optional.get(), remoteFile );
+        }
     }
 
     public String lookup( File remoteFile ){
