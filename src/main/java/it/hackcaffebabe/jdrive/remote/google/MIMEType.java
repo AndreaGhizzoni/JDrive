@@ -10,9 +10,9 @@ public class MIMEType
     public static enum Local {
         FOLDER( "folder" ),
 
-        DOC( "doc" ), DOCX( "docx" ), ODT( "odt" ),
-        XLS( "xls" ), XLSX( "xlsx" ),
-        PPT( "ppt" ), PPTX( "pptx" ),
+//        DOC( "doc" ), DOCX( "docx" ), ODT( "odt" ),
+//        XLS( "xls" ), XLSX( "xlsx" ),
+//        PPT( "ppt" ), PPTX( "pptx" ),
 
         ;
         private String mimeType;
@@ -28,15 +28,15 @@ public class MIMEType
         PRESENTATION( "application/vnd.google-apps.presentation" ),
         DRAWING( "application/vnd.google-apps.drawing" ),
 
-        WORD( "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ),
-        POWER_POINT( "application/vnd.openxmlformats-officedocument.presentationml.presentation" ),
-        EXCEL( "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ),
+//        WORD( "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ),
+//        POWER_POINT( "application/vnd.openxmlformats-officedocument.presentationml.presentation" ),
+//        EXCEL( "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ),
 
         OPEN_WORD( "application/vnd.oasis.opendocument.text" ),
         OPEN_SHEET( "application/x-vnd.oasis.opendocument.spreadsheet" ),
         OPEN_PRESENTATION( "application/vnd.oasis.opendocument.presentation" ),
 
-        PDF( "application/pdf" ),
+//        PDF( "application/pdf" ),
 
         PNG( "image/png" )
 
@@ -59,22 +59,9 @@ public class MIMEType
         put( Remote.PRESENTATION, Remote.OPEN_PRESENTATION );
         put( Remote.DRAWING, Remote.PNG );
 
-        put( Remote.WORD, Remote.PDF );
-        put( Remote.POWER_POINT, Remote.PDF );
-        put( Remote.EXCEL, Remote.PDF );
-
         //======================================================================
         // Remote <- Local (upload)
         put( Local.FOLDER, Remote.FOLDER );
-
-        // documents
-        put( Local.DOC, Remote.DOCUMENT );
-        put( Local.DOCX, Remote.DOCUMENT );
-//        put( Local.ODT, Remote.DOCUMENT );
-        put( Local.XLS, Remote.SPREADSHEET );
-        put( Local.XLSX, Remote.SPREADSHEET );
-        put( Local.PPT, Remote.PRESENTATION );
-        put( Local.PPTX, Remote.PRESENTATION );
     }}
 
     private static void put( Enum a, Enum b ){
