@@ -57,7 +57,7 @@ public class UpLoader implements Runnable
                     Path localFile = detectedEvent.getFile();
                     if( !mappedFileSystem.isAccessible(localFile) ){
                         log.debug(
-                            "Event detected BUT skip it becasue path="
+                            "Event detected BUT skip it because path="
                             +localFile+" is not accessible."
                         );
                         continue;

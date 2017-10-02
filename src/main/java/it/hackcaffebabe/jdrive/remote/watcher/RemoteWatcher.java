@@ -47,7 +47,7 @@ public class RemoteWatcher
 
             try {
                 if (dispatchingQueue == null)
-                    throw new IOException("Dispaching Queue missing");
+                    throw new IOException("Dispatching Queue missing");
 
                 log.info("RemoteWatcher is started.");
                 //while( !Thread.interrupted() ) {
