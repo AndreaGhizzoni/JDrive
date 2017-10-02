@@ -1,48 +1,43 @@
 package it.hackcaffebabe.jdrive;
 
 
+import java.util.HashMap;
+import java.util.Optional;
+
 public class TestStuff {
 
-    private static class T {
-        private Thread rT;
+    public static class ComplexObj {
+        String a;
+        String b;
 
-        public T(){
-            this.rT = new Thread( () -> {
-                while (!Thread.interrupted()) {
-                    System.out.println("alive");
-//                    try {
-//                        Thread.sleep(1000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-                }
-            } , "name" );
-        }
-
-        public void start(){
-            this.rT.start();
-        }
-
-        public void startClosing(){
-            System.out.println("closing");
-            if( this.rT != null )
-                this.rT.interrupt();
-        }
+        ComplexObj( String a, String b ){ this.a = a; this.b = b; }
+        public String toString(){ return "[ "+a+" "+b+" ]";}
     }
 
     public static void main(String...args) {
-//        String p = "/home/andrea/Google Drive";
-//        System.out.println(p);
-//        String g = "Google Drive";
-//            System.out.println( p.replaceFirst(g, "") );
+        HashMap<ComplexObj, String> map = new HashMap<>();
+        map.put(new ComplexObj("a1", "b1"), "value1");
+        map.put(new ComplexObj("a2", "b2"), "value2");
 
-        T r = new T();
-        r.start();
-        try {
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        System.out.println( map.toString() );
+
+        Optional<ComplexObj> optional = map.keySet()
+            .stream()
+            .filter( complexObj -> complexObj.a.equals("a1") )
+            .findAny();
+
+        if( optional.isPresent() ){
+            System.out.println("find!");
+            ComplexObj complexObj = optional.get();
+            String oldValue = map.get( complexObj );
+            complexObj.a = "lol";
+
+
+            System.out.println( map.put(complexObj, oldValue) );
+        }else{
+            System.out.println("not find...");
         }
-        r.startClosing();
+
+        System.out.println( map.toString() );
     }
 }
