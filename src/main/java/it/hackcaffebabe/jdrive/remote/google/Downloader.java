@@ -58,7 +58,11 @@ public class Downloader implements Runnable
                         );
                     }catch (Exception e){
                         log.error(e.getMessage(), e);
+                        mappedFileSystem.remove( downloadEvent.getLocalPath() );
                     }
+                    mappedFileSystem.toggleAccessible(
+                        downloadEvent.getLocalPath()
+                    );
                 }else if( detectEvent instanceof Error ){
                     log.debug( ((Error)detectEvent).toString() );
                     keepRunning = false;
