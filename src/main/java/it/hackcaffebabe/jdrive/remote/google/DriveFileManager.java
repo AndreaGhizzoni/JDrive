@@ -236,7 +236,7 @@ public class DriveFileManager
             }
 
             log.debug("Try to download regular file > destination="+destination);
-            OutputStream outputStream = new FileOutputStream( destination.toFile() );
+            FileOutputStream outputStream = new FileOutputStream( destination.toFile() );
 
             String remoteFileMimeType = remoteFile.getMimeType();
             String conversion = MIMEType.convert( remoteFileMimeType );
@@ -258,7 +258,8 @@ public class DriveFileManager
                 );
                 request.executeMediaAndDownloadTo(outputStream);
             }
-
+            // docs here: https://goo.gl/JhDSFW
+            outputStream.getFD().sync();
             log.info("Download ok.");
         }
 
