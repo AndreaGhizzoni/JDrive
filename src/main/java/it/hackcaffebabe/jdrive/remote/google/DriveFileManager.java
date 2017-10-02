@@ -230,9 +230,9 @@ public class DriveFileManager
             log.debug("Try to download a folder > create new folder");
             Files.createDirectories( destination );
         }else{
-            Path destinationsParent = destination.getParent();
-            if( !destinationsParent.toFile().exists() ){
-                download( remoteFile.getParents(), destinationsParent );
+            Path destinationParent = destination.getParent();
+            if( !destinationParent.toFile().exists() ){
+                download( remoteFile.getParents(), destinationParent );
             }
 
             log.debug("Try to download regular file > destination="+destination);
