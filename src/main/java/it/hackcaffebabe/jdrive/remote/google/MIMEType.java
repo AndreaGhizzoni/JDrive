@@ -10,9 +10,9 @@ public class MIMEType
     public static enum Local {
         FOLDER( "folder" ),
 
-        DOC( "doc" ), DOCX( "docx" ),
+        DOC( "doc" ), DOCX( "docx" ), ODT( "odt" ),
         XLS( "xls" ), XLSX( "xlsx" ),
-        PPT( "ppt" ), PPTX( "pptx" )
+        PPT( "ppt" ), PPTX( "pptx" ),
 
         ;
         private String mimeType;
@@ -32,6 +32,12 @@ public class MIMEType
         POWER_POINT( "application/vnd.openxmlformats-officedocument.presentationml.presentation" ),
         EXCEL( "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ),
 
+        OPEN_WORD( "application/vnd.oasis.opendocument.text" ),
+        OPEN_SHEET( "application/x-vnd.oasis.opendocument.spreadsheet" ),
+        OPEN_PRESENTATION( "application/vnd.oasis.opendocument.presentation" ),
+
+        PDF( "application/pdf" ),
+
         PNG( "image/png" )
 
         ;
@@ -48,10 +54,14 @@ public class MIMEType
         put( Remote.FOLDER, Local.FOLDER );
 
         // google documents
-        put( Remote.DOCUMENT, Remote.WORD );
-        put( Remote.SPREADSHEET, Remote.EXCEL );
-        put( Remote.PRESENTATION, Remote.POWER_POINT );
+        put( Remote.DOCUMENT, Remote.OPEN_WORD );
+        put( Remote.SPREADSHEET, Remote.OPEN_SHEET );
+        put( Remote.PRESENTATION, Remote.OPEN_PRESENTATION );
         put( Remote.DRAWING, Remote.PNG );
+
+        put( Remote.WORD, Remote.PDF );
+        put( Remote.POWER_POINT, Remote.PDF );
+        put( Remote.EXCEL, Remote.PDF );
 
         //======================================================================
         // Remote <- Local (upload)
@@ -60,6 +70,7 @@ public class MIMEType
         // documents
         put( Local.DOC, Remote.DOCUMENT );
         put( Local.DOCX, Remote.DOCUMENT );
+//        put( Local.ODT, Remote.DOCUMENT );
         put( Local.XLS, Remote.SPREADSHEET );
         put( Local.XLSX, Remote.SPREADSHEET );
         put( Local.PPT, Remote.PRESENTATION );
