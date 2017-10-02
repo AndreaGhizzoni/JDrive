@@ -212,17 +212,29 @@ public class DriveFileManager
         log.debug("Trash remote file with name="+file.getName()+" ok");
     }
 
-    public void download( File remoteFile, Path destination ) throws IOException {
+    public void download( List<String> remoteFileID, Path destination ) throws IOException {
         // TODO check parameters null and stuff
         log.info(String.format(
-            "Try to download remote file=%s into %s",
-            remoteFile.toString(), destination)
+            "Try to download remote file with ID=%s into %s",
+            remoteFileID, destination)
         );
+
+        File remoteFile = driveService.files()
+            .get( remoteFileID.get(0) )
+            .setFields("id,modifiedTime,name,parents,trashed,mimeType")
+            .execute();
+
+        mappedFileSystem.put( destination, remoteFile, false );
 
         if( remoteFile.getMimeType().equals(MIMEType.Remote.FOLDER.toString()) ){
             log.debug("Try to download a folder > create new folder");
             Files.createDirectories( destination );
         }else{
+            Path destinationsParent = destination.getParent();
+            if( !destinationsParent.toFile().exists() ){
+                download( remoteFile.getParents(), destinationsParent );
+            }
+
             log.debug("Try to download regular file > destination="+destination);
             OutputStream outputStream = new FileOutputStream( destination.toFile() );
 
@@ -249,5 +261,7 @@ public class DriveFileManager
 
             log.info("Download ok.");
         }
+
+        mappedFileSystem.toggleAccessible( destination );
     }
 }

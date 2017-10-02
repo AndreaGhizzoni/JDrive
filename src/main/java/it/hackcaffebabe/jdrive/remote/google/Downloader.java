@@ -9,6 +9,7 @@ import it.hackcaffebabe.jdrive.remote.watcher.events.Error;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Collections;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -46,23 +47,15 @@ public class Downloader implements Runnable
                     Download downloadEvent = (Download) detectEvent;
                     log.debug( downloadEvent.toString() );
 
-                    mappedFileSystem.put(
-                        downloadEvent.getLocalPath(),
-                        downloadEvent.getRemoteFile(),
-                        false
-                    );
                     try{
                         this.driveFileManager.download(
-                            downloadEvent.getRemoteFile(),
+                            Collections.singletonList( downloadEvent.getRemoteFile().getId() ),
                             downloadEvent.getLocalPath()
                         );
                     }catch (Exception e){
                         log.error(e.getMessage(), e);
                         mappedFileSystem.remove( downloadEvent.getLocalPath() );
                     }
-                    mappedFileSystem.toggleAccessible(
-                        downloadEvent.getLocalPath()
-                    );
                 }else if( detectEvent instanceof Error ){
                     log.debug( ((Error)detectEvent).toString() );
                     keepRunning = false;
