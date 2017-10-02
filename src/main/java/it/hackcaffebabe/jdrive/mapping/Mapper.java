@@ -64,14 +64,18 @@ public class Mapper
     public File get( String path ) {
         String sanitizedPath = pathSanitizer.sanitize( path );
         log.debug("Try to get remote file associated to path="+sanitizedPath);
-        AccessiblePath accessiblePath = new AccessiblePath( sanitizedPath );
-        File file = map.get( accessiblePath );
-        if( file == null ) {
+
+        Optional<Map.Entry<AccessiblePath, File>> optional = map.entrySet()
+                .stream()
+                .filter( entry -> entry.getKey().getPath().equals(sanitizedPath) )
+                .findAny();
+        if( optional.isPresent() ){
+            Map.Entry<AccessiblePath, File> entry = optional.get();
+            logEntry("Get ok", entry.getKey(), entry.getValue());
+            return entry.getValue();
+        }else{
             log.debug(String.format("Remote file from path=%s not found", sanitizedPath));
             return null;
-        }else {
-            logEntry("Get ok", accessiblePath, file);
-            return file;
         }
     }
 
@@ -85,15 +89,17 @@ public class Mapper
 
     public void toggleAccessible( String path ){
         String sanitizedPath = pathSanitizer.sanitize( path );
-        Optional<Boolean> optional = map.keySet()
+        log.debug("Try to toggle accessible of local file path="+sanitizedPath);
+
+        Optional<AccessiblePath> optional = map.keySet()
             .stream()
             .filter( accPath -> accPath.getPath().equals(sanitizedPath) )
-            .map( AccessiblePath::isAccessible )
             .findAny();
 
         if( optional.isPresent() ){
             File remoteFile = get( sanitizedPath );
-            put( sanitizedPath, !optional.get(), remoteFile );
+            remove( sanitizedPath );
+            put( sanitizedPath, !optional.get().isAccessible(), remoteFile );
         }
     }
 
@@ -134,14 +140,19 @@ public class Mapper
     public File remove( String path ) {
         String sanitizedPath = pathSanitizer.sanitize( path );
         log.debug("Try to remove remote file associated with path: "+sanitizedPath);
-        File remoteFileRemoved = map.remove( new AccessiblePath(sanitizedPath) );
 
-        if( remoteFileRemoved == null ){
+        Optional<AccessiblePath> optional = map.keySet()
+                .stream()
+                .filter( accPath -> accPath.getPath().equals(sanitizedPath) )
+                .findAny();
+        if( optional.isPresent() ){
+            AccessiblePath accPath = optional.get();
+            File remoteFileRemoved = map.remove( accPath );
+            logEntry("Removed", sanitizedPath, accPath.isAccessible(), remoteFileRemoved);
+            return remoteFileRemoved;
+        }else{
             log.debug("Remote file associated with path="+sanitizedPath+" not found");
             return null;
-        }else{
-            logEntry("Removed", sanitizedPath, true, remoteFileRemoved);
-            return remoteFileRemoved;
         }
     }
 
