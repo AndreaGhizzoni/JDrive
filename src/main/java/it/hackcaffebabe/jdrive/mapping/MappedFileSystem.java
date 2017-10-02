@@ -46,8 +46,20 @@ public class MappedFileSystem
         map.put( localPathString, accessible, remoteFile );
     }
 
+    public synchronized void toggleAccessible( Path localPath ){
+        toggleAccessible( localPath.toString() );
+    }
+
+    public synchronized void toggleAccessible( String localPathString ) {
+        map.toggleAccessible( localPathString );
+    }
+
     public synchronized File get( Path localPath ) {
-        return map.get( localPath );
+        return get( localPath.toString() );
+    }
+
+    public synchronized File get( String localPathString ){
+        return map.get( localPathString );
     }
 
     public synchronized String lookup( File remoteFile ) {
