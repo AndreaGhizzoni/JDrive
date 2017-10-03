@@ -22,7 +22,7 @@ public class AccessiblePath
 
     public String getPath() { return sanitizer.restore( this.path ); }
 
-    boolean isAccessible() { return this.accessible; }
+    public boolean isAccessible() { return this.accessible; }
 
     public String toString() {
         String format = "{path: %s, accessible: %s}";
