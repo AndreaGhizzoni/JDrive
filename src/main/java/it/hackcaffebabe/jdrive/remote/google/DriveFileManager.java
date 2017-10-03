@@ -112,10 +112,6 @@ public class DriveFileManager
             .setName( localFile.getName() )
             .setParents( Collections.singletonList(remoteParentId) );
 
-//        String mimeType = MIMEType.convert(
-//            PathsUtil.getFileExtension(localFile)
-//        );
-
         Drive.Files.Create create = driveService.files()
             .create(fileMetadata, new FileContent(null, localFile) );
 
@@ -158,9 +154,6 @@ public class DriveFileManager
         if( updatedFile.isDirectory() ){
             update = driveService.files().update( remoteFile.getId(), fileMetadata );
         }else{
-//            String mimeType = MIMEType.convert(
-//                PathsUtil.getFileExtension(updatedFile)
-//            );
             FileContent mediaContent = new FileContent( null, updatedFile );
             update = driveService.files()
                     .update( remoteFile.getId(), fileMetadata, mediaContent );
