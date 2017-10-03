@@ -7,7 +7,8 @@ import it.hackcaffebabe.jdrive.cfg.Keys;
 /**
  * TODO add doc
  */
-class PathSanitizer implements Sanitizer {
+class PathSanitizer implements Sanitizer
+{
     private String base;
 
     PathSanitizer(){
@@ -22,13 +23,10 @@ class PathSanitizer implements Sanitizer {
     public String sanitize( String toSanitize ) {
         String sanitized = toSanitize;
         if( toSanitize.startsWith(base) ){
-            sanitized = toSanitize.replaceFirst(base, "");
+            sanitized = toSanitize.replaceFirst( base, "" );
         }
         return sanitized;
     }
 
-    String restore( String sanitized ) {
-        String restored = base+sanitized;
-        return restored;
-    }
+    String restore( String sanitized ) { return base+sanitized; }
 }
