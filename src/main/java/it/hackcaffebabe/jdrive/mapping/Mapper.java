@@ -1,6 +1,7 @@
 package it.hackcaffebabe.jdrive.mapping;
 
 import com.google.api.services.drive.model.File;
+import com.google.common.collect.Maps;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,21 +36,28 @@ public class Mapper
     public File put( String path, File remote ){ return put( path, true, remote ); }
 
     public File put( String path, boolean accessible, File remote ) {
+        Map.Entry<AccessiblePath, File> newEntry = putting( path, accessible, remote );
+        boolean overwrittenExistingRemoteFile = newEntry.getValue() != null;
+        logIfEnabled(
+            overwrittenExistingRemoteFile ? "Put overwritten previous value": "Put ok",
+            newEntry.getKey().getPath(),
+            newEntry.getKey().isAccessible(),
+            overwrittenExistingRemoteFile ? newEntry.getValue() : remote
+        );
+        return newEntry.getValue();
+    }
+
+    private Map.Entry<AccessiblePath, File> putting( String path,
+                                                     boolean accessible,
+                                                     File remote ) {
         String sanitizedPath = pathSanitizer.sanitize( path );
         AccessiblePath accessiblePath = new AccessiblePath(
             sanitizedPath,
             accessible
         );
 
-        File previousFile = map.put( accessiblePath, remote );
-
-        logIfEnabled(
-            previousFile == null ? "Put ok" : "Put overwritten previous value",
-            accessiblePath.getPath(),
-            accessiblePath.isAccessible(),
-            previousFile == null ? remote : previousFile
-        );
-        return previousFile;
+        File overwrittenFile =  map.put( accessiblePath, remote );
+        return Maps.immutableEntry( accessiblePath, overwrittenFile );
     }
 
     public File get( Path path ) { return get( path.toString() ); }
@@ -73,6 +81,8 @@ public class Mapper
             return null;
         }
     }
+
+    // TODO add getEntry( String path ) to use in Launcher
 
     private Optional<Map.Entry<AccessiblePath, File>> getting( String path ) {
         String sanitizedPath = pathSanitizer.sanitize( path );
@@ -134,15 +144,15 @@ public class Mapper
     }
 
     public File remove( String path ) {
-        Optional<Map.Entry<AccessiblePath, File>> optional = getting( path );
+        Optional<Map.Entry<AccessiblePath, File>> optional = removeFromKey( path );
 
         if( optional.isPresent() ) {
-            AccessiblePath accPath = optional.get().getKey();
-            File remoteFileRemoved = map.remove( accPath );
+            AccessiblePath accessiblePathRemoved = optional.get().getKey();
+            File remoteFileRemoved = optional.get().getValue();
             logIfEnabled(
                 "Removed",
-                accPath.getPath(),
-                accPath.isAccessible(),
+                accessiblePathRemoved.getPath(),
+                accessiblePathRemoved.isAccessible(),
                 remoteFileRemoved
             );
             return remoteFileRemoved;
@@ -154,13 +164,24 @@ public class Mapper
         }
     }
 
-    public String remove( File remoteFile ) {
-        Optional<AccessiblePath> optAccessiblePath = look( remoteFile );
+    private Optional<Map.Entry<AccessiblePath, File>> removeFromKey( String path ) {
+        Optional<Map.Entry<AccessiblePath, File>> optional = getting( path );
+        optional.ifPresent( entry -> map.remove(entry.getKey()) );
+        return optional;
+    }
 
-        if( optAccessiblePath.isPresent() ) {
-            String associatedPath = optAccessiblePath.get().getPath();
-            remove( associatedPath );
-            return pathSanitizer.restore( associatedPath );
+    public String remove( File remoteFile ) {
+        Optional<AccessiblePath> optional = removeFromValue( remoteFile );
+
+        if( optional.isPresent() ) {
+            AccessiblePath accPath = optional.get();
+            logIfEnabled(
+                "Removed",
+                accPath.getPath(),
+                accPath.isAccessible(),
+                remoteFile
+            );
+            return pathSanitizer.restore( accPath.getPath() );
         }else{
             logIfEnabled(String.format(
                 "Noting to remove: remote file=%s not found",
@@ -168,6 +189,12 @@ public class Mapper
             ));
             return null;
         }
+    }
+
+    private Optional<AccessiblePath> removeFromValue( File remoteFile ) {
+        Optional<AccessiblePath> optAccessiblePath = look( remoteFile );
+        optAccessiblePath.ifPresent( map::remove );
+        return optAccessiblePath;
     }
 
     public boolean isAccessible( Path path ) {
