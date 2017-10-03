@@ -1,7 +1,6 @@
 package it.hackcaffebabe.jdrive.mapping;
 
 import com.google.api.services.drive.model.File;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,14 +29,6 @@ public class Mapper
 
     public void put( String path, File remote ){
         put( path, true, remote );
-    }
-
-    public void putAll( Map<String, File> map ) {
-        map.forEach( this::put );
-    }
-
-    public void putAll( List<String> paths ) {
-        paths.forEach( this::put );
     }
 
     public void put( String path, boolean accessible, File remote ){
@@ -82,10 +73,6 @@ public class Mapper
 
     public Map<AccessiblePath, File> getImmutableMap(){
         return Collections.unmodifiableMap( map );
-    }
-
-    public void toggleAccessible( Path path ){
-        toggleAccessible( path.toString() );
     }
 
     public void toggleAccessible( String path ){
