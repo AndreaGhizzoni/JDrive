@@ -55,8 +55,7 @@ public class Mapper
     public File get( Path path ) { return get( path.toString() ); }
 
     public File get( String path ) {
-        String sanitizedPath = pathSanitizer.sanitize( path );
-        Optional<Map.Entry<AccessiblePath, File>> optional = getting( sanitizedPath );
+        Optional<Map.Entry<AccessiblePath, File>> optional = getting( path );
 
         if( optional.isPresent() ){
             Map.Entry<AccessiblePath, File> entry = optional.get();
@@ -69,16 +68,17 @@ public class Mapper
             return entry.getValue();
         }else{
             logIfEnabled(String.format(
-                "Get remote file from path=%s not found", sanitizedPath)
+                "Get remote file from path=%s not found", path )
             );
             return null;
         }
     }
 
     private Optional<Map.Entry<AccessiblePath, File>> getting( String path ) {
+        String sanitizedPath = pathSanitizer.sanitize( path );
         return map.entrySet()
             .stream()
-            .filter( entry -> entry.getKey().getPath().equals(path) )
+            .filter( entry -> entry.getKey().getPath().equals(sanitizedPath) )
             .findAny();
     }
 
@@ -134,22 +134,21 @@ public class Mapper
     }
 
     public File remove( String path ) {
-        String sanitizedPath = pathSanitizer.sanitize( path );
-        Optional<Map.Entry<AccessiblePath, File>> optional = getting( sanitizedPath );
+        Optional<Map.Entry<AccessiblePath, File>> optional = getting( path );
 
         if( optional.isPresent() ) {
             AccessiblePath accPath = optional.get().getKey();
             File remoteFileRemoved = map.remove( accPath );
             logIfEnabled(
                 "Removed",
-                sanitizedPath,
+                accPath.getPath(),
                 accPath.isAccessible(),
                 remoteFileRemoved
             );
             return remoteFileRemoved;
         }else{
             logIfEnabled(String.format(
-                "Noting to remove: path=%s not found", sanitizedPath
+                "Noting to remove: path=%s not found", path
             ));
             return null;
         }
