@@ -20,9 +20,13 @@ public class Mapper
     private PathSanitizer pathSanitizer = new PathSanitizer();
     private boolean logEnable = true;
 
-    public Mapper(){ this( ENABLE_LOG); }
+    public Mapper(){ this(ENABLE_LOG); }
 
     public Mapper( boolean enableLog ) { this.logEnable = enableLog; }
+
+    public Map<AccessiblePath, File> getImmutableMap() {
+        return Collections.unmodifiableMap( map );
+    }
 
     public File put( Path path ) { return put( path.toString() ); }
 
@@ -37,16 +41,10 @@ public class Mapper
             accessible
         );
 
-        String message;
         File previousFile = map.put( accessiblePath, remote );
-        if( previousFile == null ) {
-            message = "Put ok";
-        }else{
-            message = "Put overwritten previous value";
-        }
 
         logIfEnabled(
-            message,
+            previousFile == null ? "Put ok" : "Put overwritten previous value",
             accessiblePath.getPath(),
             accessiblePath.isAccessible(),
             previousFile == null ? remote : previousFile
@@ -54,17 +52,11 @@ public class Mapper
         return previousFile;
     }
 
-    public File get( Path path ) {
-        return get( path.toString() );
-    }
+    public File get( Path path ) { return get( path.toString() ); }
 
     public File get( String path ) {
         String sanitizedPath = pathSanitizer.sanitize( path );
-
-        Optional<Map.Entry<AccessiblePath, File>> optional = map.entrySet()
-            .stream()
-            .filter( entry -> entry.getKey().getPath().equals(sanitizedPath) )
-            .findAny();
+        Optional<Map.Entry<AccessiblePath, File>> optional = getting( sanitizedPath );
 
         if( optional.isPresent() ){
             Map.Entry<AccessiblePath, File> entry = optional.get();
@@ -83,16 +75,15 @@ public class Mapper
         }
     }
 
-    public Map<AccessiblePath, File> getImmutableMap() {
-        return Collections.unmodifiableMap( map );
+    private Optional<Map.Entry<AccessiblePath, File>> getting( String path ) {
+        return map.entrySet()
+            .stream()
+            .filter( entry -> entry.getKey().getPath().equals(path) )
+            .findAny();
     }
 
     public void toggleAccessible( String path ) {
-        String sanitizedPath = pathSanitizer.sanitize( path );
-        Optional<Map.Entry<AccessiblePath, File>> optional = map.entrySet()
-            .stream()
-            .filter( entry -> entry.getKey().getPath().equals(sanitizedPath) )
-            .findAny();
+        Optional<Map.Entry<AccessiblePath, File>> optional =  getting( path );
 
         if( optional.isPresent() ){
             Map.Entry<AccessiblePath, File> entryToOverwrite = optional.get();
@@ -144,13 +135,10 @@ public class Mapper
 
     public File remove( String path ) {
         String sanitizedPath = pathSanitizer.sanitize( path );
-        Optional<AccessiblePath> optional = map.keySet()
-            .stream()
-            .filter( accPath -> accPath.getPath().equals(sanitizedPath) )
-            .findAny();
+        Optional<Map.Entry<AccessiblePath, File>> optional = getting( sanitizedPath );
 
         if( optional.isPresent() ) {
-            AccessiblePath accPath = optional.get();
+            AccessiblePath accPath = optional.get().getKey();
             File remoteFileRemoved = map.remove( accPath );
             logIfEnabled(
                 "Removed",
@@ -191,15 +179,13 @@ public class Mapper
         String sanitizedPath = pathSanitizer.sanitize( path );
         return map.keySet()
             .stream()
-            .filter( accessiblePath -> accessiblePath.getPath().equals(sanitizedPath) )
+            .filter( accPath -> accPath.getPath().equals(sanitizedPath) )
             .findAny()
             .map( AccessiblePath::isAccessible )
             .orElse(true);
     }
 
-    public boolean exists( Path path ) {
-        return exists( path.toString() );
-    }
+    public boolean exists( Path path ) { return exists( path.toString() ); }
 
     public boolean exists( String path ) {
         return map.containsKey( new AccessiblePath(path) );
