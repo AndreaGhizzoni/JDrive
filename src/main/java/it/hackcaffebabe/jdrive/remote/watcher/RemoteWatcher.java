@@ -100,12 +100,13 @@ public class RemoteWatcher
         File jdriveRemoteFolder = getJDriveRemoteFolderOrCreate( jdriveLocalPath );
         log.info("JDrive remote folder found.");
 
+        log.info("Starting mapping remote files...");
         Mapper mapper = new Mapper();
         recursivelyListFullPathsFrom(
             jdriveRemoteFolder,
             jdriveRemoteFolder.getName()
         ).forEach( mapper::put );
-        log.info("Mapping remote and local file complete.");
+        log.info("Mapping remote file complete.");
 
         return mapper;
     }
