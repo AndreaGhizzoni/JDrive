@@ -46,7 +46,7 @@ public class Mapper
         return newEntry.getValue();
     }
 
-    private Map.Entry<AccessiblePath, File> putting( String path,
+    Map.Entry<AccessiblePath, File> putting( String path,
                                                      boolean accessible,
                                                      File remote ) {
         AccessiblePath accessiblePath = new AccessiblePath( path, accessible );
@@ -78,7 +78,7 @@ public class Mapper
 
     // TODO add getEntry( String path ) to use in Launcher
 
-    private Optional<Map.Entry<AccessiblePath, File>> getting( String path ) {
+    Optional<Map.Entry<AccessiblePath, File>> getting( String path ) {
         return map.entrySet()
             .stream()
             .filter( entry -> entry.getKey().getPath().equals(path) )
@@ -125,7 +125,7 @@ public class Mapper
         }
     }
 
-    private Optional<AccessiblePath> look( File remoteFile ){
+    Optional<AccessiblePath> look( File remoteFile ){
         return map.entrySet()
             .stream()
             .filter( entry -> {
@@ -157,7 +157,7 @@ public class Mapper
         }
     }
 
-    private Optional<Map.Entry<AccessiblePath, File>> removeFromKey( String path ) {
+    Optional<Map.Entry<AccessiblePath, File>> removeFromKey( String path ) {
         Optional<Map.Entry<AccessiblePath, File>> optional = getting( path );
         optional.ifPresent( entry -> map.remove(entry.getKey()) );
         return optional;
@@ -184,7 +184,7 @@ public class Mapper
         }
     }
 
-    private Optional<AccessiblePath> removeFromValue( File remoteFile ) {
+    Optional<AccessiblePath> removeFromValue( File remoteFile ) {
         Optional<AccessiblePath> optAccessiblePath = look( remoteFile );
         optAccessiblePath.ifPresent( map::remove );
         return optAccessiblePath;
@@ -210,13 +210,13 @@ public class Mapper
     }
 
     private void logIfEnabled( String message ) {
-        if( logEnable ) { log.debug( message ); }
+        if( logEnable ) {
+            log.debug( message );
+        }
     }
 
-    private void logIfEnabled( String action,
-                               String path,
-                               boolean accessible,
-                               File remoteFile ) {
+    private void logIfEnabled( String action, String path,
+                               boolean accessible, File remoteFile ) {
         if( logEnable ) {
             log.debug(String.format(
                 "%s [ path: %s, accessible: %s, remote: %s ]",
