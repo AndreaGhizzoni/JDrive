@@ -16,9 +16,9 @@ public class Mapper
     private static final Logger log = LogManager.getLogger();
     public static final boolean ENABLE_LOG = true;
     public static final boolean DISABLE_LOG = false;
+    private boolean logEnable = ENABLE_LOG;
 
     private HashMap<AccessiblePath, File> map = new HashMap<>();
-    private boolean logEnable = true;
 
     public Mapper(){ this(ENABLE_LOG); }
 
@@ -36,19 +36,19 @@ public class Mapper
 
     public File put( String path, boolean accessible, File remote ) {
         Map.Entry<AccessiblePath, File> newEntry = putting( path, accessible, remote );
-        boolean overwrittenExistingRemoteFile = newEntry.getValue() != null;
+        boolean overwrittenExistingFile = newEntry.getValue() != null;
         logIfEnabled(
-            overwrittenExistingRemoteFile ? "Put overwritten previous value": "Put ok",
+            overwrittenExistingFile ? "Put overwritten previous value": "Put ok",
             newEntry.getKey().getPath(),
             newEntry.getKey().isAccessible(),
-            overwrittenExistingRemoteFile ? newEntry.getValue() : remote
+            overwrittenExistingFile ? newEntry.getValue() : remote
         );
         return newEntry.getValue();
     }
 
     Map.Entry<AccessiblePath, File> putting( String path,
-                                                     boolean accessible,
-                                                     File remote ) {
+                                             boolean accessible,
+                                             File remote ) {
         AccessiblePath accessiblePath = new AccessiblePath( path, accessible );
         File overwrittenFile =  map.put( accessiblePath, remote );
         return Maps.immutableEntry( accessiblePath, overwrittenFile );
