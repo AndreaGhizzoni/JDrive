@@ -76,7 +76,25 @@ public class Mapper
         }
     }
 
-    // TODO add getEntry( String path ) to use in Launcher
+    public Map.Entry<AccessiblePath, File> getFullEntry( String path ) {
+        Optional<Map.Entry<AccessiblePath, File>> optional = getting( path );
+
+        if( optional.isPresent() ){
+            Map.Entry<AccessiblePath, File> entry = optional.get();
+            logIfEnabled(
+                "Get ok",
+                entry.getKey().getPath(),
+                entry.getKey().isAccessible(),
+                entry.getValue()
+            );
+            return entry;
+        }else{
+            logIfEnabled(String.format(
+                "Get remote file from path=%s not found", path )
+            );
+            return null;
+        }
+    }
 
     Optional<Map.Entry<AccessiblePath, File>> getting( String path ) {
         return map.entrySet()
