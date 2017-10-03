@@ -138,7 +138,7 @@ public class Launcher
     private static void testMapDifference( Mapper local,
                                            Mapper remote,
                                            LinkedBlockingQueue<Event> downloadQueue ){
-        log.debug("Start doing differences between local and remote map...");
+        log.info("Start doing differences between local and remote map...");
 
         MappedFileSystem mappedFileSystem = MappedFileSystem.getInstance();
         Map<AccessiblePath, File> localImmutableMap = local.getImmutableMap();
@@ -154,20 +154,24 @@ public class Launcher
         Set<AccessiblePath> common = Sets.intersection( localKeys, remoteKeys );
         log.debug("--> common keys");
         log.debug(common.toString());
+        log.info("Starting to put common folders..");
         common.forEach(
             accessiblePath -> mappedFileSystem.put(
                 accessiblePath.getPath(),
                 remote.get( accessiblePath.getPath() )
             )
         );
+        log.info("Common folders put.");
 
         Set<AccessiblePath> onlyLocal = Sets.difference( localKeys, remoteKeys );
         log.debug("--> only local keys");
         log.debug(onlyLocal.toString());
+        // TODO schedule for upload for each onlyLocal entry
 
         Set<AccessiblePath> onlyRemote = Sets.difference( remoteKeys, localKeys );
         log.debug("--> only remote keys");
         log.debug(onlyRemote.toString());
+        log.info("Starting to queue remote files to download...");
         onlyRemote.forEach(
             accessiblePath -> {
                 File remoteFileToDownload = remote.get( accessiblePath.getPath() );
@@ -182,6 +186,9 @@ public class Launcher
                 }
             }
         );
+        log.info("Queue remote files complete.");
+
+        log.info("Differences between local and remote map complete.");
     }
 
     private static void startJDrive(){
