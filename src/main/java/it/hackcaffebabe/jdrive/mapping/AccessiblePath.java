@@ -4,20 +4,23 @@ package it.hackcaffebabe.jdrive.mapping;
  * Wrapper class that contains a file path and a flag that tells other
  * threads if that path can be accessed.
  */
-public class AccessiblePath {
+public class AccessiblePath
+{
     private String path;
     private boolean accessible;
 
-    AccessiblePath(String path ){
+    private PathSanitizer sanitizer = new PathSanitizer();
+
+    public AccessiblePath( String path ){
         this( path, true );
     }
 
-    AccessiblePath(String path, boolean accessible ){
-        this.path = path;
+    public AccessiblePath( String path, boolean accessible ){
+        this.path = sanitizer.sanitize( path );
         this.accessible = accessible;
     }
 
-    public String getPath() { return this.path;  }
+    public String getPath() { return sanitizer.restore( this.path ); }
 
     boolean isAccessible() { return this.accessible; }
 

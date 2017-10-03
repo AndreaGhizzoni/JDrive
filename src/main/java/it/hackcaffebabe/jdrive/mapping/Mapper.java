@@ -18,7 +18,6 @@ public class Mapper
     public static final boolean DISABLE_LOG = false;
 
     private HashMap<AccessiblePath, File> map = new HashMap<>();
-    private PathSanitizer pathSanitizer = new PathSanitizer();
     private boolean logEnable = true;
 
     public Mapper(){ this(ENABLE_LOG); }
@@ -50,12 +49,7 @@ public class Mapper
     private Map.Entry<AccessiblePath, File> putting( String path,
                                                      boolean accessible,
                                                      File remote ) {
-        String sanitizedPath = pathSanitizer.sanitize( path );
-        AccessiblePath accessiblePath = new AccessiblePath(
-            sanitizedPath,
-            accessible
-        );
-
+        AccessiblePath accessiblePath = new AccessiblePath( path, accessible );
         File overwrittenFile =  map.put( accessiblePath, remote );
         return Maps.immutableEntry( accessiblePath, overwrittenFile );
     }
@@ -85,10 +79,9 @@ public class Mapper
     // TODO add getEntry( String path ) to use in Launcher
 
     private Optional<Map.Entry<AccessiblePath, File>> getting( String path ) {
-        String sanitizedPath = pathSanitizer.sanitize( path );
         return map.entrySet()
             .stream()
-            .filter( entry -> entry.getKey().getPath().equals(sanitizedPath) )
+            .filter( entry -> entry.getKey().getPath().equals(path) )
             .findAny();
     }
 
@@ -122,7 +115,7 @@ public class Mapper
                 accPath.isAccessible(),
                 remoteFile
             );
-            return pathSanitizer.restore( accPath.getPath() );
+            return accPath.getPath();
         }else{
             logIfEnabled(String.format(
                 "Path associated with remote file %s not found",
@@ -181,7 +174,7 @@ public class Mapper
                 accPath.isAccessible(),
                 remoteFile
             );
-            return pathSanitizer.restore( accPath.getPath() );
+            return accPath.getPath();
         }else{
             logIfEnabled(String.format(
                 "Noting to remove: remote file=%s not found",
@@ -202,10 +195,9 @@ public class Mapper
     }
 
     public boolean isAccessible( String path ) {
-        String sanitizedPath = pathSanitizer.sanitize( path );
         return map.keySet()
             .stream()
-            .filter( accPath -> accPath.getPath().equals(sanitizedPath) )
+            .filter( accPath -> accPath.getPath().equals(path) )
             .findAny()
             .map( AccessiblePath::isAccessible )
             .orElse(true);
