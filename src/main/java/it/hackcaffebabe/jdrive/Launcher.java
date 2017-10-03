@@ -156,10 +156,16 @@ public class Launcher
         log.debug(common.toString());
         log.info("Starting to put common folders..");
         common.forEach(
-            accessiblePath -> mappedFileSystem.put(
-                accessiblePath.getPath(),
-                remote.get( accessiblePath.getPath() )
-            )
+            accessiblePath -> {
+                Map.Entry<AccessiblePath, File> entry = remote.getFullEntry(
+                    accessiblePath.getPath()
+                );
+                mappedFileSystem.put(
+                    entry.getKey().getPath(),
+                    entry.getValue(),
+                    entry.getKey().isAccessible()
+                );
+            }
         );
         log.info("Common folders put.");
 
@@ -174,9 +180,11 @@ public class Launcher
         log.info("Starting to queue remote files to download...");
         onlyRemote.forEach(
             accessiblePath -> {
-                File remoteFileToDownload = remote.get( accessiblePath.getPath() );
-                Path localFile = Paths.get(remote.lookup( remoteFileToDownload ) );
-
+                Map.Entry<AccessiblePath, File> entry = remote.getFullEntry(
+                    accessiblePath.getPath()
+                );
+                Path localFile = Paths.get( entry.getKey().getPath() );
+                File remoteFileToDownload = entry.getValue();
                 try{
                     downloadQueue.put(
                         new Download(remoteFileToDownload, localFile, "TODO change me")
