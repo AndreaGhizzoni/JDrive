@@ -23,6 +23,8 @@ class PathSanitizer implements Sanitizer
 
     @Override
     public String sanitize( String toSanitize ) {
+        if( toSanitize == null ) return "";
+
         String sanitized = toSanitize;
         if( toSanitize.startsWith(base) ){
             sanitized = toSanitize.replaceFirst( base, "" );
@@ -35,5 +37,8 @@ class PathSanitizer implements Sanitizer
      * @param sanitized {@link java.lang.String} a sanitized path.
      * @return {@link java.lang.String} the non sanitized path.
      */
-    String restore( String sanitized ) { return base+sanitized; }
+    String restore( String sanitized ) {
+        if( sanitized == null || sanitized.isEmpty() ) return "";
+        return base+sanitized;
+    }
 }
